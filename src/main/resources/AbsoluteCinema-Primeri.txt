@@ -25,17 +25,17 @@ scene entrance(): scrap{
     project(isEven(5));
 }
 ---4
-scene helloThere(var name: string): string{
-    if(name == "Obi-Wan") {
-        cut "General Kenobi!";
+scene sayHello(var name: string): string{
+    if(name == "Remy") {
+        cut "Bonjour " + name;
     }
     else{
-        cut "hi lol.";
+        cut "Hi " + name;
     }
 }
 scene entrance(): scrap{
-    project(helloThere("Obi-Wan"));
-    project(helloThere("Luke Skywalker"));
+    project(sayHello("Remy"));
+    project(sayHello("Lazar"));
 }
 ---5
 scene guessingGame(): scrap{
@@ -104,8 +104,8 @@ scene entrance(): scrap{
     project(reverseString(str)); 
 }
 ---9
-scene getCharFirstOccurance(var input: string, var inputLenght: int, var target: char): int{
-    keepRollingDuring(var i: int = 0; i < inputLenght; i++) {
+scene getCharFirstOccurrence(var input: string, var inputLength: int, var target: char): int{
+    keepRollingDuring(var i: int = 0; i < inputLength; i++) {
         if(input[i] == target) {
             cut input[i];
         }
@@ -115,7 +115,7 @@ scene getCharFirstOccurance(var input: string, var inputLenght: int, var target:
 scene entrance(): scrap{
     var str: string = "Minecraft";
     var target: char = 'c';
-    project(getCharFirstOccurance(str, 9));
+    project(getCharFirstOccurrence(str, 9));
 }
 ---10
 scene isLeapYear(var year: int): string{
