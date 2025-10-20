@@ -1,5 +1,7 @@
 package com.lazar.core.model;
 
+import com.lazar.core.util.TokenFormatter;
+
 public class Token {
     public final TokenType type;
     public final String lexeme;
