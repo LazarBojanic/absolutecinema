@@ -57,101 +57,71 @@ public class Lexer {
 	private void scanToken() {
 		char c = advance();
 		switch (c) {
-			case ' ':
-			case '\r':
-			case '\t':
-				break;
-			case '\n':
+			case ' ', '\r', '\t' -> {
+			}
+			case '\n' -> {
 				line++;
 				column = 1;
-				break;
-
-			case '(':
-				add(TokenType.LEFT_PAREN);
-				break;
-			case ')':
-				add(TokenType.RIGHT_PAREN);
-				break;
-			case '{':
-				add(TokenType.LEFT_BRACE);
-				break;
-			case '}':
-				add(TokenType.RIGHT_BRACE);
-				break;
-			case '[':
-				add(TokenType.LEFT_BRACKET);
-				break;
-			case ']':
-				add(TokenType.RIGHT_BRACKET);
-				break;
-			case ',':
-				add(TokenType.COMMA);
-				break;
-			case '.':
-				add(TokenType.DOT);
-				break;
-			case ';':
-				add(TokenType.SEMICOLON);
-				break;
-			case ':':
-				add(TokenType.COLON);
-				break;
-			case '@':
-				add(TokenType.AT);
-				break;
-
-			case '!':
-				add(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG);
-				break;
-			case '=':
-				add(match('=') ? TokenType.EQUAL_EQUAL : TokenType.EQUAL);
-				break;
-			case '<':
-				add(match('=') ? TokenType.LESS_EQUAL : TokenType.LESS);
-				break;
-			case '>':
-				add(match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER);
-				break;
-
-			case '+':
-				if (match('+')) add(TokenType.PLUS_PLUS);
-				else if (match('=')) add(TokenType.PLUS_EQUAL);
-				else add(TokenType.PLUS);
-				break;
-
-			case '-':
-				if (match('-')) add(TokenType.MINUS_MINUS);
-				else if (match('=')) add(TokenType.MINUS_EQUAL);
-				else add(TokenType.MINUS);
-				break;
-
-			case '*':
-				add(match('=') ? TokenType.STAR_EQUAL : TokenType.STAR);
-				break;
-			case '/':
-				add(match('=') ? TokenType.SLASH_EQUAL : TokenType.SLASH);
-				break;
-			case '%':
-				add(match('=') ? TokenType.PERCENT_EQUAL : TokenType.PERCENT);
-				break;
-
-			case '&':
-				if (match('&')) add(TokenType.AND_AND);
-				else error("Unexpected '&' (did you mean '&&'?)");
-				break;
-			case '|':
-				if (match('|')) add(TokenType.OR_OR);
-				else error("Unexpected '|' (did you mean '||'?)");
-				break;
-
-			case '"':
-				string();
-				break;
-			case '\'':
-				character();
-				break;
-
-			default:
+			}
+			case '(' -> add(TokenType.LEFT_PAREN);
+			case ')' -> add(TokenType.RIGHT_PAREN);
+			case '{' -> add(TokenType.LEFT_BRACE);
+			case '}' -> add(TokenType.RIGHT_BRACE);
+			case '[' -> add(TokenType.LEFT_BRACKET);
+			case ']' -> add(TokenType.RIGHT_BRACKET);
+			case ',' -> add(TokenType.COMMA);
+			case '.' -> add(TokenType.DOT);
+			case ';' -> add(TokenType.SEMICOLON);
+			case ':' -> add(TokenType.COLON);
+			case '@' -> add(TokenType.AT);
+			case '!' -> add(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG);
+			case '=' -> add(match('=') ? TokenType.EQUAL_EQUAL : TokenType.EQUAL);
+			case '<' -> add(match('=') ? TokenType.LESS_EQUAL : TokenType.LESS);
+			case '>' -> add(match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER);
+			case '+' -> {
+				if (match('+')) {
+					add(TokenType.PLUS_PLUS);
+				}
+				else if (match('=')) {
+					add(TokenType.PLUS_EQUAL);
+				}
+				else {
+					add(TokenType.PLUS);
+				}
+			}
+			case '-' -> {
+				if (match('-')) {
+					add(TokenType.MINUS_MINUS);
+				}
+				else if (match('=')) {
+					add(TokenType.MINUS_EQUAL);
+				}
+				else {
+					add(TokenType.MINUS);
+				}
+			}
+			case '*' -> add(match('=') ? TokenType.STAR_EQUAL : TokenType.STAR);
+			case '/' -> add(match('=') ? TokenType.SLASH_EQUAL : TokenType.SLASH);
+			case '%' -> add(match('=') ? TokenType.PERCENT_EQUAL : TokenType.PERCENT);
+			case '&' -> {
+				if (match('&')) {
+					add(TokenType.AND_AND);
+				}
+				else {
+					error("Unexpected '&' (did you mean '&&'?)");
+				}
+			}
+			case '|' -> {
+				if (match('|')) {
+					add(TokenType.OR_OR);
+				}
+				else {
+					error("Unexpected '|' (did you mean '||'?)");
+				}
+			}
+			case '"' -> string();
+			case '\'' -> character();
+			default -> {
 				if (isDigit(c)) {
 					number();
 				}
@@ -161,38 +131,49 @@ public class Lexer {
 				else {
 					error("Unexpected character: '" + c + "'");
 				}
+			}
 		}
 	}
 
 	private void identifier() {
-		while (isAlphaNumeric(peek())) advance();
+		while (isAlphaNumeric(peek())) {
+			advance();
+		}
 		String text = source.substring(start, current);
 		TokenType type = keywords.get(text);
-		if (type == null) type = TokenType.IDENTIFIER;
+		if (type == null) {
+			type = TokenType.IDENTIFIER;
+		}
 		add(type);
 	}
 
 	private void number() {
 		boolean isDouble = false;
 
-		while (isDigit(peek())) advance();
+		while (isDigit(peek())) {
+			advance();
+		}
 
 		if (peek() == '.' && isDigit(peekNext())) {
 			isDouble = true;
-			advance();
-			while (isDigit(peek())) advance();
+			do advance();
+			while (isDigit(peek()));
 		}
 
 		if ((peek() == 'e' || peek() == 'E')) {
 			isDouble = true;
 			int save = current;
 			advance();
-			if (peek() == '+' || peek() == '-') advance();
+			if (peek() == '+' || peek() == '-') {
+				advance();
+			}
 			if (!isDigit(peek())) {
 				current = save;
 			}
 			else {
-				while (isDigit(peek())) advance();
+				while (isDigit(peek())) {
+					advance();
+				}
 			}
 		}
 
@@ -237,26 +218,13 @@ public class Lexer {
 				}
 				char e = advance();
 				switch (e) {
-					case 'n':
-						sb.append('\n');
-						break;
-					case 'r':
-						sb.append('\r');
-						break;
-					case 't':
-						sb.append('\t');
-						break;
-					case '\\':
-						sb.append('\\');
-						break;
-					case '"':
-						sb.append('"');
-						break;
-					case '\'':
-						sb.append('\'');
-						break;
-					default:
-						sb.append(e);
+					case 'n' -> sb.append('\n');
+					case 'r' -> sb.append('\r');
+					case 't' -> sb.append('\t');
+					case '\\' -> sb.append('\\');
+					case '"' -> sb.append('"');
+					case '\'' -> sb.append('\'');
+					default -> sb.append(e);
 				}
 			}
 			else if (c == '\n') {
@@ -300,28 +268,15 @@ public class Lexer {
 				return;
 			}
 			char e = advance();
-			switch (e) {
-				case 'n':
-					value = '\n';
-					break;
-				case 'r':
-					value = '\r';
-					break;
-				case 't':
-					value = '\t';
-					break;
-				case '\\':
-					value = '\\';
-					break;
-				case '\'':
-					value = '\'';
-					break;
-				case '"':
-					value = '"';
-					break;
-				default:
-					value = e;
-			}
+			value = switch (e) {
+				case 'n' -> '\n';
+				case 'r' -> '\r';
+				case 't' -> '\t';
+				case '\\' -> '\\';
+				case '\'' -> '\'';
+				case '"' -> '"';
+				default -> e;
+			};
 		}
 		else {
 			value = c;
@@ -336,19 +291,27 @@ public class Lexer {
 	}
 
 	private boolean match(char expected) {
-		if (isAtEnd()) return false;
-		if (source.charAt(current) != expected) return false;
+		if (isAtEnd()) {
+			return false;
+		}
+		if (source.charAt(current) != expected) {
+			return false;
+		}
 		advance();
 		return true;
 	}
 
 	private char peek() {
-		if (isAtEnd()) return '\0';
+		if (isAtEnd()) {
+			return '\0';
+		}
 		return source.charAt(current);
 	}
 
 	private char peekNext() {
-		if (current + 1 >= source.length()) return '\0';
+		if (current + 1 >= source.length()) {
+			return '\0';
+		}
 		return source.charAt(current + 1);
 	}
 
