@@ -1,0 +1,334 @@
+scene add(var a: int, var b: int): int{
+    cut num1 + num2;
+}
+scene entrance(): scrap{
+    project(add(6, 2));
+}
+scene square(var a: int): int{
+    cut a*a;
+}
+scene entrance(): scrap{
+    project(square(7));
+}
+scene isEven(var num: int): string{
+    if(num % 2 == 0) {
+        cut "yes";
+    }
+    else{
+        cut "no";
+    }
+}
+scene entrance(): scrap{
+    project(isEven(5));
+}
+scene sayHello(var name: string): string{
+    if(name == "Remy") {
+        cut "Bonjour " + name;
+    }
+    else{
+        cut "Hi " + name;
+    }
+}
+scene entrance(): scrap{
+    project(sayHello("Remy"));
+    project(sayHello("Lazar"));
+}
+scene guessingGame(): scrap{
+    var targetWord: string = "test";
+    keepRollingIf(yes) {
+        var guessedWord: string = capture();
+        if(guessedWord != targetWord) {
+            project("incorrect");
+        }
+        else{
+            project("correct");
+            exit;
+        }
+    }
+}
+scene entrance(): scrap{
+    guessingGame();
+}
+Setup Movie{
+    var title: string;
+    var rating: double;
+    Movie(var title: string, var rating: double) {
+        @title = title;
+        @rating = rating;
+    }
+}
+scene getAverageRating(movies: Movie[], moviesLength): double{
+    var sum: double = 0;
+    keepRollingDuring(var i: int = 0; i < moviesLength; i++) {
+        sum += movies[i].rating;
+    }
+    cut sum / moviesLength;
+}
+scene entrance(): scrap{
+    var movies: Movie[] = action Movie[5];
+    movies[0] = action Movie("Frances Ha", 7.4);
+    movies[1] = action Movie("55 Steps", 6.9);
+    movies[2] = action Movie("Arrival", 7.5);
+    movies[3] = action Movie("Ratatouille", 7.8);
+    movies[4] = action Movie("Inside Out", 7.9);
+    project(getAverageRating(movies, 5));
+}
+scene factorial(var n: int): int{
+    var factorial: int = 0;
+    keepRollingDuring(var i: int = 1; i <= n; i++) {
+        factorial+=i;
+    }
+    cut factorial;
+}
+scene entrance(): scrap{
+    var num: int = 25;
+    project(factorial(num));
+}
+scene reverseString(var input: string, var length: int): string{
+    var reversed: string = "";
+    keepRollingDuring(var i: int = length - 1; i >= 0; i--) {
+        reversed += input[i];
+    }
+    cut reversed;
+}
+scene entrance(): scrap{
+    var str: string = "hello";
+    project(reverseString(str)); 
+}
+scene getCharFirstOccurrence(var input: string, var inputLength: int, var target: char): int{
+    keepRollingDuring(var i: int = 0; i < inputLength; i++) {
+        if(input[i] == target) {
+            cut input[i];
+        }
+    }
+    cut -1;
+}
+scene entrance(): scrap{
+    var str: string = "Minecraft";
+    var target: char = 'c';
+    project(getCharFirstOccurrence(str, 9));
+}
+scene isLeapYear(var year: int): string{
+    if (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) {
+        cut "yes";
+    }
+    else{
+        cut "no";
+    }
+}
+scene entrance(): scrap{
+    project(isLeapYear(2012));
+}
+scene getCircleArea(var radius: double): double{
+    cut 3.14 * radius * radius;
+}
+scene entrance(): scrap{
+    var area: double = getCircleArea(5.0);
+    project(area);
+}
+scene isPrime(var input: int): string{
+    keepRollingDuring(var i: int = 2; i < input; i++) {
+        if (input % i == 0) {
+            cut "no";
+        }
+    }
+    cut "yes";
+}
+scene entrance(): scrap {
+    var num: int = 17;
+    var isPrime: string = isPrime(17);
+    if(isPrime == "yes") {
+        project(num + " is prime.");
+    }
+    else{
+        project(num + " is not prime.");
+    }
+}
+scene calculate(var a: int, var b: int, var operation: char): int {
+    if (operation == '+') {
+        cut a + b;
+    }
+    else if (operation == '-') {
+        cut a - b;
+    }
+    else if (operation == '*') {
+        cut a * b;
+    }
+    else if (operation == '/') {
+        cut a / b;
+    }
+    else if (operation == '%') {
+        cut a % b;
+    }
+    cut -31101;
+}
+scene entrance(): scrap {
+    var x: int = 10;
+    var y: int = 5;
+    var operation: char = '+';
+    var result: int = calculate(x, y, operation);
+    if(result != -31101) {
+        project(result);
+    }
+    else{
+        project("Operation not valid.");
+    }
+}
+scene addDigits(var input: int): int {
+    var sum: int = 0;
+    keepRollingDuring(var i: int = input; i > 0; i /= 10) {
+        sum += i % 10;
+    }
+    cut sum;
+}
+scene entrance(): scrap{
+    var num: int = 12345;
+    project(addDigits(num));
+}
+scene bubbleSort(var array: int[], var length: int): int[] {
+    var swapped: int = 1;
+    keepRollingIf (swapped == 1) {
+        swapped = 0;
+        keepRollingDuring(var i: int = 0; i < length - 1; i++) {
+            if (array[i] > array[i + 1]) {
+                var temp: int = array[i];
+                array[i] = array[i + 1];
+                array[i + 1] = temp;
+                swapped = 1;
+            }
+        }
+    }
+    cut array;
+}
+scene projectArray(var array: int[], var length: int): scrap {
+    keepRollingDuring(var i: int = 0; i < length; i++) {
+        project(array[i]);
+    }
+}
+scene entrance(): scrap{
+    var unsortedArray: int[] = action int[10] {64, 34, 25, 12, 22, 11, 90, 1, 3, 65};
+    projectArray(bubbleSort(unsortedArray, 10));
+}
+scene countDelimiterOccurrences(var input: string, var delimiter: char): int {
+    var count: int = 0;
+    keepRollingDuring(var i: int = 0; i < input.length; i++) {
+        if (input[i] == delimiter) {
+            count++;
+        }
+    }
+    cut count + 1;
+}
+scene splitString(input: string, var inputLength: int, delimiter: char): string[] {
+    var numberOfParts: int = countDelimiterOccurrences(input, delimiter);
+    var result: string[] = action string[numberOfParts];
+    var part: string = "";
+    var partIndex: int = 0;
+    keepRollingDuring(var i: int = 0; i < inputLength; i++) {
+        if (input[i] == delimiter) {
+            result[partIndex] = part;
+            part = "";
+            partIndex++;
+        }
+        else{
+            part += input[i];
+        }
+    }
+    result[partIndex] = part;
+    cut result;
+}
+scene projectArray(var array: int[], var length: int): scrap {
+    keepRollingDuring(var i: int = 0; i < length; i++) {
+        project(array[i]);
+    }
+}
+scene entrance(): scrap {
+    var inputString: string = "red,blue,green,yellow";
+    var delimiter: char = ',';
+    var parts: string[] = splitString(inputString, 21, delimiter);
+    projectArray(parts);
+}
+scene getFib(var n: int): int[] {
+    var fib: int[] = action int[n];
+    fib[0] = 0;
+    fib[1] = 1;
+    keepRollingDuring(var i: int = 2; i < n; i++) {
+        fib[i] = fib[i-1] + fib[i-2];
+    }
+    cut fib;
+}
+scene projectArray(var array: int[], var length: int): scrap {
+    keepRollingDuring(var i: int = 0; i < length; i++) {
+        project(array[i]);
+    }
+}
+scene entrance(): scrap {
+    var n: int = 10;
+    projectArray(getFib(n));
+}
+scene newYearsCountdown(): scrap {
+    var count: int = 10;
+    project("Let's do the new years countdown.");
+    replayIf(count > 0) {
+        project(count + "!");
+        count--;
+    }
+    project("Happy New Year!");
+}
+scene entrance(): scrap {
+    newYearsCountdown();
+}
+scene arrayContains(var input: string[], var inputLength: int, var target: string): int{
+    keepRollingDuring(var i: int = 0; i < inputLength; i++) {
+        if(input[i] == target) {
+            cut "yes";
+        }
+    }
+    cut "no";
+}
+scene getColorOfThing(var input: string): string {
+    var redThings = action string[] {"wine", "cherry", "rose"};
+    var greenThings = action string[] {"grass", "apple", "cucumber"};
+    var blueThings = action string[] {"sky", "ocean", "blueberry"};
+
+    if (arrayContains(redThings, input) == "yes") {
+        cut "red";
+    } 
+    else if (arrayContains(greenThings, input) == "yes") {
+        cut "green";
+    } 
+    else if (arrayContains(blueThings, input) == "yes") {
+        cut "blue";
+    } 
+    else {
+        cut "unknown";
+    }
+}
+scene entrance(): scrap {
+    var thing: string = "apple";
+    var color: string = getColorOfThing(thing);
+    project("Your thing is: " + color);
+}
+scene isPalindrome(var input: int): string{
+    var originalNum: int = input;
+    var reversedNum: int = 0;
+    keepRollingDuring(var i: int = input; i > 0; i /= 10) {
+        var digit: int = i % 10;
+        reversedNum = reversedNum * 10 + digit;
+    }
+    if (reversedNum == originalNum) {
+        cut "yes";
+    }
+    else{
+        cut "no";
+    }
+}
+scene entrance(): scrap{
+    var num: int = 12155121;
+    var result: string = isPalindrome(num);
+    if (result == "yes") {
+        project(num + " is a palindrome.");
+    }
+    else{
+        project(num + " is not a palindrome.");
+    }
+}
