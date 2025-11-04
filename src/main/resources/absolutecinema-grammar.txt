@@ -33,7 +33,7 @@ exprStmt         → expression ";"
 // Expressions (highest precedence first)
 
 primary          → INT_LITERAL | DOUBLE_LITERAL | STRING_LITERAL | CHAR_LITERAL
-                 | TRUE | FALSE
+                 | TRUE | FALSE | NULL
                  | IDENT
                  | "@"
                  | "action" type "(" arguments? ")"

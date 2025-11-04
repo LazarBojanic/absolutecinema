@@ -449,6 +449,9 @@ public final class Parser {
 		if (match(TokenType.TRUE)) {
 			return new Literal(true);
 		}
+		if (match(TokenType.NULL)) {
+			return new Literal(null);
+		}
 		if (match(TokenType.INT_LITERAL)) {
 			return new Literal(previous().getLiteral());
 		}

@@ -31,6 +31,7 @@ public class Lexer {
 		keywords.put("string", TokenType.STRING);
 		keywords.put("true", TokenType.TRUE);
 		keywords.put("false", TokenType.FALSE);
+		keywords.put("null", TokenType.NULL);
 	}
 
 	private final String source;
@@ -57,7 +58,9 @@ public class Lexer {
 		char c = advance();
 		switch (c) {
 			case ' ':
-			case '\r':
+			case '\r': {
+				break;
+			}
 			case '\t': {
 				break;
 			}
@@ -127,27 +130,15 @@ public class Lexer {
 				break;
 			}
 			case '+': {
-				if (match('+')) {
-					add(TokenType.PLUS_PLUS);
-				}
-				else if (match('=')) {
-					add(TokenType.PLUS_EQUAL);
-				}
-				else {
-					add(TokenType.PLUS);
-				}
+				if (match('+')) add(TokenType.PLUS_PLUS);
+				else if (match('=')) add(TokenType.PLUS_EQUAL);
+				else add(TokenType.PLUS);
 				break;
 			}
 			case '-': {
-				if (match('-')) {
-					add(TokenType.MINUS_MINUS);
-				}
-				else if (match('=')) {
-					add(TokenType.MINUS_EQUAL);
-				}
-				else {
-					add(TokenType.MINUS);
-				}
+				if (match('-')) add(TokenType.MINUS_MINUS);
+				else if (match('=')) add(TokenType.MINUS_EQUAL);
+				else add(TokenType.MINUS);
 				break;
 			}
 			case '*': {
@@ -162,24 +153,6 @@ public class Lexer {
 				add(match('=') ? TokenType.PERCENT_EQUAL : TokenType.PERCENT);
 				break;
 			}
-			case '&': {
-				if (match('&')) {
-					add(TokenType.AND_AND);
-				}
-				else {
-					error("Unexpected '&' (did you mean '&&'?)");
-				}
-				break;
-			}
-			case '|': {
-				if (match('|')) {
-					add(TokenType.OR_OR);
-				}
-				else {
-					error("Unexpected '|' (did you mean '||'?)");
-				}
-				break;
-			}
 			case '"': {
 				string();
 				break;
@@ -189,30 +162,11 @@ public class Lexer {
 				break;
 			}
 			default: {
-				if (isDigit(c)) {
-					number();
-				}
-				else if (isAlpha(c)) {
-					identifier();
-				}
-				else {
-					error("Unexpected character: '" + c + "'");
-				}
-				break;
+				if (isDigit(c)) number();
+				else if (isAlpha(c)) identifier();
+				else error("Unexpected character: '" + c + "'");
 			}
 		}
-	}
-
-	private void identifier() {
-		while (isAlphaNumeric(peek())) {
-			advance();
-		}
-		String text = source.substring(start, current);
-		TokenType type = keywords.get(text);
-		if (type == null) {
-			type = TokenType.IDENTIFIER;
-		}
-		add(type);
 	}
 
 	private void number() {
@@ -389,6 +343,18 @@ public class Lexer {
 		String text = source.substring(start, current);
 		int tokenColumn = column - (current - start);
 		tokens.add(new Token(type, text, literal, line, tokenColumn));
+	}
+
+	private void identifier() {
+		while (isAlphaNumeric(peek())) advance();
+		String text = source.substring(start, current);
+		TokenType type = keywords.get(text);
+		if (type == null) {
+			add(TokenType.IDENTIFIER);
+		}
+		else {
+			add(type);
+		}
 	}
 
 	private boolean isAtEnd() {
