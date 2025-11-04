@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
+import java.util.Map; // Added import for Map
+import java.util.Set; // Added import for Set
 
 public final class JsonAstSwingViewer {
 	private JsonAstSwingViewer() {}
@@ -52,16 +54,16 @@ public final class JsonAstSwingViewer {
 
 		if (node.isObject()) {
 			ObjectNode obj = (ObjectNode) node;
-			// Use fieldNames() for compatibility
-			Iterator<String> it = obj.fieldNames();
-			while (it.hasNext()) {
-				String key = it.next();
-				JsonNode val = obj.get(key);
+			// Use properties() which returns Set<Map.Entry<String, JsonNode>>
+			Set<Map.Entry<String, JsonNode>> properties = obj.properties();
+			for (Map.Entry<String, JsonNode> property : properties) {
+				String key = property.getKey();
+				JsonNode val = property.getValue();
 
 				// Omit redundant label duplication (cosmetic only)
 				if ((key.equals("decl") && label.startsWith("decl:")) ||
-						(key.equals("stmt") && label.startsWith("stmt:")) ||
-						(key.equals("expr") && label.startsWith("expr:"))) {
+					(key.equals("stmt") && label.startsWith("stmt:")) ||
+					(key.equals("expr") && label.startsWith("expr:"))) {
 					continue;
 				}
 
@@ -83,22 +85,23 @@ public final class JsonAstSwingViewer {
 	}
 
 	private static String rootLabel(JsonNode node) {
-		if (node != null && node.isObject() && node.has("type")) return node.get("type").asText();
+		if (node != null && node.isObject() && node.has("type")) return node.get("type").asString();
 		return "root";
 	}
 
 	private static String shortLabel(JsonNode node, String key) {
 		if (node == null || node.isNull()) return "null";
-		if (node.isTextual()) return node.asText();
+		if (node.isTextual()) return "\"" + node.asText() + "\"";
 		if (node.isNumber()) return node.asText();
 		if (node.isBoolean()) return String.valueOf(node.booleanValue());
 		if (node.isArray()) return "[]";
 		if (node.isObject()) {
-			ObjectNode o = (ObjectNode) node;
-			if (o.has("expr")) return "expr:" + o.get("expr").asText();
-			if (o.has("stmt")) return "stmt:" + o.get("stmt").asText();
-			if (o.has("decl")) return "decl:" + o.get("decl").asText();
-			if (o.has("name") && !(o.has("expr") || o.has("stmt") || o.has("decl"))) return o.get("name").asText();
+			if (node.has("expr")) return "expr:" + node.get("expr").asString();
+			if (node.has("stmt")) return "stmt:" + node.get("stmt").asString();
+			if (node.has("decl")) return "decl:" + node.get("decl").asString();
+			if (node.has("name") && !(node.has("expr") || node.has("stmt") || node.has("decl"))) {
+				return node.get("name").asString();
+			}
 			return "{ }";
 		}
 		return node.toString();
