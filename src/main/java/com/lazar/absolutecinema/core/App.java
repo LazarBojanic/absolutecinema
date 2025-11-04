@@ -2,11 +2,15 @@ package com.lazar.absolutecinema.core;
 
 import com.lazar.absolutecinema.lexer.Lexer;
 import com.lazar.absolutecinema.parser.Parser;
+import com.lazar.absolutecinema.parser.ast.Program;
+import com.lazar.absolutecinema.util.JsonAstPrinter;
 import com.lazar.absolutecinema.util.Util;
 
 import java.io.File;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class App {
 	private Lexer lexer;
@@ -49,8 +53,20 @@ public class App {
 	}
 
 	public void run() {
-		lexer = new Lexer(sourceCode);
-		var tokens = lexer.lex();
-		Util.printTokenTable(tokens);
+		try{
+			lexer = new Lexer(sourceCode);
+			var tokens = lexer.lex();
+			Util.printTokenTable(tokens);
+			parser = new Parser(tokens);
+			Program program = parser.parseProgram();
+
+			JsonAstPrinter printer = new JsonAstPrinter();
+			String json = printer.print(program);
+			Files.writeString(Path.of("./ast.json"), json);
+			System.out.println("AST printed to ./ast.json");
+		}
+		catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 	}
 }
