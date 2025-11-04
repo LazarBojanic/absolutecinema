@@ -160,36 +160,10 @@ public class Lexer {
 			while (isDigit(peek()));
 		}
 
-		if ((peek() == 'e' || peek() == 'E')) {
-			isDouble = true;
-			int save = current;
-			advance();
-			if (peek() == '+' || peek() == '-') {
-				advance();
-			}
-			if (!isDigit(peek())) {
-				current = save;
-			}
-			else {
-				while (isDigit(peek())) {
-					advance();
-				}
-			}
-		}
-
-		if (peek() == 'f' || peek() == 'F' || peek() == 'd' || peek() == 'D') {
-			isDouble = true;
-			advance();
-		}
-
 		String lexeme = source.substring(start, current);
 		if (isDouble) {
 			try {
-				Double value = Double.parseDouble(lexeme
-					.replace("F", "")
-					.replace("f", "")
-					.replace("D", "")
-					.replace("d", ""));
+				Double value = Double.parseDouble(lexeme);
 				add(TokenType.DOUBLE_LITERAL, value);
 			}
 			catch (NumberFormatException ex) {

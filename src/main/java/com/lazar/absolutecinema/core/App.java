@@ -2,6 +2,7 @@ package com.lazar.absolutecinema.core;
 
 import com.lazar.absolutecinema.lexer.Lexer;
 import com.lazar.absolutecinema.parser.Parser;
+import com.lazar.absolutecinema.util.Util;
 
 import java.io.File;
 import java.io.InputStream;
@@ -50,8 +51,6 @@ public class App {
 	public void run() {
 		lexer = new Lexer(sourceCode);
 		var tokens = lexer.lex();
-		for (var t : tokens) {
-			System.out.println(t);
-		}
+		Util.printTokenTable(tokens);
 	}
 }
