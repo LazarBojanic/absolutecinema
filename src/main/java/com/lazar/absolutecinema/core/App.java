@@ -4,6 +4,8 @@ import com.lazar.absolutecinema.lexer.Lexer;
 import com.lazar.absolutecinema.parser.Parser;
 import com.lazar.absolutecinema.parser.ast.Program;
 import com.lazar.absolutecinema.util.JsonAstPrinter;
+import com.lazar.absolutecinema.util.JsonAstSwingViewer;
+import com.lazar.absolutecinema.util.JsonAstToDot;
 import com.lazar.absolutecinema.util.Util;
 
 import java.io.File;
@@ -64,6 +66,13 @@ public class App {
 			String json = printer.print(program);
 			Files.writeString(Path.of("./ast.json"), json);
 			System.out.println("AST printed to ./ast.json");
+
+			Path jsonFile = Path.of("ast.json");
+			String dot = JsonAstToDot.fromFile(jsonFile);
+			Files.writeString(Path.of("ast.dot"), dot);
+			System.out.println("Wrote ast.dot");
+			JsonAstSwingViewer.show(jsonFile);
+
 		}
 		catch (Exception e) {
 			System.out.println(e.getMessage());
