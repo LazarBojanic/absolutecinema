@@ -9,8 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Convert ast.json into a Graphviz DOT graph without relying on ObjectNode iteration APIs.
- * We bind JSON to plain Java types (Map/List/primitive) and traverse those.
+ * Convert ast.json into a Graphviz DOT graph by first binding to simple Java types.
  */
 public final class JsonAstToDot {
 	private final StringBuilder sb = new StringBuilder();
@@ -31,7 +30,8 @@ public final class JsonAstToDot {
 	@SuppressWarnings("unchecked")
 	public static String fromString(String json) {
 		ObjectMapper mapper = new ObjectMapper();
-		Object root = mapper.readValue(json, Object.class); // Map/List/String/Number/Boolean/null
+		Object root;
+		root = mapper.readValue(json, Object.class); // Map/List/String/Number/Boolean/null
 		return new JsonAstToDot().toDot(root);
 	}
 
@@ -63,7 +63,6 @@ public final class JsonAstToDot {
 		if (node instanceof Boolean b) return String.valueOf(b);
 		if (node instanceof List<?>) return "[]";
 		if (node instanceof Map<?,?> m) {
-			// Prefer schema hints for nicer labels
 			Object type = m.get("type");
 			if (type instanceof String ts) return ts;
 			Object decl = m.get("decl");
@@ -73,7 +72,7 @@ public final class JsonAstToDot {
 			Object expr = m.get("expr");
 			if (expr instanceof String es) return "expr:" + es;
 			Object name = m.get("name");
-			if (name instanceof String ns && !m.containsKey("expr") && !m.containsKey("stmt") && !m.containsKey("decl"))
+			if (name instanceof String ns && !(expr instanceof String) && !(stmt instanceof String) && !(decl instanceof String))
 				return ns;
 			return "{ }";
 		}
@@ -128,8 +127,11 @@ public final class JsonAstToDot {
 
 	private Object valForKey(String key, Object val) {
 		if (!(val instanceof Map<?,?> m)) return val;
-		Object name = ((Map<?,?>) m).get("name");
-		if (name instanceof String ns && !((Map<?,?>) m).containsKey("expr") && !((Map<?,?>) m).containsKey("stmt") && !((Map<?,?>) m).containsKey("decl")) {
+		Object name = m.get("name");
+		Object expr = m.get("expr");
+		Object stmt = m.get("stmt");
+		Object decl = m.get("decl");
+		if (name instanceof String ns && !(expr instanceof String) && !(stmt instanceof String) && !(decl instanceof String)) {
 			return ns;
 		}
 		return val;

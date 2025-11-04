@@ -91,19 +91,32 @@ public final class JsonAstSwingViewer {
 
 	private static String shortLabel(JsonNode node, String key) {
 		if (node == null || node.isNull()) return "null";
-		if (node.isTextual()) return "\"" + node.asText() + "\"";
-		if (node.isNumber()) return node.asText();
+		if (node.isString()) return "\"" + node.asString() + "\"";
+		if (node.isNumber()) return node.asString();
 		if (node.isBoolean()) return String.valueOf(node.booleanValue());
 		if (node.isArray()) return "[]";
+
 		if (node.isObject()) {
-			if (node.has("expr")) return "expr:" + node.get("expr").asString();
-			if (node.has("stmt")) return "stmt:" + node.get("stmt").asString();
-			if (node.has("decl")) return "decl:" + node.get("decl").asString();
-			if (node.has("name") && !(node.has("expr") || node.has("stmt") || node.has("decl"))) {
-				return node.get("name").asString();
+			// show expr/stmt/decl only if they are simple text
+			if (node.has("expr")) {
+				JsonNode expr = node.get("expr");
+				return expr.isString() ? "expr:" + expr.asString() : "expr:{ }";
+			}
+			if (node.has("stmt")) {
+				JsonNode stmt = node.get("stmt");
+				return stmt.isString() ? "stmt:" + stmt.asString() : "stmt:{ }";
+			}
+			if (node.has("decl")) {
+				JsonNode decl = node.get("decl");
+				return decl.isString() ? "decl:" + decl.asString() : "decl:{ }";
+			}
+			if (node.has("name")) {
+				JsonNode name = node.get("name");
+				return name.isString() ? name.asString() : "{ }";
 			}
 			return "{ }";
 		}
+
 		return node.toString();
 	}
 }
