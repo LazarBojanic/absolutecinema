@@ -28,11 +28,14 @@ public final class Parser {
 			}
 			if (match(TokenType.SETUP)) {
 				decls.add(parseSetupDecl());
-			} else if (match(TokenType.SCENE)) {
+			}
+			else if (match(TokenType.SCENE)) {
 				decls.add(parseSceneDecl(false));
-			} else if (match(TokenType.VAR)) {
+			}
+			else if (match(TokenType.VAR)) {
 				decls.add(parseTopLevelVarDecl());
-			} else {
+			}
+			else {
 				error(peek(), "Expected a top-level declaration: 'setup', 'scene', or 'var'.");
 			}
 		}
@@ -73,18 +76,22 @@ public final class Parser {
 				}
 				consume(TokenType.SEMICOLON, "Expected ';' after field declaration.");
 				fields.add(new VarDecl(fname, ftype, init));
-			} else if (check(TokenType.IDENTIFIER) && peek().getLexeme().equals(name.getLexeme())) {
+			}
+			else if (check(TokenType.IDENTIFIER) && peek().getLexeme().equals(name.getLexeme())) {
 				Token ctorName = advance();
 				consume(TokenType.LEFT_PAREN, "Expected '(' after constructor name.");
 				List<Param> params = parseParamList();
 				consume(TokenType.RIGHT_PAREN, "Expected ')' after constructor parameters.");
 				Block body = parseBlock();
 				ctor = new ConstructorDecl(ctorName, params, body);
-			} else if (match(TokenType.SCENE)) {
+			}
+			else if (match(TokenType.SCENE)) {
 				methods.add(parseSceneDecl(true));
-			} else if (match(TokenType.SEMICOLON)) {
+			}
+			else if (match(TokenType.SEMICOLON)) {
 				// skip stray
-			} else {
+			}
+			else {
 				error(peek(), "Expected field, constructor, or scene method in setup: '" + name.getLexeme() + "'.");
 			}
 		}
@@ -103,7 +110,8 @@ public final class Parser {
 		TypeRef retType;
 		if (match(TokenType.SCRAP)) {
 			retType = new TypeRef(previous(), 0);
-		} else {
+		}
+		else {
 			retType = parseTypeRef();
 		}
 
@@ -122,13 +130,15 @@ public final class Parser {
 				consume(TokenType.COLON, "Expected ':' after parameter name.");
 				TypeRef ptype = parseTypeRef();
 				params.add(new Param(pname, ptype));
-			} else {
+			}
+			else {
 				Token pname = consume(TokenType.IDENTIFIER, "Expected parameter name (use 'var name: Type').");
 				consume(TokenType.COLON, "Expected ':' after parameter name.");
 				TypeRef ptype = parseTypeRef();
 				params.add(new Param(pname, ptype));
 			}
-		} while (match(TokenType.COMMA));
+		}
+		while (match(TokenType.COMMA));
 		return params;
 	}
 
@@ -138,13 +148,16 @@ public final class Parser {
 		while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
 			if (match(TokenType.VAR)) {
 				items.add(new Var(parseLocalVarDecl()));
-			} else if (match(TokenType.SCENE)) {
+			}
+			else if (match(TokenType.SCENE)) {
 				error(previous(), "Nested scenes are not allowed.");
 				synchronizeTo(TokenType.RIGHT_BRACE);
-			} else if (match(TokenType.SETUP)) {
+			}
+			else if (match(TokenType.SETUP)) {
 				error(previous(), "Nested setups are not allowed.");
 				synchronizeTo(TokenType.RIGHT_BRACE);
-			} else {
+			}
+			else {
 				items.add(statement());
 			}
 		}
@@ -157,7 +170,8 @@ public final class Parser {
 		while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
 			if (match(TokenType.VAR)) {
 				items.add(new Var(parseLocalVarDecl()));
-			} else {
+			}
+			else {
 				items.add(statement());
 			}
 		}
@@ -221,7 +235,8 @@ public final class Parser {
 		if (match(TokenType.ELSE)) {
 			if (match(TokenType.IF)) {
 				elseBranch = parseIf();
-			} else {
+			}
+			else {
 				consume(TokenType.LEFT_BRACE, "Expected '{' to start 'else' block.");
 				elseBranch = parseBlockFromAlreadyConsumedBrace();
 			}
@@ -243,11 +258,13 @@ public final class Parser {
 		Node initializer;
 		if (match(TokenType.VAR)) {
 			initializer = new Var(parseLocalVarDecl());
-		} else if (!check(TokenType.SEMICOLON)) {
+		}
+		else if (!check(TokenType.SEMICOLON)) {
 			Expr initExpr = expression();
 			consume(TokenType.SEMICOLON, "Expected ';' after for initializer.");
 			initializer = new ExprStmt(initExpr);
-		} else {
+		}
+		else {
 			consume(TokenType.SEMICOLON, "Expected ';' after for initializer.");
 			initializer = null;
 		}
@@ -280,7 +297,9 @@ public final class Parser {
 	// Expressions
 	// ==========================
 
-	private Expr expression() { return assignment(); }
+	private Expr expression() {
+		return assignment();
+	}
 
 	private Expr assignment() {
 		Expr expr = or();
@@ -290,7 +309,8 @@ public final class Parser {
 			if (expr instanceof Variable || expr instanceof Get || expr instanceof Index) {
 				if (expr instanceof Get g) {
 					return new Set(g.object, g.name, op, value);
-				} else {
+				}
+				else {
 					return new Assign(expr, op, value);
 				}
 			}
@@ -376,20 +396,25 @@ public final class Parser {
 				if (!check(TokenType.RIGHT_PAREN)) {
 					do {
 						args.add(expression());
-					} while (match(TokenType.COMMA));
+					}
+					while (match(TokenType.COMMA));
 				}
 				Token paren = consume(TokenType.RIGHT_PAREN, "Expected ')' after arguments.");
 				expr = new Call(expr, paren, args);
-			} else if (match(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
+			}
+			else if (match(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
 				expr = new Postfix(expr, previous());
-			} else if (match(TokenType.LEFT_BRACKET)) {
+			}
+			else if (match(TokenType.LEFT_BRACKET)) {
 				Expr index = expression();
 				consume(TokenType.RIGHT_BRACKET, "Expected ']' after index.");
 				expr = new Index(expr, index);
-			} else if (match(TokenType.DOT)) {
+			}
+			else if (match(TokenType.DOT)) {
 				Token name = consume(TokenType.IDENTIFIER, "Expected property name after '.'.");
 				expr = new Get(expr, name);
-			} else {
+			}
+			else {
 				break;
 			}
 		}
@@ -404,11 +429,13 @@ public final class Parser {
 				if (!check(TokenType.RIGHT_PAREN)) {
 					do {
 						args.add(expression());
-					} while (match(TokenType.COMMA));
+					}
+					while (match(TokenType.COMMA));
 				}
 				Token paren = consume(TokenType.RIGHT_PAREN, "Expected ')' after arguments.");
 				expr = new Call(expr, paren, args);
-			} else {
+			}
+			else {
 				break;
 			}
 		}
@@ -416,14 +443,30 @@ public final class Parser {
 	}
 
 	private Expr primary() {
-		if (match(TokenType.FALSE)) { return new Literal(false); }
-		if (match(TokenType.TRUE)) { return new Literal(true); }
-		if (match(TokenType.INT_LITERAL)) { return new Literal(previous().getLiteral()); }
-		if (match(TokenType.DOUBLE_LITERAL)) { return new Literal(previous().getLiteral()); }
-		if (match(TokenType.STRING_LITERAL)) { return new Literal(previous().getLiteral()); }
-		if (match(TokenType.CHAR_LITERAL)) { return new Literal(previous().getLiteral()); }
-		if (match(TokenType.IDENTIFIER)) { return new Variable(previous()); }
-		if (match(TokenType.AT)) { return new This(previous()); }
+		if (match(TokenType.FALSE)) {
+			return new Literal(false);
+		}
+		if (match(TokenType.TRUE)) {
+			return new Literal(true);
+		}
+		if (match(TokenType.INT_LITERAL)) {
+			return new Literal(previous().getLiteral());
+		}
+		if (match(TokenType.DOUBLE_LITERAL)) {
+			return new Literal(previous().getLiteral());
+		}
+		if (match(TokenType.STRING_LITERAL)) {
+			return new Literal(previous().getLiteral());
+		}
+		if (match(TokenType.CHAR_LITERAL)) {
+			return new Literal(previous().getLiteral());
+		}
+		if (match(TokenType.IDENTIFIER)) {
+			return new Variable(previous());
+		}
+		if (match(TokenType.AT)) {
+			return new This(previous());
+		}
 		if (match(TokenType.ACTION)) {
 			Token action = previous();
 			TypeRef type = parseTypeRef();
@@ -432,20 +475,24 @@ public final class Parser {
 				if (!check(TokenType.RIGHT_PAREN)) {
 					do {
 						args.add(expression());
-					} while (match(TokenType.COMMA));
+					}
+					while (match(TokenType.COMMA));
 				}
 				consume(TokenType.RIGHT_PAREN, "Expected ')' after constructor args.");
 				return new ActionNew(action, type, args, null, null);
-			} else if (match(TokenType.LEFT_BRACE)) {
+			}
+			else if (match(TokenType.LEFT_BRACE)) {
 				List<Expr> elements = new ArrayList<>();
 				if (!check(TokenType.RIGHT_BRACE)) {
 					do {
 						elements.add(expression());
-					} while (match(TokenType.COMMA));
+					}
+					while (match(TokenType.COMMA));
 				}
 				consume(TokenType.RIGHT_BRACE, "Expected '}' after array literal.");
 				return new ArrayLiteral(elements);
-			} else if (match(TokenType.LEFT_BRACKET)) {
+			}
+			else if (match(TokenType.LEFT_BRACKET)) {
 				Expr capacity = expression();
 				consume(TokenType.RIGHT_BRACKET, "Expected ']' after array capacity.");
 				List<Expr> init = null;
@@ -454,12 +501,14 @@ public final class Parser {
 					if (!check(TokenType.RIGHT_BRACE)) {
 						do {
 							init.add(expression());
-						} while (match(TokenType.COMMA));
+						}
+						while (match(TokenType.COMMA));
 					}
 					consume(TokenType.RIGHT_BRACE, "Expected '}' after array initializer.");
 				}
 				return new ActionNew(action, type, null, capacity, init);
-			} else {
+			}
+			else {
 				error(peek(), "Expected '(' for constructor call or '[' for array capacity after type in 'action'.");
 			}
 		}
@@ -524,9 +573,17 @@ public final class Parser {
 		return previous();
 	}
 
-	private boolean isAtEnd() { return peek().getType() == TokenType.EOF; }
-	private Token peek() { return tokens.get(current); }
-	private Token previous() { return tokens.get(current - 1); }
+	private boolean isAtEnd() {
+		return peek().getType() == TokenType.EOF;
+	}
+
+	private Token peek() {
+		return tokens.get(current);
+	}
+
+	private Token previous() {
+		return tokens.get(current - 1);
+	}
 
 	private Token consume(TokenType type, String message) {
 		if (check(type)) {
@@ -548,6 +605,8 @@ public final class Parser {
 	}
 
 	private static final class ParseError extends RuntimeException {
-		ParseError(String msg) { super(msg); }
+		ParseError(String msg) {
+			super(msg);
+		}
 	}
 }

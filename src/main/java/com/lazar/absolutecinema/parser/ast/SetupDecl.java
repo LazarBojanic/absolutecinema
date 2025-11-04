@@ -1,12 +1,24 @@
 package com.lazar.absolutecinema.parser.ast;
 
 import com.lazar.absolutecinema.model.Token;
+
 import java.util.List;
 
 public final class SetupDecl implements Decl {
-	public final Token name; public final List<VarDecl> fields; public final ConstructorDecl ctor; public final java.util.List<SceneDecl> methods;
+	public final Token name;
+	public final List<VarDecl> fields;
+	public final ConstructorDecl ctor;
+	public final java.util.List<SceneDecl> methods;
+
 	public SetupDecl(Token name, List<VarDecl> fields, ConstructorDecl ctor, List<SceneDecl> methods) {
-		this.name = name; this.fields = fields; this.ctor = ctor; this.methods = methods;
+		this.name = name;
+		this.fields = fields;
+		this.ctor = ctor;
+		this.methods = methods;
 	}
-	@Override public <R> R accept(DeclVisitor<R> v) { return v.visitSetup(this); }
+
+	@Override
+	public <R> R accept(DeclVisitor<R> v) {
+		return v.visitSetup(this);
+	}
 }

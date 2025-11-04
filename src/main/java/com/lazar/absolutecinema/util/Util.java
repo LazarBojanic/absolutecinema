@@ -52,8 +52,9 @@ public class Util {
 		}
 		return escaped;
 	}
+
 	private static String pad(String s, int width, boolean rightAlign) {
-		if (s == null){
+		if (s == null) {
 			s = "";
 		}
 		int pad = width - s.length();
@@ -63,6 +64,7 @@ public class Util {
 		String spaces = " ".repeat(pad);
 		return rightAlign ? spaces + s : s + spaces;
 	}
+
 	private static String renderRow(String[] cells, int[] widths, boolean[] rightAlign) {
 		StringBuilder line = new StringBuilder("|");
 		for (int c = 0; c < widths.length; c++) {
@@ -72,6 +74,7 @@ public class Util {
 		}
 		return line.toString();
 	}
+
 	private static String buildBorder(int[] widths) {
 		StringBuilder sep = new StringBuilder();
 		sep.append('+');
@@ -80,6 +83,7 @@ public class Util {
 		}
 		return sep.toString();
 	}
+
 	private static int[] computeWidths(String[] headers, List<String[]> rows) {
 		int cols = headers.length;
 		int[] widths = new int[cols];

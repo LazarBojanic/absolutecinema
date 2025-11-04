@@ -15,11 +15,25 @@ public class Token {
 		this.column = column;
 	}
 
-	public TokenType getType() { return type; }
-	public String getLexeme() { return lexeme; }
-	public Object getLiteral() { return literal; }
-	public int getLine() { return line; }
-	public int getColumn() { return column; }
+	public TokenType getType() {
+		return type;
+	}
+
+	public String getLexeme() {
+		return lexeme;
+	}
+
+	public Object getLiteral() {
+		return literal;
+	}
+
+	public int getLine() {
+		return line;
+	}
+
+	public int getColumn() {
+		return column;
+	}
 
 	@Override
 	public String toString() {

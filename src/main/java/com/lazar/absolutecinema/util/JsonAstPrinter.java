@@ -1,8 +1,10 @@
 package com.lazar.absolutecinema.util;
 
 import com.lazar.absolutecinema.parser.ast.*;
-import tools.jackson.databind.*;
-import tools.jackson.databind.node.*;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 public final class JsonAstPrinter {
 	private final ObjectMapper mapper = new ObjectMapper();
@@ -17,7 +19,8 @@ public final class JsonAstPrinter {
 		root.set("declarations", decls);
 		try {
 			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new RuntimeException("Failed to serialize AST to JSON", e);
 		}
 	}

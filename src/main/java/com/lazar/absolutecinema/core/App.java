@@ -13,11 +13,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class App {
+	private static App instance;
 	private Lexer lexer;
 	private Parser parser;
 	private File sourceFile;
 	private String sourceCode;
-	private static App instance;
 
 	private App(String[] args) {
 		try {
@@ -53,7 +53,7 @@ public class App {
 	}
 
 	public void run() {
-		try{
+		try {
 			lexer = new Lexer(sourceCode);
 			var tokens = lexer.lex();
 			Util.printTokenTable(tokens);

@@ -9,14 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 public class Lexer {
-	private final String source;
-	private final List<Token> tokens = new ArrayList<>();
-
-	private int start = 0;
-	private int current = 0;
-	private int line = 1;
-	private int column = 1;
-
 	private static final Map<String, TokenType> keywords = new HashMap<>();
 
 	static {
@@ -41,6 +33,13 @@ public class Lexer {
 		keywords.put("false", TokenType.FALSE);
 	}
 
+	private final String source;
+	private final List<Token> tokens = new ArrayList<>();
+	private int start = 0;
+	private int current = 0;
+	private int line = 1;
+	private int column = 1;
+
 	public Lexer(String source) {
 		this.source = source != null ? source : "";
 	}
@@ -57,7 +56,9 @@ public class Lexer {
 	private void scanToken() {
 		char c = advance();
 		switch (c) {
-			case ' ': case '\r': case '\t': {
+			case ' ':
+			case '\r':
+			case '\t': {
 				break;
 			}
 			case '\n': {
@@ -65,27 +66,74 @@ public class Lexer {
 				column = 1;
 				break;
 			}
-			case '(': { add(TokenType.LEFT_PAREN); break; }
-			case ')': { add(TokenType.RIGHT_PAREN); break; }
-			case '{': { add(TokenType.LEFT_BRACE); break; }
-			case '}': { add(TokenType.RIGHT_BRACE); break; }
-			case '[': { add(TokenType.LEFT_BRACKET); break; }
-			case ']': { add(TokenType.RIGHT_BRACKET); break; }
-			case ',': { add(TokenType.COMMA); break; }
-			case '.': { add(TokenType.DOT); break; }
-			case ';': { add(TokenType.SEMICOLON); break; }
-			case ':': { add(TokenType.COLON); break; }
-			case '@': { add(TokenType.AT); break; }
-			case '!': { add(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG); break; }
-			case '=': { add(match('=') ? TokenType.EQUAL_EQUAL : TokenType.EQUAL); break; }
-			case '<': { add(match('=') ? TokenType.LESS_EQUAL : TokenType.LESS); break; }
-			case '>': { add(match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER); break; }
+			case '(': {
+				add(TokenType.LEFT_PAREN);
+				break;
+			}
+			case ')': {
+				add(TokenType.RIGHT_PAREN);
+				break;
+			}
+			case '{': {
+				add(TokenType.LEFT_BRACE);
+				break;
+			}
+			case '}': {
+				add(TokenType.RIGHT_BRACE);
+				break;
+			}
+			case '[': {
+				add(TokenType.LEFT_BRACKET);
+				break;
+			}
+			case ']': {
+				add(TokenType.RIGHT_BRACKET);
+				break;
+			}
+			case ',': {
+				add(TokenType.COMMA);
+				break;
+			}
+			case '.': {
+				add(TokenType.DOT);
+				break;
+			}
+			case ';': {
+				add(TokenType.SEMICOLON);
+				break;
+			}
+			case ':': {
+				add(TokenType.COLON);
+				break;
+			}
+			case '@': {
+				add(TokenType.AT);
+				break;
+			}
+			case '!': {
+				add(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG);
+				break;
+			}
+			case '=': {
+				add(match('=') ? TokenType.EQUAL_EQUAL : TokenType.EQUAL);
+				break;
+			}
+			case '<': {
+				add(match('=') ? TokenType.LESS_EQUAL : TokenType.LESS);
+				break;
+			}
+			case '>': {
+				add(match('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER);
+				break;
+			}
 			case '+': {
 				if (match('+')) {
 					add(TokenType.PLUS_PLUS);
-				} else if (match('=')) {
+				}
+				else if (match('=')) {
 					add(TokenType.PLUS_EQUAL);
-				} else {
+				}
+				else {
 					add(TokenType.PLUS);
 				}
 				break;
@@ -93,20 +141,32 @@ public class Lexer {
 			case '-': {
 				if (match('-')) {
 					add(TokenType.MINUS_MINUS);
-				} else if (match('=')) {
+				}
+				else if (match('=')) {
 					add(TokenType.MINUS_EQUAL);
-				} else {
+				}
+				else {
 					add(TokenType.MINUS);
 				}
 				break;
 			}
-			case '*': { add(match('=') ? TokenType.STAR_EQUAL : TokenType.STAR); break; }
-			case '/': { add(match('=') ? TokenType.SLASH_EQUAL : TokenType.SLASH); break; }
-			case '%': { add(match('=') ? TokenType.PERCENT_EQUAL : TokenType.PERCENT); break; }
+			case '*': {
+				add(match('=') ? TokenType.STAR_EQUAL : TokenType.STAR);
+				break;
+			}
+			case '/': {
+				add(match('=') ? TokenType.SLASH_EQUAL : TokenType.SLASH);
+				break;
+			}
+			case '%': {
+				add(match('=') ? TokenType.PERCENT_EQUAL : TokenType.PERCENT);
+				break;
+			}
 			case '&': {
 				if (match('&')) {
 					add(TokenType.AND_AND);
-				} else {
+				}
+				else {
 					error("Unexpected '&' (did you mean '&&'?)");
 				}
 				break;
@@ -114,7 +174,8 @@ public class Lexer {
 			case '|': {
 				if (match('|')) {
 					add(TokenType.OR_OR);
-				} else {
+				}
+				else {
 					error("Unexpected '|' (did you mean '||'?)");
 				}
 				break;
@@ -130,9 +191,11 @@ public class Lexer {
 			default: {
 				if (isDigit(c)) {
 					number();
-				} else if (isAlpha(c)) {
+				}
+				else if (isAlpha(c)) {
 					identifier();
-				} else {
+				}
+				else {
 					error("Unexpected character: '" + c + "'");
 				}
 				break;
@@ -169,14 +232,17 @@ public class Lexer {
 			try {
 				Double value = Double.parseDouble(lexeme);
 				add(TokenType.DOUBLE_LITERAL, value);
-			} catch (NumberFormatException ex) {
+			}
+			catch (NumberFormatException ex) {
 				error("Invalid double literal: " + lexeme);
 			}
-		} else {
+		}
+		else {
 			try {
 				Integer value = Integer.parseInt(lexeme);
 				add(TokenType.INT_LITERAL, value);
-			} catch (NumberFormatException ex) {
+			}
+			catch (NumberFormatException ex) {
 				error("Invalid int literal: " + lexeme);
 			}
 		}
@@ -193,19 +259,42 @@ public class Lexer {
 				}
 				char e = advance();
 				switch (e) {
-					case 'n': { sb.append('\n'); break; }
-					case 'r': { sb.append('\r'); break; }
-					case 't': { sb.append('\t'); break; }
-					case '\\': { sb.append('\\'); break; }
-					case '"': { sb.append('"'); break; }
-					case '\'': { sb.append('\''); break; }
-					default: { sb.append(e); break; }
+					case 'n': {
+						sb.append('\n');
+						break;
+					}
+					case 'r': {
+						sb.append('\r');
+						break;
+					}
+					case 't': {
+						sb.append('\t');
+						break;
+					}
+					case '\\': {
+						sb.append('\\');
+						break;
+					}
+					case '"': {
+						sb.append('"');
+						break;
+					}
+					case '\'': {
+						sb.append('\'');
+						break;
+					}
+					default: {
+						sb.append(e);
+						break;
+					}
 				}
-			} else if (c == '\n') {
+			}
+			else if (c == '\n') {
 				line++;
 				column = 1;
 				sb.append('\n');
-			} else {
+			}
+			else {
 				sb.append(c);
 			}
 		}
@@ -249,7 +338,8 @@ public class Lexer {
 				case '"' -> '"';
 				default -> e;
 			};
-		} else {
+		}
+		else {
 			value = c;
 		}
 		if (peek() != '\'') {
