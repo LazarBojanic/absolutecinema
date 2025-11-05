@@ -159,9 +159,15 @@ public class Lexer {
 				break;
 			}
 			default: {
-				if (isDigit(c)) number();
-				else if (isAlpha(c)) identifier();
-				else error("Unexpected character: '" + c + "'");
+				if (isDigit(c)) {
+					number();
+				}
+				else if (isAlpha(c)) {
+					identifier();
+				}
+				else {
+					error("Unexpected character: '" + c + "'");
+				}
 			}
 		}
 	}
