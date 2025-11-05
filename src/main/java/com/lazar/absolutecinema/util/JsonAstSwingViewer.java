@@ -11,12 +11,12 @@ import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Iterator;
-import java.util.Map; // Added import for Map
-import java.util.Set; // Added import for Set
+import java.util.Map;
+import java.util.Set;
 
 public final class JsonAstSwingViewer {
-	private JsonAstSwingViewer() {}
+	private JsonAstSwingViewer() {
+	}
 
 	public static void show(Path jsonFile) {
 		try {

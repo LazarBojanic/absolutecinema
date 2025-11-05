@@ -1,6 +1,6 @@
 package com.lazar.absolutecinema.parser.ast;
 
-import com.lazar.absolutecinema.model.Token;
+import com.lazar.absolutecinema.lexer.Token;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ public final class SetupDecl implements Decl {
 	public final Token name;
 	public final List<VarDecl> fields;
 	public final ConstructorDecl ctor;
-	public final java.util.List<SceneDecl> methods;
+	public final List<SceneDecl> methods;
 
 	public SetupDecl(Token name, List<VarDecl> fields, ConstructorDecl ctor, List<SceneDecl> methods) {
 		this.name = name;

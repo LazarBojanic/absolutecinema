@@ -1,9 +1,11 @@
 package com.lazar.absolutecinema.parser.ast;
 
-public final class Block implements Stmt {
-	public final java.util.List<Node> statements;
+import java.util.List;
 
-	public Block(java.util.List<Node> statements) {
+public final class Block implements Stmt {
+	public final List<Node> statements;
+
+	public Block(List<Node> statements) {
 		this.statements = statements;
 	}
 

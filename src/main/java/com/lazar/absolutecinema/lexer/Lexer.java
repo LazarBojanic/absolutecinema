@@ -1,8 +1,5 @@
 package com.lazar.absolutecinema.lexer;
 
-import com.lazar.absolutecinema.model.Token;
-import com.lazar.absolutecinema.model.TokenType;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -349,7 +346,9 @@ public class Lexer {
 	}
 
 	private void identifier() {
-		while (isAlphaNumeric(peek())) advance();
+		while (isAlphaNumeric(peek())) {
+			advance();
+		}
 		String text = source.substring(start, current);
 		TokenType type = keywords.get(text);
 		if (type == null) {

@@ -1,7 +1,8 @@
 scene isEven(var num: int): string {
   if (num % 2 == 0) {
     cut "yes";
-  } else {
+  }
+  else {
     cut "no";
   }
 }

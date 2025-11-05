@@ -15,7 +15,8 @@ public final class JsonAstToDot {
 	private final StringBuilder sb = new StringBuilder();
 	private int nextId = 0;
 
-	private JsonAstToDot() {}
+	private JsonAstToDot() {
+	}
 
 	public static String fromFile(Path jsonFile) {
 		try {
@@ -49,7 +50,9 @@ public final class JsonAstToDot {
 	}
 
 	// ===== Implementation =====
-	private int id() { return nextId++; }
+	private int id() {
+		return nextId++;
+	}
 
 	private String esc(String s) {
 		if (s == null) return "null";
@@ -62,7 +65,7 @@ public final class JsonAstToDot {
 		if (node instanceof Number n) return n.toString();
 		if (node instanceof Boolean b) return String.valueOf(b);
 		if (node instanceof List<?>) return "[]";
-		if (node instanceof Map<?,?> m) {
+		if (node instanceof Map<?, ?> m) {
 			Object type = m.get("type");
 			if (type instanceof String ts) return ts;
 			Object decl = m.get("decl");
@@ -100,14 +103,14 @@ public final class JsonAstToDot {
 
 		if (node == null) return me;
 
-		if (node instanceof Map<?,?> map) {
-			for (Map.Entry<?,?> e : ((Map<Object,Object>) map).entrySet()) {
+		if (node instanceof Map<?, ?> map) {
+			for (Map.Entry<?, ?> e : ((Map<Object, Object>) map).entrySet()) {
 				String key = String.valueOf(e.getKey());
 				Object val = e.getValue();
 				// Skip redundant cosmetic labels
 				if (("decl".equals(key) && label.startsWith("decl:")) ||
-						("stmt".equals(key) && label.startsWith("stmt:")) ||
-						("expr".equals(key) && label.startsWith("expr:"))) {
+					("stmt".equals(key) && label.startsWith("stmt:")) ||
+					("expr".equals(key) && label.startsWith("expr:"))) {
 					continue;
 				}
 				int ch = emit(val, labelFor(valForKey(key, val)));
@@ -126,7 +129,7 @@ public final class JsonAstToDot {
 	}
 
 	private Object valForKey(String key, Object val) {
-		if (!(val instanceof Map<?,?> m)) return val;
+		if (!(val instanceof Map<?, ?> m)) return val;
 		Object name = m.get("name");
 		Object expr = m.get("expr");
 		Object stmt = m.get("stmt");

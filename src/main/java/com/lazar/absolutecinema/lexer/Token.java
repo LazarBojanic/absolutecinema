@@ -1,4 +1,4 @@
-package com.lazar.absolutecinema.model;
+package com.lazar.absolutecinema.lexer;
 
 public class Token {
 	private final TokenType type;

@@ -1,7 +1,7 @@
 package com.lazar.absolutecinema.parser;
 
-import com.lazar.absolutecinema.model.Token;
-import com.lazar.absolutecinema.model.TokenType;
+import com.lazar.absolutecinema.lexer.Token;
+import com.lazar.absolutecinema.lexer.TokenType;
 import com.lazar.absolutecinema.parser.ast.*;
 
 import java.util.ArrayList;

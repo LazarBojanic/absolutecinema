@@ -1,51 +1,61 @@
 {
-  "type" : "program",
-  "declarations" : [ {
-    "kind" : "scene",
-    "name" : "isEven",
-    "isMethod" : false,
-    "returnType" : {
-      "name" : "string",
-      "arrayDepth" : 0
-    },
-    "params" : [ {
-      "name" : "num",
-      "type" : {
-        "name" : "int",
-        "arrayDepth" : 0
-      }
-    } ],
-    "body" : [ {
-      "stmt" : "if",
-      "cond" : {
-        "expr" : "binary",
-        "op" : "==",
-        "left" : {
-          "expr" : "binary",
-          "op" : "%",
-          "left" : {
-            "expr" : "var",
-            "name" : "num"
-          },
-          "right" : 2
-        },
-        "right" : 0
-      },
-      "then" : {
-        "stmt" : "block",
-        "body" : [ {
-          "stmt" : "return",
-          "value" : "yes"
-        } ]
-      },
-      "else" : {
-        "stmt" : "block",
-        "body" : [ {
-          "stmt" : "return",
-          "value" : "no"
-        } ]
-      }
-    } ],
-    "decl" : "scene"
-  } ]
+	"type": "program",
+	"declarations": [
+		{
+			"kind": "scene",
+			"name": "isEven",
+			"isMethod": false,
+			"returnType": {
+				"name": "string",
+				"arrayDepth": 0
+			},
+			"params": [
+				{
+					"name": "num",
+					"type": {
+						"name": "int",
+						"arrayDepth": 0
+					}
+				}
+			],
+			"body": [
+				{
+					"stmt": "if",
+					"cond": {
+						"expr": "binary",
+						"op": "==",
+						"left": {
+							"expr": "binary",
+							"op": "%",
+							"left": {
+								"expr": "var",
+								"name": "num"
+							},
+							"right": 2
+						},
+						"right": 0
+					},
+					"then": {
+						"stmt": "block",
+						"body": [
+							{
+								"stmt": "return",
+								"value": "yes"
+							}
+						]
+					},
+					"else": {
+						"stmt": "block",
+						"body": [
+							{
+								"stmt": "return",
+								"value": "no"
+							}
+						]
+					}
+				}
+			],
+			"decl": "scene"
+		}
+	]
 }

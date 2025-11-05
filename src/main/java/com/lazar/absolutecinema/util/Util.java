@@ -1,6 +1,6 @@
 package com.lazar.absolutecinema.util;
 
-import com.lazar.absolutecinema.model.Token;
+import com.lazar.absolutecinema.lexer.Token;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.lazar.absolutecinema.parser.ast;
 
-import com.lazar.absolutecinema.model.Token;
+import com.lazar.absolutecinema.lexer.Token;
 
 public final class Unary implements Expr {
 	public final Token op;
