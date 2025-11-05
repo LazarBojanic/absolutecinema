@@ -58,10 +58,7 @@ public class Lexer {
 		char c = advance();
 		switch (c) {
 			case ' ':
-			case '\r': {
-				break;
-			}
-			case '\t': {
+			case '\r', '\t': {
 				break;
 			}
 			case '\n': {
@@ -176,10 +173,10 @@ public class Lexer {
 		}
 		if (peek() == '.' && isDigit(peekNext())) {
 			isDouble = true;
-			advance();
-			while (isDigit(peek())) {
+			do {
 				advance();
 			}
+			while (isDigit(peek()));
 		}
 		String lexeme = source.substring(start, current);
 		if (isDouble) {

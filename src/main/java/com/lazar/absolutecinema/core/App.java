@@ -40,7 +40,6 @@ public class App {
 				}
 				sourceCode = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 			}
-			run();
 		}
 		catch (Exception e) {
 			System.out.println(e.getMessage());
