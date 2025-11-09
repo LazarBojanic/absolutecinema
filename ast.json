@@ -1,61 +1,107 @@
 {
-	"type": "program",
-	"declarations": [
-		{
-			"kind": "scene",
-			"name": "isEven",
-			"isMethod": false,
-			"returnType": {
-				"name": "string",
-				"arrayDepth": 0
-			},
-			"params": [
-				{
-					"name": "num",
-					"type": {
-						"name": "int",
-						"arrayDepth": 0
-					}
-				}
-			],
-			"body": [
-				{
-					"stmt": "if",
-					"cond": {
-						"expr": "binary",
-						"op": "==",
-						"left": {
-							"expr": "binary",
-							"op": "%",
-							"left": {
-								"expr": "var",
-								"name": "num"
-							},
-							"right": 2
-						},
-						"right": 0
-					},
-					"then": {
-						"stmt": "block",
-						"body": [
-							{
-								"stmt": "return",
-								"value": "yes"
-							}
-						]
-					},
-					"else": {
-						"stmt": "block",
-						"body": [
-							{
-								"stmt": "return",
-								"value": "no"
-							}
-						]
-					}
-				}
-			],
-			"decl": "scene"
-		}
-	]
+  "type" : "program",
+  "declarations" : [ {
+    "name" : "temp",
+    "type" : {
+      "name" : "string",
+      "arrayDepth" : 0
+    },
+    "decl" : "var"
+  }, {
+    "kind" : "scene",
+    "name" : "isEven",
+    "isMethod" : false,
+    "returnType" : {
+      "name" : "string",
+      "arrayDepth" : 0
+    },
+    "params" : [ {
+      "name" : "num",
+      "type" : {
+        "name" : "int",
+        "arrayDepth" : 0
+      }
+    } ],
+    "body" : [ {
+      "stmt" : "if",
+      "cond" : {
+        "expr" : "binary",
+        "op" : "==",
+        "left" : {
+          "expr" : "binary",
+          "op" : "%",
+          "left" : {
+            "expr" : "var",
+            "name" : "num"
+          },
+          "right" : 2
+        },
+        "right" : 0
+      },
+      "then" : {
+        "stmt" : "block",
+        "body" : [ {
+          "stmt" : "return",
+          "value" : "yes"
+        } ]
+      },
+      "else" : {
+        "stmt" : "block",
+        "body" : [ {
+          "stmt" : "return",
+          "value" : "no"
+        } ]
+      }
+    } ],
+    "decl" : "scene"
+  }, {
+    "name" : "even",
+    "type" : {
+      "name" : "string",
+      "arrayDepth" : 0
+    },
+    "decl" : "var"
+  }, {
+    "kind" : "scene",
+    "name" : "entrance",
+    "isMethod" : false,
+    "returnType" : {
+      "name" : "scrap",
+      "arrayDepth" : 0
+    },
+    "params" : [ {
+      "name" : "args",
+      "type" : {
+        "name" : "string",
+        "arrayDepth" : 1
+      }
+    } ],
+    "body" : [ {
+      "stmt" : "expr",
+      "expr" : {
+        "expr" : "assign",
+        "target" : {
+          "expr" : "var",
+          "name" : "even"
+        },
+        "op" : "=",
+        "value" : {
+          "expr" : "call",
+          "callee" : {
+            "expr" : "var",
+            "name" : "isEven"
+          },
+          "args" : [ {
+            "expr" : "call",
+            "callee" : {
+              "expr" : "var",
+              "name" : "isOdd"
+            },
+            "args" : [ ]
+          } ]
+        }
+      }
+    } ],
+    "decl" : "scene"
+  } ]
 }

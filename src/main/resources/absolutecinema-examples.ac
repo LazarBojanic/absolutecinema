@@ -1,8 +1,3 @@
-scene isEven(var num: int): string {
-  if (num % 2 == 0) {
-    cut "yes";
-  }
-  else {
-    cut "no";
-  }
+scene entrance(var args: string[]) : scrap{
+	even = isEven(isOdd());
 }
