@@ -1,0 +1,48 @@
+<program> ::= <declaration>* EOF
+
+<declaration> ::= <setupDecl> | <sceneDecl> | <varDecl> | <statement>
+<setupDecl> ::= "setup" IDENT "{" (<fieldDecl> | <ctorDecl> | <methodDecl>)* "}"
+<fieldDecl> ::= "var" IDENT ":" <type> ("=" <expression>)? ";"
+<ctorDecl> ::= IDENT "(" <params>? ")" <block>
+<methodDecl> ::= "scene" IDENT "(" <params>? ")" ":" ("scrap" | <type>) <block>
+<sceneDecl> ::= "scene" IDENT "(" <params>? ")" ":" ("scrap" | <type>) <block>
+<varDecl> ::= "var" IDENT ":" <type> ("=" <expression>)? ";"
+<params> ::= <param> ("," <param>)*
+<param> ::= ("var")? IDENT ":" <type>
+
+// Types
+<type> ::= ("int" | "double" | "char" | "string" | "bool" | IDENT) ("[" "]")*
+
+// Statements
+<block> ::= "{" <declaration>* "}"
+<statement> ::= <exprStmt> | <ifStmt> | <whileStmt> | <forStmt> | <returnStmt> | <assignStmt> | <callStmt> | <block> | <emptyStmt>
+<exprStmt> ::= <expression> ";"
+<ifStmt> ::= "if" "(" <expression> ")" <block> ("elif" "(" <expression> ")" <block>)* ("else" <block>)?
+<whileStmt> ::= "keepRollingIf" "(" <expression> ")" <block>
+<forStmt> ::= "keepRollingDuring" "(" (<varDecl> | <exprStmt> | ";") <expression>? ";" <expression>? ")" <block>
+<returnStmt> ::= "cut" <expression>? ";"
+<assignStmt> ::= (<IDENT> | <memberAccess> | <indexAccess>) "=" <expression> ";"
+<callStmt> ::= <callExpr> ";"
+<emptyStmt> ::= ";"
+
+// Expressions
+<expression> ::= <assignment>
+<assignment> ::= (<IDENT> | <memberAccess> | <indexAccess>) "=" <assignment> | <logical_or>
+<logical_or> ::= <logical_and> ("||" <logical_and>)*
+<logical_and> ::= <equality> ("&&" <equality>)*
+<equality> ::= <comparison> (("==" | "!=") <comparison>)*
+<comparison> ::= <term> (("<" | "<=" | ">" | ">=") <term>)*
+<term> ::= <factor> (("+" | "-") <factor>)*
+<factor> ::= <unary> (("*" | "/" | "%") <unary>)*
+<unary> ::= ("!" | "-" | "++" | "--") <unary> | <postfix>
+<postfix> ::= <primary> ("++" | "--")?
+<primary> ::= <literal> | IDENT | "(" <expression> ")" | <arrayLiteral> | <objectInstantiation> | <callExpr> | <memberAccess> | <indexAccess>
+
+// Literals and special expressions
+<literal> ::= NUMBER | STRING | CHAR | "true" | "false" | "null"
+<arrayLiteral> ::= "action" <type> "[" <expression>? "]" ("{" (<expression> ("," <expression>)*)? "}")?
+<objectInstantiation> ::= "action" IDENT "(" <arguments>? ")"
+<callExpr> ::= (<IDENT> | <memberAccess>) "(" <arguments>? ")"
+<memberAccess> ::= (<IDENT> | "(" <expression> ")" | <callExpr>) ("." IDENT)+
+<indexAccess> ::= (<IDENT> | <memberAccess>) "[" <expression> "]"
+<arguments> ::= <expression> ("," <expression>)*
