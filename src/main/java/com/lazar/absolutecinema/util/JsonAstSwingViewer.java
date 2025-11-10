@@ -47,20 +47,17 @@ public final class JsonAstSwingViewer {
 		});
 	}
 
-	// ===== Helpers =====
 	private static DefaultMutableTreeNode toTreeNode(JsonNode node, String label) {
 		DefaultMutableTreeNode me = new DefaultMutableTreeNode(label);
 		if (node == null || node.isNull()) return me;
 
 		if (node.isObject()) {
 			ObjectNode obj = (ObjectNode) node;
-			// Use properties() which returns Set<Map.Entry<String, JsonNode>>
 			Set<Map.Entry<String, JsonNode>> properties = obj.properties();
 			for (Map.Entry<String, JsonNode> property : properties) {
 				String key = property.getKey();
 				JsonNode val = property.getValue();
 
-				// Omit redundant label duplication (cosmetic only)
 				if ((key.equals("decl") && label.startsWith("decl:")) ||
 					(key.equals("stmt") && label.startsWith("stmt:")) ||
 					(key.equals("expr") && label.startsWith("expr:"))) {
@@ -80,7 +77,6 @@ public final class JsonAstSwingViewer {
 				me.add(child);
 			}
 		}
-		// primitives are leaves with their textual value already in the label
 		return me;
 	}
 
@@ -97,7 +93,6 @@ public final class JsonAstSwingViewer {
 		if (node.isArray()) return "[]";
 
 		if (node.isObject()) {
-			// show expr/stmt/decl only if they are simple text
 			if (node.has("expr")) {
 				JsonNode expr = node.get("expr");
 				return expr.isString() ? "expr:" + expr.asString() : "expr:{ }";

@@ -9,9 +9,6 @@ import java.util.Collections;
 import java.util.List;
 
 public final class Parser {
-	// ==========================
-	// Parser – State & Entry
-	// ==========================
 
 	private final List<Token> tokens;
 	private int current = 0;
@@ -24,7 +21,6 @@ public final class Parser {
 		List<Node> items = new ArrayList<>();
 		while (!isAtEnd()) {
 			if (match(TokenType.SEMICOLON)) {
-				// allow empty statements at top-level
 				continue;
 			}
 			if (match(TokenType.SETUP)) {
@@ -37,16 +33,11 @@ public final class Parser {
 				items.add(parseTopLevelVarDecl());
 			}
 			else {
-				// Treat anything else as a statement (e.g., calls, assignments) at top level
 				items.add(statement());
 			}
 		}
 		return new Program(items);
 	}
-
-	// ==========================
-	// Declarations
-	// ==========================
 
 	private Decl parseTopLevelVarDecl() {
 		Token name = consume(TokenType.IDENTIFIER, "Expected variable name.");
@@ -91,7 +82,6 @@ public final class Parser {
 				methods.add(parseSceneDecl(true));
 			}
 			else if (match(TokenType.SEMICOLON)) {
-				// skip stray
 			}
 			else {
 				error(peek(), "Expected field, constructor, or scene method in setup: '" + name.getLexeme() + "'.");
@@ -144,10 +134,6 @@ public final class Parser {
 		return params;
 	}
 
-	// ==========================
-	// Blocks & Statements
-	// ==========================
-
 	private Block parseBlock() {
 		consume(TokenType.LEFT_BRACE, "Expected '{' to start block.");
 		List<Node> items = new ArrayList<>();
@@ -197,10 +183,6 @@ public final class Parser {
 		return new VarDecl(name, type, init);
 	}
 
-	// ==========================
-	// Statements
-	// ==========================
-
 	private Stmt statement() {
 		if (match(TokenType.LEFT_BRACE)) {
 			current--;
@@ -230,7 +212,6 @@ public final class Parser {
 		consume(TokenType.LEFT_BRACE, "Expected '{' to start 'if' block.");
 		Block baseThen = parseBlockFromAlreadyConsumedBrace();
 
-		// Collect zero or more 'elif' branches
 		List<IfBranch> elifs = new ArrayList<>();
 		while (match(TokenType.ELIF)) {
 			consume(TokenType.LEFT_PAREN, "Expected '(' after 'elif'.");
@@ -247,7 +228,6 @@ public final class Parser {
 			elseBranch = parseBlockFromAlreadyConsumedBrace();
 		}
 
-		// Fold elifs into nested If nodes (right-associative)
 		for (int i = elifs.size() - 1; i >= 0; i--) {
 			IfBranch b = elifs.get(i);
 			elseBranch = new If(b.cond, b.thenBlock, elseBranch);
@@ -305,9 +285,6 @@ public final class Parser {
 		return new Return(kw, value);
 	}
 
-	// ==========================
-	// Expressions
-	// ==========================
 
 	private Expr expression() {
 		return assignment();
@@ -401,7 +378,6 @@ public final class Parser {
 	}
 
 	private Expr postfix() {
-		// Unified postfix: calls, indexing, member access, and postfix ++/-- in one loop
 		Expr expr = primary();
 		while (true) {
 			if (match(TokenType.LEFT_PAREN)) {
@@ -435,15 +411,33 @@ public final class Parser {
 	}
 
 	private Expr primary() {
-		if (match(TokenType.FALSE)) return new Literal(false);
-		if (match(TokenType.TRUE)) return new Literal(true);
-		if (match(TokenType.NULL)) return new Literal(null);
-		if (match(TokenType.INT_LITERAL)) return new Literal(previous().getLiteral());
-		if (match(TokenType.DOUBLE_LITERAL)) return new Literal(previous().getLiteral());
-		if (match(TokenType.STRING_LITERAL)) return new Literal(previous().getLiteral());
-		if (match(TokenType.CHAR_LITERAL)) return new Literal(previous().getLiteral());
-		if (match(TokenType.IDENTIFIER)) return new Variable(previous());
-		if (match(TokenType.AT)) return new This(previous());
+		if (match(TokenType.FALSE)) {
+			return new Literal(false);
+		}
+		if (match(TokenType.TRUE)) {
+			return new Literal(true);
+		}
+		if (match(TokenType.NULL)) {
+			return new Literal(null);
+		}
+		if (match(TokenType.INT_LITERAL)) {
+			return new Literal(previous().getLiteral());
+		}
+		if (match(TokenType.DOUBLE_LITERAL)) {
+			return new Literal(previous().getLiteral());
+		}
+		if (match(TokenType.STRING_LITERAL)) {
+			return new Literal(previous().getLiteral());
+		}
+		if (match(TokenType.CHAR_LITERAL)) {
+			return new Literal(previous().getLiteral());
+		}
+		if (match(TokenType.IDENTIFIER)) {
+			return new Variable(previous());
+		}
+		if (match(TokenType.AT)) {
+			return new This(previous());
+		}
 
 		if (match(TokenType.ACTION)) {
 			Token action = previous();
@@ -505,8 +499,8 @@ public final class Parser {
 			Token name = previous();
 			int depth = 0;
 			while (check(TokenType.LEFT_BRACKET) && checkNext(TokenType.RIGHT_BRACKET)) {
-				advance(); // '['
-				advance(); // ']'
+				advance();
+				advance();
 				depth++;
 			}
 			return new TypeRef(name, depth);
@@ -514,10 +508,6 @@ public final class Parser {
 		error(peek(), "Expected a type name.");
 		return new TypeRef(previous(), 0);
 	}
-
-	// ==========================
-	// Helpers
-	// ==========================
 
 	private boolean match(TokenType... types) {
 		for (TokenType t : types) {
@@ -538,7 +528,9 @@ public final class Parser {
 	}
 
 	private Token advance() {
-		if (!isAtEnd()) current++;
+		if (!isAtEnd()) {
+			current++;
+		}
 		return previous();
 	}
 
@@ -555,7 +547,9 @@ public final class Parser {
 	}
 
 	private Token consume(TokenType type, String message) {
-		if (check(type)) return advance();
+		if (check(type)) {
+			return advance();
+		}
 		error(peek(), message);
 		return previous();
 	}
@@ -566,7 +560,9 @@ public final class Parser {
 	}
 
 	private void synchronizeTo(TokenType stopAt) {
-		while (!isAtEnd() && !check(stopAt)) advance();
+		while (!isAtEnd() && !check(stopAt)) {
+			advance();
+		}
 	}
 
 	private static final class ParseError extends RuntimeException {

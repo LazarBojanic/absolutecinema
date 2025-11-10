@@ -20,7 +20,6 @@ public class Lexer {
 		keywords.put("else", TokenType.ELSE);
 		keywords.put("keepRollingDuring", TokenType.KEEP_ROLLING_DURING);
 		keywords.put("keepRollingIf", TokenType.KEEP_ROLLING_IF);
-		// capture/project/entrance are NOT keywords so they can be used as identifiers/calls
 		keywords.put("int", TokenType.INT);
 		keywords.put("double", TokenType.DOUBLE);
 		keywords.put("char", TokenType.CHAR);
@@ -141,7 +140,6 @@ public class Lexer {
 				break;
 			}
 			case '/': {
-				// No comments in the language; either '/=' or '/'
 				if (match('=')) add(TokenType.SLASH_EQUAL);
 				else add(TokenType.SLASH);
 				break;
@@ -222,7 +220,7 @@ public class Lexer {
 			}
 		}
 		if (isAtEnd()) error("Unterminated string");
-		advance(); // closing '"'
+		advance();
 		add(TokenType.STRING_LITERAL, sb.toString());
 	}
 
@@ -246,21 +244,31 @@ public class Lexer {
 			value = c;
 		}
 		if (peek() != '\'') error("Unterminated char literal (missing closing '\'')");
-		advance(); // closing quote
+		advance();
 		add(TokenType.CHAR_LITERAL, value);
 	}
 
 	private void identifier() {
-		while (isAlphaNumeric(peek())) advance();
+		while (isAlphaNumeric(peek())){
+			advance();
+		}
 		String text = source.substring(start, current);
 		TokenType type = keywords.get(text);
-		if (type == null) add(TokenType.IDENTIFIER);
-		else add(type);
+		if (type == null){
+			add(TokenType.IDENTIFIER);
+		}
+		else {
+			add(type);
+		}
 	}
 
 	private boolean match(char expected) {
-		if (isAtEnd()) return false;
-		if (source.charAt(current) != expected) return false;
+		if (isAtEnd()) {
+			return false;
+		}
+		if (source.charAt(current) != expected) {
+			return false;
+		}
 		current++;
 		column++;
 		return true;
@@ -278,7 +286,9 @@ public class Lexer {
 	}
 
 	private char peekNext() {
-		if (current + 1 >= source.length()) return '\0';
+		if (current + 1 >= source.length()){
+			return '\0';
+		}
 		return source.charAt(current + 1);
 	}
 

@@ -8,9 +8,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Convert ast.json into a Graphviz DOT graph by first binding to simple Java types.
- */
+
 public final class JsonAstToDot {
 	private final StringBuilder sb = new StringBuilder();
 	private int nextId = 0;
@@ -32,7 +30,7 @@ public final class JsonAstToDot {
 	public static String fromString(String json) {
 		ObjectMapper mapper = new ObjectMapper();
 		Object root;
-		root = mapper.readValue(json, Object.class); // Map/List/String/Number/Boolean/null
+		root = mapper.readValue(json, Object.class);
 		return new JsonAstToDot().toDot(root);
 	}
 
@@ -49,35 +47,58 @@ public final class JsonAstToDot {
 		return sb.toString();
 	}
 
-	// ===== Implementation =====
 	private int id() {
 		return nextId++;
 	}
 
 	private String esc(String s) {
-		if (s == null) return "null";
+		if (s == null) {
+			return "null";
+		}
 		return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
 	}
 
 	private String labelFor(Object node) {
-		if (node == null) return "null";
-		if (node instanceof String s) return '"' + s + '"';
-		if (node instanceof Number n) return n.toString();
-		if (node instanceof Boolean b) return String.valueOf(b);
-		if (node instanceof List<?>) return "[]";
-		if (node instanceof Map<?, ?> m) {
-			Object type = m.get("type");
-			if (type instanceof String ts) return ts;
-			Object decl = m.get("decl");
-			if (decl instanceof String ds) return "decl:" + ds;
-			Object stmt = m.get("stmt");
-			if (stmt instanceof String ss) return "stmt:" + ss;
-			Object expr = m.get("expr");
-			if (expr instanceof String es) return "expr:" + es;
-			Object name = m.get("name");
-			if (name instanceof String ns && !(expr instanceof String) && !(stmt instanceof String) && !(decl instanceof String))
-				return ns;
-			return "{ }";
+		switch (node) {
+			case null -> {
+				return "null";
+			}
+			case String s -> {
+				return '"' + s + '"';
+			}
+			case Number n -> {
+				return n.toString();
+			}
+			case Boolean b -> {
+				return String.valueOf(b);
+			}
+			case List<?> objects -> {
+				return "[]";
+			}
+			case Map<?, ?> m -> {
+				Object type = m.get("type");
+				if (type instanceof String ts) {
+					return ts;
+				}
+				Object decl = m.get("decl");
+				if (decl instanceof String ds) {
+					return "decl:" + ds;
+				}
+				Object stmt = m.get("stmt");
+				if (stmt instanceof String ss) {
+					return "stmt:" + ss;
+				}
+				Object expr = m.get("expr");
+				if (expr instanceof String es) {
+					return "expr:" + es;
+				}
+				Object name = m.get("name");
+				if (name instanceof String ns)
+					return ns;
+				return "{ }";
+			}
+			default -> {
+			}
 		}
 		return String.valueOf(node);
 	}
@@ -101,35 +122,41 @@ public final class JsonAstToDot {
 		int me = id();
 		node(me, label);
 
-		if (node == null) return me;
-
-		if (node instanceof Map<?, ?> map) {
-			for (Map.Entry<?, ?> e : ((Map<Object, Object>) map).entrySet()) {
-				String key = String.valueOf(e.getKey());
-				Object val = e.getValue();
-				// Skip redundant cosmetic labels
-				if (("decl".equals(key) && label.startsWith("decl:")) ||
-					("stmt".equals(key) && label.startsWith("stmt:")) ||
-					("expr".equals(key) && label.startsWith("expr:"))) {
-					continue;
+		switch (node) {
+			case null -> {
+				return me;
+			}
+			case Map<?, ?> map -> {
+				for (Map.Entry<?, ?> e : ((Map<Object, Object>) map).entrySet()) {
+					String key = String.valueOf(e.getKey());
+					Object val = e.getValue();
+					if (("decl".equals(key) && label.startsWith("decl:")) ||
+						("stmt".equals(key) && label.startsWith("stmt:")) ||
+						("expr".equals(key) && label.startsWith("expr:"))) {
+						continue;
+					}
+					int ch = emit(val, labelFor(valForKey(key, val)));
+					edge(me, ch, key);
 				}
-				int ch = emit(val, labelFor(valForKey(key, val)));
-				edge(me, ch, key);
+			}
+			case List<?> list -> {
+				for (int i = 0; i < list.size(); i++) {
+					Object val = list.get(i);
+					int ch = emit(val, labelFor(val));
+					edge(me, ch, String.valueOf(i));
+				}
+			}
+			default -> {
 			}
 		}
-		else if (node instanceof List<?> list) {
-			for (int i = 0; i < list.size(); i++) {
-				Object val = list.get(i);
-				int ch = emit(val, labelFor(val));
-				edge(me, ch, String.valueOf(i));
-			}
-		}
-		// primitives are leaves; already labeled
+
 		return me;
 	}
 
 	private Object valForKey(String key, Object val) {
-		if (!(val instanceof Map<?, ?> m)) return val;
+		if (!(val instanceof Map<?, ?> m)) {
+			return val;
+		}
 		Object name = m.get("name");
 		Object expr = m.get("expr");
 		Object stmt = m.get("stmt");
