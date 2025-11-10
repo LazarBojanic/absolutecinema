@@ -1,3 +1,11 @@
-scene entrance(var args: string[]) : scrap{
-	even = isEven(isOdd());
+setup Shirt{
+    var color: string;
+    var size: int;
+    Shirt(color: string, size: int){
+        @.color = color;
+        @.size = size;
+    }
+    scene getColor(): string{
+        cut @.color;
+    }
 }

@@ -52,6 +52,7 @@ OR: '||';
 NOT: '!';
 
 // Symbols
+AT: '@';
 DOT: '.';
 COMMA: ',';
 COLON: ':';
@@ -65,15 +66,12 @@ RBRACK: ']';
 
 // Literals
 IDENT: [a-zA-Z_][a-zA-Z0-9_]*;
-
 NUMBER: [0-9]+ ('.' [0-9]+)?;
 STRING_LITERAL: '"' (~["\\] | '\\' .)* '"';
 CHAR_LITERAL: '\'' (~['\\] | '\\' .) '\'';
 
-// Whitespace and comments
+// Whitespace
 WS: [ \t\r\n]+ -> skip;
-LINE_COMMENT: '//' ~[\r\n]* -> skip;
-BLOCK_COMMENT: '/*' .*? '*/' -> skip;
 
 // Parser Rules
 program: declaration* EOF;
@@ -126,7 +124,7 @@ assignStmt: accessExpression ASSIGN expression SEMI;
 
 emptyStmt: SEMI;
 
-// Expressions - Fixed to avoid mutual left recursion
+// Expressions
 expression: assignment;
 
 assignment: accessExpression ASSIGN assignment | logical_or;
@@ -150,22 +148,22 @@ postfix: primary (INCREMENT | DECREMENT)?;
 primary:
     literal
     | IDENT
+    | AT
     | LPAREN expression RPAREN
     | arrayLiteral
     | objectInstantiation
     | callExpression;
 
-// Access expressions (fixed recursion)
+// Access expressions
 accessExpression:
-    IDENT (accessSuffix)*
-    | LPAREN expression RPAREN (accessSuffix)+;
+    (IDENT | AT | LPAREN expression RPAREN) accessSuffix*;
 
 accessSuffix:
     DOT IDENT
     | LBRACK expression RBRACK
     | LPAREN arguments? RPAREN;
 
-// Call expression (simplified)
+// Call expression
 callExpression: accessExpression LPAREN arguments? RPAREN;
 
 // Literals and special expressions

@@ -142,6 +142,10 @@ public final class Parser {
 		return params;
 	}
 
+	// ==========================
+	// Blocks & Statements
+	// ==========================
+
 	private Block parseBlock() {
 		consume(TokenType.LEFT_BRACE, "Expected '{' to start block.");
 		List<Node> items = new ArrayList<>();
@@ -212,14 +216,6 @@ public final class Parser {
 		if (match(TokenType.CUT)) {
 			return parseReturn();
 		}
-		if (match(TokenType.EXIT)) {
-			consume(TokenType.SEMICOLON, "Expected ';' after 'exit'.");
-			return new Break(previous());
-		}
-		if (match(TokenType.SKIP)) {
-			consume(TokenType.SEMICOLON, "Expected ';' after 'skip'.");
-			return new Continue(previous());
-		}
 		Expr expr = expression();
 		consume(TokenType.SEMICOLON, "Expected ';' after expression.");
 		return new ExprStmt(expr);
@@ -227,22 +223,37 @@ public final class Parser {
 
 	private Stmt parseIf() {
 		consume(TokenType.LEFT_PAREN, "Expected '(' after 'if'.");
-		Expr cond = expression();
+		Expr baseCond = expression();
 		consume(TokenType.RIGHT_PAREN, "Expected ')' after if condition.");
 		consume(TokenType.LEFT_BRACE, "Expected '{' to start 'if' block.");
-		Block thenBlock = parseBlockFromAlreadyConsumedBrace();
+		Block baseThen = parseBlockFromAlreadyConsumedBrace();
+
+		// Collect zero or more 'elif' branches
+		List<IfBranch> elifs = new ArrayList<>();
+		while (match(TokenType.ELIF)) {
+			consume(TokenType.LEFT_PAREN, "Expected '(' after 'elif'.");
+			Expr cond = expression();
+			consume(TokenType.RIGHT_PAREN, "Expected ')' after elif condition.");
+			consume(TokenType.LEFT_BRACE, "Expected '{' to start 'elif' block.");
+			Block thenB = parseBlockFromAlreadyConsumedBrace();
+			elifs.add(new IfBranch(cond, thenB));
+		}
+
 		Stmt elseBranch = null;
 		if (match(TokenType.ELSE)) {
-			if (match(TokenType.IF)) {
-				elseBranch = parseIf();
-			}
-			else {
-				consume(TokenType.LEFT_BRACE, "Expected '{' to start 'else' block.");
-				elseBranch = parseBlockFromAlreadyConsumedBrace();
-			}
+			consume(TokenType.LEFT_BRACE, "Expected '{' to start 'else' block.");
+			elseBranch = parseBlockFromAlreadyConsumedBrace();
 		}
-		return new If(cond, thenBlock, elseBranch);
+
+		// Fold elifs into nested If nodes (right-associative)
+		for (int i = elifs.size() - 1; i >= 0; i--) {
+			IfBranch b = elifs.get(i);
+			elseBranch = new If(b.cond, b.thenBlock, elseBranch);
+		}
+		return new If(baseCond, baseThen, elseBranch);
 	}
+
+	private record IfBranch(Expr cond, Block thenBlock) {}
 
 	private Stmt parseWhile() {
 		consume(TokenType.LEFT_PAREN, "Expected '(' after 'keepRollingIf'.");
@@ -297,13 +308,11 @@ public final class Parser {
 	// Expressions
 	// ==========================
 
-	private Expr expression() {
-		return assignment();
-	}
+	private Expr expression() { return assignment(); }
 
 	private Expr assignment() {
 		Expr expr = or();
-		if (match(TokenType.EQUAL, TokenType.PLUS_EQUAL, TokenType.MINUS_EQUAL, TokenType.STAR_EQUAL, TokenType.SLASH_EQUAL, TokenType.PERCENT_EQUAL)) {
+		if (match(TokenType.EQUAL)) {
 			Token op = previous();
 			Expr value = assignment();
 			if (expr instanceof Variable || expr instanceof Get || expr instanceof Index) {
@@ -391,18 +400,7 @@ public final class Parser {
 	private Expr postfix() {
 		Expr expr = call();
 		while (true) {
-			if (match(TokenType.LEFT_PAREN)) {
-				List<Expr> args = new ArrayList<>();
-				if (!check(TokenType.RIGHT_PAREN)) {
-					do {
-						args.add(expression());
-					}
-					while (match(TokenType.COMMA));
-				}
-				Token paren = consume(TokenType.RIGHT_PAREN, "Expected ')' after arguments.");
-				expr = new Call(expr, paren, args);
-			}
-			else if (match(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
+			if (match(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
 				expr = new Postfix(expr, previous());
 			}
 			else if (match(TokenType.LEFT_BRACKET)) {
@@ -427,9 +425,7 @@ public final class Parser {
 			if (match(TokenType.LEFT_PAREN)) {
 				List<Expr> args = new ArrayList<>();
 				if (!check(TokenType.RIGHT_PAREN)) {
-					do {
-						args.add(expression());
-					}
+					do { args.add(expression()); }
 					while (match(TokenType.COMMA));
 				}
 				Token paren = consume(TokenType.RIGHT_PAREN, "Expected ')' after arguments.");
@@ -443,42 +439,23 @@ public final class Parser {
 	}
 
 	private Expr primary() {
-		if (match(TokenType.FALSE)) {
-			return new Literal(false);
-		}
-		if (match(TokenType.TRUE)) {
-			return new Literal(true);
-		}
-		if (match(TokenType.NULL)) {
-			return new Literal(null);
-		}
-		if (match(TokenType.INT_LITERAL)) {
-			return new Literal(previous().getLiteral());
-		}
-		if (match(TokenType.DOUBLE_LITERAL)) {
-			return new Literal(previous().getLiteral());
-		}
-		if (match(TokenType.STRING_LITERAL)) {
-			return new Literal(previous().getLiteral());
-		}
-		if (match(TokenType.CHAR_LITERAL)) {
-			return new Literal(previous().getLiteral());
-		}
-		if (match(TokenType.IDENTIFIER)) {
-			return new Variable(previous());
-		}
-		if (match(TokenType.AT)) {
-			return new This(previous());
-		}
+		if (match(TokenType.FALSE)) return new Literal(false);
+		if (match(TokenType.TRUE)) return new Literal(true);
+		if (match(TokenType.NULL)) return new Literal(null);
+		if (match(TokenType.INT_LITERAL)) return new Literal(previous().getLiteral());
+		if (match(TokenType.DOUBLE_LITERAL)) return new Literal(previous().getLiteral());
+		if (match(TokenType.STRING_LITERAL)) return new Literal(previous().getLiteral());
+		if (match(TokenType.CHAR_LITERAL)) return new Literal(previous().getLiteral());
+		if (match(TokenType.IDENTIFIER)) return new Variable(previous());
+		if (match(TokenType.AT)) return new This(previous());
+
 		if (match(TokenType.ACTION)) {
 			Token action = previous();
 			TypeRef type = parseTypeRef();
 			if (match(TokenType.LEFT_PAREN)) {
 				List<Expr> args = new ArrayList<>();
 				if (!check(TokenType.RIGHT_PAREN)) {
-					do {
-						args.add(expression());
-					}
+					do { args.add(expression()); }
 					while (match(TokenType.COMMA));
 				}
 				consume(TokenType.RIGHT_PAREN, "Expected ')' after constructor args.");
@@ -487,9 +464,7 @@ public final class Parser {
 			else if (match(TokenType.LEFT_BRACE)) {
 				List<Expr> elements = new ArrayList<>();
 				if (!check(TokenType.RIGHT_BRACE)) {
-					do {
-						elements.add(expression());
-					}
+					do { elements.add(expression()); }
 					while (match(TokenType.COMMA));
 				}
 				consume(TokenType.RIGHT_BRACE, "Expected '}' after array literal.");
@@ -502,9 +477,7 @@ public final class Parser {
 				if (match(TokenType.LEFT_BRACE)) {
 					init = new ArrayList<>();
 					if (!check(TokenType.RIGHT_BRACE)) {
-						do {
-							init.add(expression());
-						}
+						do { init.add(expression()); }
 						while (match(TokenType.COMMA));
 					}
 					consume(TokenType.RIGHT_BRACE, "Expected '}' after array initializer.");
@@ -515,6 +488,7 @@ public final class Parser {
 				error(peek(), "Expected '(' for constructor call or '[' for array capacity after type in 'action'.");
 			}
 		}
+
 		if (match(TokenType.LEFT_PAREN)) {
 			Expr expr = expression();
 			consume(TokenType.RIGHT_PAREN, "Expected ')' after expression.");
@@ -525,11 +499,9 @@ public final class Parser {
 	}
 
 	private TypeRef parseTypeRef() {
-		if (match(TokenType.INT, TokenType.DOUBLE, TokenType.CHAR, TokenType.STRING, TokenType.IDENTIFIER)) {
+		if (match(TokenType.INT, TokenType.DOUBLE, TokenType.CHAR, TokenType.STRING, TokenType.BOOL, TokenType.IDENTIFIER)) {
 			Token name = previous();
 			int depth = 0;
-			// Only treat '[]' as array type brackets. If '[' is not immediately followed by ']',
-			// it belongs to array capacity (e.g., action double[3]) or indexing and must not be consumed here.
 			while (check(TokenType.LEFT_BRACKET) && checkNext(TokenType.RIGHT_BRACKET)) {
 				advance(); // '['
 				advance(); // ']'
@@ -547,51 +519,25 @@ public final class Parser {
 
 	private boolean match(TokenType... types) {
 		for (TokenType t : types) {
-			if (check(t)) {
-				advance();
-				return true;
-			}
+			if (check(t)) { advance(); return true; }
 		}
 		return false;
 	}
 
-	private boolean check(TokenType type) {
-		if (isAtEnd()) {
-			return false;
-		}
-		return peek().getType() == type;
-	}
+	private boolean check(TokenType type) { return !isAtEnd() && peek().getType() == type; }
 
-	private boolean checkNext(TokenType type) {
-		if (current >= tokens.size() - 1) {
-			return false;
-		}
-		return tokens.get(current + 1).getType() == type;
-	}
+	private boolean checkNext(TokenType type) { return current < tokens.size() - 1 && tokens.get(current + 1).getType() == type; }
 
-	private Token advance() {
-		if (!isAtEnd()) {
-			current++;
-		}
-		return previous();
-	}
+	private Token advance() { if (!isAtEnd()) current++; return previous(); }
 
-	private boolean isAtEnd() {
-		return peek().getType() == TokenType.EOF;
-	}
+	private boolean isAtEnd() { return peek().getType() == TokenType.EOF; }
 
-	private Token peek() {
-		return tokens.get(current);
-	}
+	private Token peek() { return tokens.get(current); }
 
-	private Token previous() {
-		return tokens.get(current - 1);
-	}
+	private Token previous() { return tokens.get(current - 1); }
 
 	private Token consume(TokenType type, String message) {
-		if (check(type)) {
-			return advance();
-		}
+		if (check(type)) return advance();
 		error(peek(), message);
 		return previous();
 	}
@@ -601,15 +547,7 @@ public final class Parser {
 		throw new ParseError("PARSER ERROR" + where + ": " + message + " (line: " + token.getLine() + ", col: " + token.getColumn() + ")");
 	}
 
-	private void synchronizeTo(TokenType stopAt) {
-		while (!isAtEnd() && !check(stopAt)) {
-			advance();
-		}
-	}
+	private void synchronizeTo(TokenType stopAt) { while (!isAtEnd() && !check(stopAt)) advance(); }
 
-	private static final class ParseError extends RuntimeException {
-		ParseError(String msg) {
-			super(msg);
-		}
-	}
+	private static final class ParseError extends RuntimeException { ParseError(String msg) { super(msg); } }
 }

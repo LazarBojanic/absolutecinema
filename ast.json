@@ -1,107 +1,86 @@
 {
   "type" : "program",
   "declarations" : [ {
-    "name" : "temp",
-    "type" : {
-      "name" : "string",
-      "arrayDepth" : 0
-    },
-    "decl" : "var"
-  }, {
-    "kind" : "scene",
-    "name" : "isEven",
-    "isMethod" : false,
-    "returnType" : {
-      "name" : "string",
-      "arrayDepth" : 0
-    },
-    "params" : [ {
-      "name" : "num",
+    "decl" : "setup",
+    "name" : "Shirt",
+    "fields" : [ {
+      "name" : "color",
+      "type" : {
+        "name" : "string",
+        "arrayDepth" : 0
+      }
+    }, {
+      "name" : "size",
       "type" : {
         "name" : "int",
         "arrayDepth" : 0
       }
     } ],
-    "body" : [ {
-      "stmt" : "if",
-      "cond" : {
-        "expr" : "binary",
-        "op" : "==",
-        "left" : {
-          "expr" : "binary",
-          "op" : "%",
-          "left" : {
-            "expr" : "var",
-            "name" : "num"
-          },
-          "right" : 2
-        },
-        "right" : 0
-      },
-      "then" : {
-        "stmt" : "block",
-        "body" : [ {
-          "stmt" : "return",
-          "value" : "yes"
-        } ]
-      },
-      "else" : {
-        "stmt" : "block",
-        "body" : [ {
-          "stmt" : "return",
-          "value" : "no"
-        } ]
-      }
-    } ],
-    "decl" : "scene"
-  }, {
-    "name" : "even",
-    "type" : {
-      "name" : "string",
-      "arrayDepth" : 0
-    },
-    "decl" : "var"
-  }, {
-    "kind" : "scene",
-    "name" : "entrance",
-    "isMethod" : false,
-    "returnType" : {
-      "name" : "scrap",
-      "arrayDepth" : 0
-    },
-    "params" : [ {
-      "name" : "args",
-      "type" : {
-        "name" : "string",
-        "arrayDepth" : 1
-      }
-    } ],
-    "body" : [ {
-      "stmt" : "expr",
-      "expr" : {
-        "expr" : "assign",
-        "target" : {
-          "expr" : "var",
-          "name" : "even"
-        },
-        "op" : "=",
-        "value" : {
-          "expr" : "call",
-          "callee" : {
-            "expr" : "var",
-            "name" : "isEven"
-          },
-          "args" : [ {
-            "expr" : "call",
-            "callee" : {
-              "expr" : "var",
-              "name" : "isOdd"
-            },
-            "args" : [ ]
-          } ]
+    "ctor" : {
+      "kind" : "ctor",
+      "name" : "Shirt",
+      "params" : [ {
+        "name" : "color",
+        "type" : {
+          "name" : "string",
+          "arrayDepth" : 0
         }
-      }
-    } ],
-    "decl" : "scene"
+      }, {
+        "name" : "size",
+        "type" : {
+          "name" : "int",
+          "arrayDepth" : 0
+        }
+      } ],
+      "body" : [ {
+        "stmt" : "expr",
+        "expr" : {
+          "expr" : "set",
+          "object" : {
+            "expr" : "this"
+          },
+          "name" : "color",
+          "op" : "=",
+          "value" : {
+            "expr" : "var",
+            "name" : "color"
+          }
+        }
+      }, {
+        "stmt" : "expr",
+        "expr" : {
+          "expr" : "set",
+          "object" : {
+            "expr" : "this"
+          },
+          "name" : "size",
+          "op" : "=",
+          "value" : {
+            "expr" : "var",
+            "name" : "size"
+          }
+        }
+      } ]
+    },
+    "methods" : [ {
+      "kind" : "scene",
+      "name" : "getColor",
+      "isMethod" : true,
+      "returnType" : {
+        "name" : "string",
+        "arrayDepth" : 0
+      },
+      "params" : [ ],
+      "body" : [ {
+        "stmt" : "return",
+        "value" : {
+          "expr" : "get",
+          "object" : {
+            "expr" : "this"
+          },
+          "name" : "color"
+        }
+      } ]
+    } ]
   } ]
 }

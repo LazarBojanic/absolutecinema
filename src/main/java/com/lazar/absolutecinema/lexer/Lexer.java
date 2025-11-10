@@ -16,16 +16,16 @@ public class Lexer {
 		keywords.put("setup", TokenType.SETUP);
 		keywords.put("action", TokenType.ACTION);
 		keywords.put("if", TokenType.IF);
+		keywords.put("elif", TokenType.ELIF);
 		keywords.put("else", TokenType.ELSE);
 		keywords.put("keepRollingDuring", TokenType.KEEP_ROLLING_DURING);
 		keywords.put("keepRollingIf", TokenType.KEEP_ROLLING_IF);
-		keywords.put("skip", TokenType.SKIP);
-		keywords.put("exit", TokenType.EXIT);
 		// capture/project/entrance are NOT keywords so they can be used as identifiers/calls
 		keywords.put("int", TokenType.INT);
 		keywords.put("double", TokenType.DOUBLE);
 		keywords.put("char", TokenType.CHAR);
 		keywords.put("string", TokenType.STRING);
+		keywords.put("bool", TokenType.BOOL);
 		keywords.put("true", TokenType.TRUE);
 		keywords.put("false", TokenType.FALSE);
 		keywords.put("null", TokenType.NULL);
@@ -54,8 +54,7 @@ public class Lexer {
 	private void scanToken() {
 		char c = advance();
 		switch (c) {
-			case ' ':
-			case '\r', '\t': {
+			case ' ': case '\r': case '\t': {
 				break;
 			}
 			case '\n': {
@@ -63,50 +62,18 @@ public class Lexer {
 				column = 1;
 				break;
 			}
-			case '(': {
-				add(TokenType.LEFT_PAREN);
-				break;
-			}
-			case ')': {
-				add(TokenType.RIGHT_PAREN);
-				break;
-			}
-			case '{': {
-				add(TokenType.LEFT_BRACE);
-				break;
-			}
-			case '}': {
-				add(TokenType.RIGHT_BRACE);
-				break;
-			}
-			case '[': {
-				add(TokenType.LEFT_BRACKET);
-				break;
-			}
-			case ']': {
-				add(TokenType.RIGHT_BRACKET);
-				break;
-			}
-			case ',': {
-				add(TokenType.COMMA);
-				break;
-			}
-			case '.': {
-				add(TokenType.DOT);
-				break;
-			}
-			case ';': {
-				add(TokenType.SEMICOLON);
-				break;
-			}
-			case ':': {
-				add(TokenType.COLON);
-				break;
-			}
-			case '@': {
-				add(TokenType.AT);
-				break;
-			}
+			case '(': add(TokenType.LEFT_PAREN); break;
+			case ')': add(TokenType.RIGHT_PAREN); break;
+			case '{': add(TokenType.LEFT_BRACE); break;
+			case '}': add(TokenType.RIGHT_BRACE); break;
+			case '[': add(TokenType.LEFT_BRACKET); break;
+			case ']': add(TokenType.RIGHT_BRACKET); break;
+			case ',': add(TokenType.COMMA); break;
+			case '.': add(TokenType.DOT); break;
+			case ';': add(TokenType.SEMICOLON); break;
+			case ':': add(TokenType.COLON); break;
+			case '@': add(TokenType.AT); break;
+
 			case '!': {
 				add(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG);
 				break;
@@ -139,8 +106,20 @@ public class Lexer {
 				add(match('=') ? TokenType.STAR_EQUAL : TokenType.STAR);
 				break;
 			}
+			case '&': {
+				if (match('&')) add(TokenType.AND_AND);
+				else error("Unexpected '&' (did you mean '&&'?)");
+				break;
+			}
+			case '|': {
+				if (match('|')) add(TokenType.OR_OR);
+				else error("Unexpected '|' (did you mean '||'?)");
+				break;
+			}
 			case '/': {
-				add(match('=') ? TokenType.SLASH_EQUAL : TokenType.SLASH);
+				// No comments in the language; either '/=' or '/'
+				if (match('=')) add(TokenType.SLASH_EQUAL);
+				else add(TokenType.SLASH);
 				break;
 			}
 			case '%': {
@@ -171,14 +150,10 @@ public class Lexer {
 
 	private void number() {
 		boolean isDouble = false;
-		while (isDigit(peek())) {
-			advance();
-		}
+		while (isDigit(peek())) advance();
 		if (peek() == '.' && isDigit(peekNext())) {
 			isDouble = true;
-			do {
-				advance();
-			}
+			do advance();
 			while (isDigit(peek()));
 		}
 		String lexeme = source.substring(start, current);
@@ -207,126 +182,64 @@ public class Lexer {
 		while (!isAtEnd() && peek() != '"') {
 			char c = advance();
 			if (c == '\\') {
-				if (isAtEnd()) {
-					error("Unterminated string escape");
-					return;
-				}
+				if (isAtEnd()) error("Unterminated string");
 				char e = advance();
 				switch (e) {
-					case 'n': {
-						sb.append('\n');
-						break;
-					}
-					case 'r': {
-						sb.append('\r');
-						break;
-					}
-					case 't': {
-						sb.append('\t');
-						break;
-					}
-					case '\\': {
-						sb.append('\\');
-						break;
-					}
-					case '"': {
-						sb.append('"');
-						break;
-					}
-					case '\'': {
-						sb.append('\'');
-						break;
-					}
-					default: {
-						sb.append(e);
-						break;
-					}
+					case 'n' -> sb.append('\n');
+					case 'r' -> sb.append('\r');
+					case 't' -> sb.append('\t');
+					case '"' -> sb.append('"');
+					case '\\' -> sb.append('\\');
+					default -> sb.append(e);
 				}
-			}
-			else if (c == '\n') {
-				line++;
-				column = 1;
-				sb.append('\n');
 			}
 			else {
 				sb.append(c);
 			}
 		}
-		if (isAtEnd()) {
-			error("Unterminated string literal");
-			return;
-		}
-		advance();
+		if (isAtEnd()) error("Unterminated string");
+		advance(); // closing '"'
 		add(TokenType.STRING_LITERAL, sb.toString());
 	}
 
 	private void character() {
-		if (isAtEnd()) {
-			error("Unterminated char literal");
-			return;
-		}
+		if (isAtEnd()) error("Unterminated char literal");
 		char value;
-		if (peek() == '\'') {
-			advance();
-			if (peek() != '\'') {
-				error("Malformed empty char literal");
-				return;
-			}
-			advance();
-			add(TokenType.CHAR_LITERAL, "");
-			return;
-		}
 		char c = advance();
 		if (c == '\\') {
-			if (isAtEnd()) {
-				error("Unterminated char escape");
-				return;
-			}
+			if (isAtEnd()) error("Unterminated char escape");
 			char e = advance();
-			value = switch (e) {
-				case 'n' -> '\n';
-				case 'r' -> '\r';
-				case 't' -> '\t';
-				case '\\' -> '\\';
-				case '\'' -> '\'';
-				case '"' -> '"';
-				default -> e;
-			};
+			switch (e) {
+				case 'n' -> value = '\n';
+				case 'r' -> value = '\r';
+				case 't' -> value = '\t';
+				case '\'' -> value = '\'';
+				case '\\' -> value = '\\';
+				default -> value = e;
+			}
 		}
 		else {
 			value = c;
 		}
-		if (peek() != '\'') {
-			error("Unterminated char literal (missing closing quote)");
-			return;
-		}
-		advance();
+		if (peek() != '\'') error("Unterminated char literal (missing closing '\'')");
+		advance(); // closing quote
 		add(TokenType.CHAR_LITERAL, value);
 	}
 
+	private void identifier() {
+		while (isAlphaNumeric(peek())) advance();
+		String text = source.substring(start, current);
+		TokenType type = keywords.get(text);
+		if (type == null) add(TokenType.IDENTIFIER);
+		else add(type);
+	}
+
 	private boolean match(char expected) {
-		if (isAtEnd()) {
-			return false;
-		}
-		if (source.charAt(current) != expected) {
-			return false;
-		}
-		advance();
+		if (isAtEnd()) return false;
+		if (source.charAt(current) != expected) return false;
+		current++;
+		column++;
 		return true;
-	}
-
-	private char peek() {
-		if (isAtEnd()) {
-			return '\0';
-		}
-		return source.charAt(current);
-	}
-
-	private char peekNext() {
-		if (current + 1 >= source.length()) {
-			return '\0';
-		}
-		return source.charAt(current + 1);
 	}
 
 	private char advance() {
@@ -335,9 +248,27 @@ public class Lexer {
 		return c;
 	}
 
-	private void add(TokenType type) {
-		add(type, null);
+	private char peek() {
+		if (isAtEnd()) return '\0';
+		return source.charAt(current);
 	}
+
+	private char peekNext() {
+		if (current + 1 >= source.length()) return '\0';
+		return source.charAt(current + 1);
+	}
+
+	private boolean isAlpha(char c) {
+		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
+	}
+
+	private boolean isAlphaNumeric(char c) { return isAlpha(c) || isDigit(c); }
+
+	private boolean isDigit(char c) { return c >= '0' && c <= '9'; }
+
+	private boolean isAtEnd() { return current >= source.length(); }
+
+	private void add(TokenType type) { add(type, null); }
 
 	private void add(TokenType type, Object literal) {
 		String text = source.substring(start, current);
@@ -345,37 +276,12 @@ public class Lexer {
 		tokens.add(new Token(type, text, literal, line, tokenColumn));
 	}
 
-	private void identifier() {
-		while (isAlphaNumeric(peek())) {
-			advance();
-		}
-		String text = source.substring(start, current);
-		TokenType type = keywords.get(text);
-		if (type == null) {
-			add(TokenType.IDENTIFIER);
-		}
-		else {
-			add(type);
-		}
-	}
-
-	private boolean isAtEnd() {
-		return current >= source.length();
-	}
-
-	private boolean isDigit(char c) {
-		return c >= '0' && c <= '9';
-	}
-
-	private boolean isAlpha(char c) {
-		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
-	}
-
-	private boolean isAlphaNumeric(char c) {
-		return isAlpha(c) || isDigit(c);
-	}
-
 	private void error(String message) {
-		throw new RuntimeException("[Lexer] Line " + line + ", Col " + column + ": " + message);
+		int tokenColumn = column - (current - start);
+		throw new LexerError("LEXER ERROR at line " + line + ", col " + tokenColumn + ": " + message);
+	}
+
+	public static final class LexerError extends RuntimeException {
+		public LexerError(String msg) { super(msg); }
 	}
 }

@@ -1,13 +1,13 @@
 package com.lazar.absolutecinema.lexer;
 
 public enum TokenType {
-	//Characters
+	// Characters
 	LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
 	LEFT_BRACKET, RIGHT_BRACKET,
 	COMMA, DOT, SEMICOLON, COLON,
 	AT,
 
-	//Operators
+	// Operators
 	PLUS, PLUS_PLUS, PLUS_EQUAL,
 	MINUS, MINUS_MINUS, MINUS_EQUAL,
 	STAR, STAR_EQUAL,
@@ -21,13 +21,13 @@ public enum TokenType {
 
 	AND_AND, OR_OR,
 
-	//Literals
+	// Literals
 	IDENTIFIER, INT_LITERAL, DOUBLE_LITERAL, STRING_LITERAL, CHAR_LITERAL,
 
-	//Keywords (language & types)
+	// Keywords (language & types)
 	VAR, SCENE, CUT, SCRAP, SETUP, ACTION,
-	IF, ELSE, KEEP_ROLLING_DURING, KEEP_ROLLING_IF, SKIP, EXIT,
-	INT, DOUBLE, CHAR, STRING, TRUE, FALSE, NULL,
+	IF, ELIF, ELSE, KEEP_ROLLING_DURING, KEEP_ROLLING_IF,
+	INT, DOUBLE, CHAR, STRING, BOOL, TRUE, FALSE, NULL,
 
 	EOF
 }

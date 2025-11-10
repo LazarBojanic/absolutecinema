@@ -21,13 +21,13 @@
 <whileStmt> ::= "keepRollingIf" "(" <expression> ")" <block>
 <forStmt> ::= "keepRollingDuring" "(" (<varDecl> | <exprStmt> | ";") <expression>? ";" <expression>? ")" <block>
 <returnStmt> ::= "cut" <expression>? ";"
-<assignStmt> ::= (<IDENT> | <memberAccess> | <indexAccess>) "=" <expression> ";"
+<assignStmt> ::= <accessExpression> "=" <expression> ";"
 <callStmt> ::= <callExpr> ";"
 <emptyStmt> ::= ";"
 
 // Expressions
 <expression> ::= <assignment>
-<assignment> ::= (<IDENT> | <memberAccess> | <indexAccess>) "=" <assignment> | <logical_or>
+<assignment> ::= <accessExpression> "=" <assignment> | <logical_or>
 <logical_or> ::= <logical_and> ("||" <logical_and>)*
 <logical_and> ::= <equality> ("&&" <equality>)*
 <equality> ::= <comparison> (("==" | "!=") <comparison>)*
@@ -36,13 +36,15 @@
 <factor> ::= <unary> (("*" | "/" | "%") <unary>)*
 <unary> ::= ("!" | "-" | "++" | "--") <unary> | <postfix>
 <postfix> ::= <primary> ("++" | "--")?
-<primary> ::= <literal> | IDENT | "(" <expression> ")" | <arrayLiteral> | <objectInstantiation> | <callExpr> | <memberAccess> | <indexAccess>
+<primary> ::= <literal> | IDENT | "@" | "(" <expression> ")" | <arrayLiteral> | <objectInstantiation> | <callExpr>
+
+// Access and calls
+<accessExpression> ::= (IDENT | "@" | "(" <expression> ")") <accessSuffix>*
+<accessSuffix> ::= "." IDENT | "[" <expression> "]" | "(" <arguments>? ")"
+<callExpr> ::= <accessExpression> "(" <arguments>? ")"
 
 // Literals and special expressions
 <literal> ::= NUMBER | STRING | CHAR | "true" | "false" | "null"
 <arrayLiteral> ::= "action" <type> "[" <expression>? "]" ("{" (<expression> ("," <expression>)*)? "}")?
 <objectInstantiation> ::= "action" IDENT "(" <arguments>? ")"
-<callExpr> ::= (<IDENT> | <memberAccess>) "(" <arguments>? ")"
-<memberAccess> ::= (<IDENT> | "(" <expression> ")" | <callExpr>) ("." IDENT)+
-<indexAccess> ::= (<IDENT> | <memberAccess>) "[" <expression> "]"
 <arguments> ::= <expression> ("," <expression>)*
