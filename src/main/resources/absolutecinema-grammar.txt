@@ -2,14 +2,13 @@ Absolute Cinema – Grammar (readable)
 
 program          → declaration* EOF
 
-// Declarations
-
 declaration      → setupDecl | sceneDecl | varDecl
 setupDecl        → "setup" IDENT "{" ( fieldDecl | ctorDecl | methodDecl | ";" )* "}"
 fieldDecl        → "var" IDENT ":" type ("=" expression)? ";"
 ctorDecl         → IDENT "(" params? ")" block               // name must equal setup name (semantic check)
 methodDecl       → "scene" IDENT "(" params? ")" ":" ("scrap" | type) block
 sceneDecl        → "scene" IDENT "(" params? ")" ":" ("scrap" | type) block
+varDecl          → "var" IDENT ":" type ("=" expression)? ";"
 params           → param ("," param)*
 param            → ("var")? IDENT ":" type
 
@@ -19,36 +18,15 @@ type             → ("int" | "double" | "char" | "string" | IDENT) ("[" "]")*
 
 // Statements
 
-block            → "{" ( declaration | statement )* "}"
-statement        → ifStmt | whileStmt | forStmt | returnStmt | breakStmt | continueStmt | exprStmt | block
-ifStmt           → "if" "(" expression ")" block ("else" ( ifStmt | block ))?
-whileStmt        → "keepRollingIf" "(" expression ")" block
-forStmt          → "keepRollingDuring" "(" (varDecl | exprStmt | ";") expression? ";" expression? ")" block
+block            → "{" ( varDecl | statement )* "}"
+statement        → ifStmt | whileStmt | forStmt | returnStmt | assignStmt | callStmt | block
+ifStmt           → "if" "(" condExp ")" block ("else" block | "elif" block)?
+whileStmt        → "keepRollingIf" "(" condExp ")" block
+forStmt          → "keepRollingDuring" "(" (varDeclAssign | assignStmt)? ";" condExp ";" assignStmt ")" block
 returnStmt       → "cut" expression? ";"
-breakStmt        → "exit" ";"
-continueStmt     → "skip" ";"
-varDecl          → "var" IDENT ":" type ("=" expression)? ";"
-exprStmt         → expression ";"
-
-// Expressions (highest precedence first)
-
-primary          → INT_LITERAL | DOUBLE_LITERAL | STRING_LITERAL | CHAR_LITERAL
-                 | TRUE | FALSE | NULL
-                 | IDENT
-                 | "@"
-                 | "action" type "(" arguments? ")"
-                 | "action" type "[" expression "]" ("{" arguments? "}")?
-                 | "(" expression ")"
-
-call             → primary ( "(" arguments? ")" )*
-postfix          → call ( ("++" | "--") | "[" expression "]" | "." IDENT )*
-unary            → ("!" | "-" | "++" | "--") unary | postfix
-factor           → unary ( ("*" | "/" | "%") unary )*
-term             → factor ( ("+" | "-") factor )*
-comparison       → term ( ("<" | "<=" | ">" | ">=") term )*
-equality         → comparison ( ("==" | "!=") comparison )*
-and              → equality ("&&" equality)*
-or               → and ("||" and)*
-assignment       → or ( ("=" | "+=" | "-=" | "*=" | "/=" | "%=") assignment )?
-
-arguments        → expression ("," expression)*
+assignStmt       → IDENT "=" expression ";"
+callStmt         → callExp ";"
+callExp          → (IDENT ".")? IDENT "(" argList ")"
+condExp          → callExp | comparisonExp
+comparisonExp    → expression ("<" | "<=" | ">" | ">=" | "==" | "!=") expression
+expression       →
