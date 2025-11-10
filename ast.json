@@ -1,65 +1,76 @@
 {
-  "type" : "program",
-  "declarations" : [ {
-    "name" : "shirt",
-    "type" : {
-      "name" : "Shirt",
-      "arrayDepth" : 0
-    },
-    "init" : {
-      "expr" : "action",
-      "type" : {
-        "name" : "Shirt",
-        "arrayDepth" : 0
-      },
-      "args" : [ "red", 10 ]
-    },
-    "decl" : "var"
-  }, {
-    "stmt" : "expr",
-    "expr" : {
-      "expr" : "call",
-      "callee" : {
-        "expr" : "get",
-        "object" : {
-          "expr" : "var",
-          "name" : "shirt"
-        },
-        "name" : "getColor"
-      },
-      "args" : [ ]
-    }
-  }, {
-    "stmt" : "expr",
-    "expr" : {
-      "expr" : "assign",
-      "target" : {
-        "expr" : "var",
-        "name" : "tshirt"
-      },
-      "op" : "=",
-      "value" : {
-        "expr" : "action",
-        "type" : {
-          "name" : "Shirt",
-          "arrayDepth" : 0
-        },
-        "args" : [ "blue", 20 ]
-      }
-    }
-  }, {
-    "stmt" : "expr",
-    "expr" : {
-      "expr" : "call",
-      "callee" : {
-        "expr" : "get",
-        "object" : {
-          "expr" : "var",
-          "name" : "tshirt"
-        },
-        "name" : "getColor"
-      },
-      "args" : [ ]
-    }
-  } ]
+	"type": "program",
+	"declarations": [
+		{
+			"name": "shirt",
+			"type": {
+				"name": "Shirt",
+				"arrayDepth": 0
+			},
+			"init": {
+				"expr": "action",
+				"type": {
+					"name": "Shirt",
+					"arrayDepth": 0
+				},
+				"args": [
+					"red",
+					10
+				]
+			},
+			"decl": "var"
+		},
+		{
+			"stmt": "expr",
+			"expr": {
+				"expr": "call",
+				"callee": {
+					"expr": "get",
+					"object": {
+						"expr": "var",
+						"name": "shirt"
+					},
+					"name": "getColor"
+				},
+				"args": []
+			}
+		},
+		{
+			"stmt": "expr",
+			"expr": {
+				"expr": "assign",
+				"target": {
+					"expr": "var",
+					"name": "tshirt"
+				},
+				"op": "=",
+				"value": {
+					"expr": "action",
+					"type": {
+						"name": "Shirt",
+						"arrayDepth": 0
+					},
+					"args": [
+						"blue",
+						20
+					]
+				}
+			}
+		},
+		{
+			"stmt": "expr",
+			"expr": {
+				"expr": "call",
+				"callee": {
+					"expr": "get",
+					"object": {
+						"expr": "var",
+						"name": "tshirt"
+					},
+					"name": "getColor"
+				},
+				"args": []
+			}
+		}
+	]
 }

@@ -54,7 +54,9 @@ public class Lexer {
 	private void scanToken() {
 		char c = advance();
 		switch (c) {
-			case ' ': case '\r': case '\t': {
+			case ' ':
+			case '\r':
+			case '\t': {
 				break;
 			}
 			case '\n': {
@@ -62,17 +64,39 @@ public class Lexer {
 				column = 1;
 				break;
 			}
-			case '(': add(TokenType.LEFT_PAREN); break;
-			case ')': add(TokenType.RIGHT_PAREN); break;
-			case '{': add(TokenType.LEFT_BRACE); break;
-			case '}': add(TokenType.RIGHT_BRACE); break;
-			case '[': add(TokenType.LEFT_BRACKET); break;
-			case ']': add(TokenType.RIGHT_BRACKET); break;
-			case ',': add(TokenType.COMMA); break;
-			case '.': add(TokenType.DOT); break;
-			case ';': add(TokenType.SEMICOLON); break;
-			case ':': add(TokenType.COLON); break;
-			case '@': add(TokenType.AT); break;
+			case '(':
+				add(TokenType.LEFT_PAREN);
+				break;
+			case ')':
+				add(TokenType.RIGHT_PAREN);
+				break;
+			case '{':
+				add(TokenType.LEFT_BRACE);
+				break;
+			case '}':
+				add(TokenType.RIGHT_BRACE);
+				break;
+			case '[':
+				add(TokenType.LEFT_BRACKET);
+				break;
+			case ']':
+				add(TokenType.RIGHT_BRACKET);
+				break;
+			case ',':
+				add(TokenType.COMMA);
+				break;
+			case '.':
+				add(TokenType.DOT);
+				break;
+			case ';':
+				add(TokenType.SEMICOLON);
+				break;
+			case ':':
+				add(TokenType.COLON);
+				break;
+			case '@':
+				add(TokenType.AT);
+				break;
 
 			case '!': {
 				add(match('=') ? TokenType.BANG_EQUAL : TokenType.BANG);
@@ -262,13 +286,21 @@ public class Lexer {
 		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
 	}
 
-	private boolean isAlphaNumeric(char c) { return isAlpha(c) || isDigit(c); }
+	private boolean isAlphaNumeric(char c) {
+		return isAlpha(c) || isDigit(c);
+	}
 
-	private boolean isDigit(char c) { return c >= '0' && c <= '9'; }
+	private boolean isDigit(char c) {
+		return c >= '0' && c <= '9';
+	}
 
-	private boolean isAtEnd() { return current >= source.length(); }
+	private boolean isAtEnd() {
+		return current >= source.length();
+	}
 
-	private void add(TokenType type) { add(type, null); }
+	private void add(TokenType type) {
+		add(type, null);
+	}
 
 	private void add(TokenType type, Object literal) {
 		String text = source.substring(start, current);
@@ -282,6 +314,8 @@ public class Lexer {
 	}
 
 	public static final class LexerError extends RuntimeException {
-		public LexerError(String msg) { super(msg); }
+		public LexerError(String msg) {
+			super(msg);
+		}
 	}
 }
