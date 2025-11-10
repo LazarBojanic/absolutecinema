@@ -1,11 +1,4 @@
-setup Shirt{
-    var color: string;
-    var size: int;
-    Shirt(color: string, size: int){
-        @.color = color;
-        @.size = size;
-    }
-    scene getColor(): string{
-        cut @.color;
-    }
-}
+var shirt : Shirt = action Shirt("red", 10);
+shirt.getColor();
+tshirt = action Shirt("blue", 20);
+tshirt.getColor();

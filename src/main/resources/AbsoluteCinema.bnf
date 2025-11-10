@@ -15,14 +15,13 @@
 
 // Statements
 <block> ::= "{" <declaration>* "}"
-<statement> ::= <exprStmt> | <ifStmt> | <whileStmt> | <forStmt> | <returnStmt> | <assignStmt> | <callStmt> | <block> | <emptyStmt>
+<statement> ::= <exprStmt> | <ifStmt> | <whileStmt> | <forStmt> | <returnStmt> | <assignStmt> | <block> | <emptyStmt>
 <exprStmt> ::= <expression> ";"
 <ifStmt> ::= "if" "(" <expression> ")" <block> ("elif" "(" <expression> ")" <block>)* ("else" <block>)?
 <whileStmt> ::= "keepRollingIf" "(" <expression> ")" <block>
 <forStmt> ::= "keepRollingDuring" "(" (<varDecl> | <exprStmt> | ";") <expression>? ";" <expression>? ")" <block>
 <returnStmt> ::= "cut" <expression>? ";"
 <assignStmt> ::= <accessExpression> "=" <expression> ";"
-<callStmt> ::= <callExpr> ";"
 <emptyStmt> ::= ";"
 
 // Expressions
@@ -35,13 +34,11 @@
 <term> ::= <factor> (("+" | "-") <factor>)*
 <factor> ::= <unary> (("*" | "/" | "%") <unary>)*
 <unary> ::= ("!" | "-" | "++" | "--") <unary> | <postfix>
-<postfix> ::= <primary> ("++" | "--")?
-<primary> ::= <literal> | IDENT | "@" | "(" <expression> ")" | <arrayLiteral> | <objectInstantiation> | <callExpr>
+<postfix> ::= <primary> ( "(" <arguments>? ")" | "[" <expression> "]" | "." IDENT | "++" | "--" )*
+<primary> ::= <literal> | IDENT | "@" | "(" <expression> ")" | <arrayLiteral> | <objectInstantiation>
 
-// Access and calls
-<accessExpression> ::= (IDENT | "@" | "(" <expression> ")") <accessSuffix>*
-<accessSuffix> ::= "." IDENT | "[" <expression> "]" | "(" <arguments>? ")"
-<callExpr> ::= <accessExpression> "(" <arguments>? ")"
+// Access (for assignment LHS)
+<accessExpression> ::= (IDENT | "@" | "(" <expression> ")") ( "." IDENT | "[" <expression> "]" | "(" <arguments>? ")" )*
 
 // Literals and special expressions
 <literal> ::= NUMBER | STRING | CHAR | "true" | "false" | "null"

@@ -13,8 +13,8 @@ public final class JsonAstPrinter {
 		ObjectNode root = mapper.createObjectNode();
 		root.put("type", "program");
 		ArrayNode decls = mapper.createArrayNode();
-		for (Decl d : program.declarations) {
-			decls.add(printDecl(d));
+		for (Node n : program.items) {
+			decls.add(printNode(n));
 		}
 		root.set("declarations", decls);
 		try {

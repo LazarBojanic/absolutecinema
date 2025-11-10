@@ -21,25 +21,27 @@ public final class Parser {
 	}
 
 	public Program parseProgram() {
-		List<Decl> decls = new ArrayList<>();
+		List<Node> items = new ArrayList<>();
 		while (!isAtEnd()) {
 			if (match(TokenType.SEMICOLON)) {
+				// allow empty statements at top-level
 				continue;
 			}
 			if (match(TokenType.SETUP)) {
-				decls.add(parseSetupDecl());
+				items.add(parseSetupDecl());
 			}
 			else if (match(TokenType.SCENE)) {
-				decls.add(parseSceneDecl(false));
+				items.add(parseSceneDecl(false));
 			}
 			else if (match(TokenType.VAR)) {
-				decls.add(parseTopLevelVarDecl());
+				items.add(parseTopLevelVarDecl());
 			}
 			else {
-				error(peek(), "Expected a top-level declaration: 'setup', 'scene', or 'var'.");
+				// Treat anything else as a statement (e.g., calls, assignments) at top level
+				items.add(statement());
 			}
 		}
-		return new Program(decls);
+		return new Program(items);
 	}
 
 	// ==========================
@@ -398,28 +400,7 @@ public final class Parser {
 	}
 
 	private Expr postfix() {
-		Expr expr = call();
-		while (true) {
-			if (match(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
-				expr = new Postfix(expr, previous());
-			}
-			else if (match(TokenType.LEFT_BRACKET)) {
-				Expr index = expression();
-				consume(TokenType.RIGHT_BRACKET, "Expected ']' after index.");
-				expr = new Index(expr, index);
-			}
-			else if (match(TokenType.DOT)) {
-				Token name = consume(TokenType.IDENTIFIER, "Expected property name after '.'.");
-				expr = new Get(expr, name);
-			}
-			else {
-				break;
-			}
-		}
-		return expr;
-	}
-
-	private Expr call() {
+		// Unified postfix: calls, indexing, member access, and postfix ++/-- in one loop
 		Expr expr = primary();
 		while (true) {
 			if (match(TokenType.LEFT_PAREN)) {
@@ -430,6 +411,18 @@ public final class Parser {
 				}
 				Token paren = consume(TokenType.RIGHT_PAREN, "Expected ')' after arguments.");
 				expr = new Call(expr, paren, args);
+			}
+			else if (match(TokenType.LEFT_BRACKET)) {
+				Expr index = expression();
+				consume(TokenType.RIGHT_BRACKET, "Expected ']' after index.");
+				expr = new Index(expr, index);
+			}
+			else if (match(TokenType.DOT)) {
+				Token name = consume(TokenType.IDENTIFIER, "Expected property name after '.'.");
+				expr = new Get(expr, name);
+			}
+			else if (match(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
+				expr = new Postfix(expr, previous());
 			}
 			else {
 				break;

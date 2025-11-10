@@ -143,7 +143,7 @@ factor: unary ((MULT | DIV | MOD) unary)*;
 
 unary: (NOT | MINUS | INCREMENT | DECREMENT) unary | postfix;
 
-postfix: primary (INCREMENT | DECREMENT)?;
+postfix: primary ( LPAREN arguments? RPAREN | LBRACK expression RBRACK | DOT IDENT | INCREMENT | DECREMENT )*;
 
 primary:
     literal
@@ -151,20 +151,11 @@ primary:
     | AT
     | LPAREN expression RPAREN
     | arrayLiteral
-    | objectInstantiation
-    | callExpression;
+    | objectInstantiation;
 
-// Access expressions
+// Access expressions (for assignment LHS)
 accessExpression:
-    (IDENT | AT | LPAREN expression RPAREN) accessSuffix*;
-
-accessSuffix:
-    DOT IDENT
-    | LBRACK expression RBRACK
-    | LPAREN arguments? RPAREN;
-
-// Call expression
-callExpression: accessExpression LPAREN arguments? RPAREN;
+    (IDENT | AT | LPAREN expression RPAREN) ( DOT IDENT | LBRACK expression RBRACK | LPAREN arguments? RPAREN )*;
 
 // Literals and special expressions
 literal: NUMBER | STRING_LITERAL | CHAR_LITERAL | TRUE | FALSE | NULL;

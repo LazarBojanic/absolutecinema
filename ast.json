@@ -1,86 +1,65 @@
 {
   "type" : "program",
   "declarations" : [ {
-    "decl" : "setup",
-    "name" : "Shirt",
-    "fields" : [ {
-      "name" : "color",
-      "type" : {
-        "name" : "string",
-        "arrayDepth" : 0
-      }
-    }, {
-      "name" : "size",
-      "type" : {
-        "name" : "int",
-        "arrayDepth" : 0
-      }
-    } ],
-    "ctor" : {
-      "kind" : "ctor",
+    "name" : "shirt",
+    "type" : {
       "name" : "Shirt",
-      "params" : [ {
-        "name" : "color",
-        "type" : {
-          "name" : "string",
-          "arrayDepth" : 0
-        }
-      }, {
-        "name" : "size",
-        "type" : {
-          "name" : "int",
-          "arrayDepth" : 0
-        }
-      } ],
-      "body" : [ {
-        "stmt" : "expr",
-        "expr" : {
-          "expr" : "set",
-          "object" : {
-            "expr" : "this"
-          },
-          "name" : "color",
-          "op" : "=",
-          "value" : {
-            "expr" : "var",
-            "name" : "color"
-          }
-        }
-      }, {
-        "stmt" : "expr",
-        "expr" : {
-          "expr" : "set",
-          "object" : {
-            "expr" : "this"
-          },
-          "name" : "size",
-          "op" : "=",
-          "value" : {
-            "expr" : "var",
-            "name" : "size"
-          }
-        }
-      } ]
+      "arrayDepth" : 0
     },
-    "methods" : [ {
-      "kind" : "scene",
-      "name" : "getColor",
-      "isMethod" : true,
-      "returnType" : {
-        "name" : "string",
+    "init" : {
+      "expr" : "action",
+      "type" : {
+        "name" : "Shirt",
         "arrayDepth" : 0
       },
-      "params" : [ ],
-      "body" : [ {
-        "stmt" : "return",
-        "value" : {
-          "expr" : "get",
-          "object" : {
-            "expr" : "this"
-          },
-          "name" : "color"
-        }
-      } ]
-    } ]
+      "args" : [ "red", 10 ]
+    },
+    "decl" : "var"
+  }, {
+    "stmt" : "expr",
+    "expr" : {
+      "expr" : "call",
+      "callee" : {
+        "expr" : "get",
+        "object" : {
+          "expr" : "var",
+          "name" : "shirt"
+        },
+        "name" : "getColor"
+      },
+      "args" : [ ]
+    }
+  }, {
+    "stmt" : "expr",
+    "expr" : {
+      "expr" : "assign",
+      "target" : {
+        "expr" : "var",
+        "name" : "tshirt"
+      },
+      "op" : "=",
+      "value" : {
+        "expr" : "action",
+        "type" : {
+          "name" : "Shirt",
+          "arrayDepth" : 0
+        },
+        "args" : [ "blue", 20 ]
+      }
+    }
+  }, {
+    "stmt" : "expr",
+    "expr" : {
+      "expr" : "call",
+      "callee" : {
+        "expr" : "get",
+        "object" : {
+          "expr" : "var",
+          "name" : "tshirt"
+        },
+        "name" : "getColor"
+      },
+      "args" : [ ]
+    }
   } ]
 }
