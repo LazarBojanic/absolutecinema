@@ -219,17 +219,23 @@ public class Lexer {
 				sb.append(c);
 			}
 		}
-		if (isAtEnd()) error("Unterminated string");
+		if (isAtEnd()) {
+			error("Unterminated string");
+		}
 		advance();
 		add(TokenType.STRING_LITERAL, sb.toString());
 	}
 
 	private void character() {
-		if (isAtEnd()) error("Unterminated char literal");
+		if (isAtEnd()) {
+			error("Unterminated char literal");
+		}
 		char value;
 		char c = advance();
 		if (c == '\\') {
-			if (isAtEnd()) error("Unterminated char escape");
+			if (isAtEnd()) {
+				error("Unterminated char escape");
+			}
 			char e = advance();
 			switch (e) {
 				case 'n' -> value = '\n';
@@ -243,7 +249,9 @@ public class Lexer {
 		else {
 			value = c;
 		}
-		if (peek() != '\'') error("Unterminated char literal (missing closing '\'')");
+		if (peek() != '\'') {
+			error("Unterminated char literal (missing closing '\'')");
+		}
 		advance();
 		add(TokenType.CHAR_LITERAL, value);
 	}
