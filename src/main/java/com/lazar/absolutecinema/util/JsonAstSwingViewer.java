@@ -36,7 +36,9 @@ public final class JsonAstSwingViewer {
 
 			JTree tree = new JTree(treeRoot);
 			tree.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-			for (int i = 0; i < tree.getRowCount(); i++) tree.expandRow(i);
+			for (int i = 0; i < tree.getRowCount(); i++) {
+				tree.expandRow(i);
+			}
 
 			JFrame f = new JFrame("AbsoluteCinema AST (JSON)");
 			f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -49,7 +51,9 @@ public final class JsonAstSwingViewer {
 
 	private static DefaultMutableTreeNode toTreeNode(JsonNode node, String label) {
 		DefaultMutableTreeNode me = new DefaultMutableTreeNode(label);
-		if (node == null || node.isNull()) return me;
+		if (node == null || node.isNull()) {
+			return me;
+		}
 
 		if (node.isObject()) {
 			ObjectNode obj = (ObjectNode) node;
@@ -86,11 +90,21 @@ public final class JsonAstSwingViewer {
 	}
 
 	private static String shortLabel(JsonNode node, String key) {
-		if (node == null || node.isNull()) return "null";
-		if (node.isString()) return "\"" + node.asString() + "\"";
-		if (node.isNumber()) return node.asString();
-		if (node.isBoolean()) return String.valueOf(node.booleanValue());
-		if (node.isArray()) return "[]";
+		if (node == null || node.isNull()) {
+			return "null";
+		}
+		if (node.isString()) {
+			return "\"" + node.asString() + "\"";
+		}
+		if (node.isNumber()) {
+			return node.asString();
+		}
+		if (node.isBoolean()) {
+			return String.valueOf(node.booleanValue());
+		}
+		if (node.isArray()) {
+			return "[]";
+		}
 
 		if (node.isObject()) {
 			if (node.has("expr")) {

@@ -3,7 +3,7 @@ package com.lazar.absolutecinema.core;
 import com.lazar.absolutecinema.lexer.Lexer;
 import com.lazar.absolutecinema.parser.Parser;
 import com.lazar.absolutecinema.parser.ast.Program;
-import com.lazar.absolutecinema.util.JsonAstPrinter;
+import com.lazar.absolutecinema.util.AstJsonConverter;
 import com.lazar.absolutecinema.util.JsonAstSwingViewer;
 import com.lazar.absolutecinema.util.JsonAstToDot;
 import com.lazar.absolutecinema.util.Util;
@@ -61,8 +61,8 @@ public class App {
 			parser = new Parser(tokens);
 			Program program = parser.parseProgram();
 
-			JsonAstPrinter printer = new JsonAstPrinter();
-			String json = printer.print(program);
+			AstJsonConverter printer = new AstJsonConverter();
+			String json = printer.convert(program);
 			Files.writeString(Path.of("./ast.json"), json);
 			System.out.println("AST printed to ./ast.json");
 

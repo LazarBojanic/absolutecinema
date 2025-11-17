@@ -1,40 +1,49 @@
 {
-  "type" : "program",
-  "declarations" : [ {
-    "name" : "count",
-    "type" : {
-      "name" : "int",
-      "arrayDepth" : 2,
-      "arrayCapacities[0]" : "3",
-      "arrayCapacities[1]" : "7"
-    },
-    "init" : {
-      "expr" : "action",
-      "type" : {
-        "name" : "int",
-        "arrayDepth" : 1,
-        "arrayCapacities[0]" : "3"
+  "type": "program",
+  "declarations": [
+    {
+      "name": "count",
+      "type": {
+        "name": "int",
+        "arrayDepth": 2,
+        "arrayCapacities[0]": "3",
+        "arrayCapacities[1]": "7"
       },
-      "initializer" : [ 1, 2, 3 ]
+      "init": {
+        "expr": "action",
+        "type": {
+          "name": "int",
+          "arrayDepth": 1,
+          "arrayCapacities[0]": "3"
+        },
+        "initializer": [
+          1,
+          2,
+          3
+        ]
+      },
+      "decl": "var"
     },
-    "decl" : "var"
-  }, {
-    "kind" : "scene",
-    "name" : "entrance",
-    "isMethod" : false,
-    "returnType" : {
-      "name" : "scrap",
-      "arrayDepth" : 0
-    },
-    "params" : [ {
-      "name" : "args",
-      "type" : {
-        "name" : "string",
-        "arrayDepth" : 1,
-        "arrayCapacities[0]" : "undefined-size"
-      }
-    } ],
-    "body" : [ ],
-    "decl" : "scene"
-  } ]
+    {
+      "kind": "scene",
+      "name": "entrance",
+      "isMethod": false,
+      "returnType": {
+        "name": "scrap",
+        "arrayDepth": 0
+      },
+      "params": [
+        {
+          "name": "args",
+          "type": {
+            "name": "string",
+            "arrayDepth": 1,
+            "arrayCapacities[0]": "undefined-size"
+          }
+        }
+      ],
+      "body": [],
+      "decl": "scene"
+    }
+  ]
 }

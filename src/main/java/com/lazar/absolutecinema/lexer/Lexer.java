@@ -257,12 +257,12 @@ public class Lexer {
 	}
 
 	private void identifier() {
-		while (isAlphaNumeric(peek())){
+		while (isAlphaNumeric(peek())) {
 			advance();
 		}
 		String text = source.substring(start, current);
 		TokenType type = keywords.get(text);
-		if (type == null){
+		if (type == null) {
 			add(TokenType.IDENTIFIER);
 		}
 		else {
@@ -294,7 +294,7 @@ public class Lexer {
 	}
 
 	private char peekNext() {
-		if (current + 1 >= source.length()){
+		if (current + 1 >= source.length()) {
 			return '\0';
 		}
 		return source.charAt(current + 1);

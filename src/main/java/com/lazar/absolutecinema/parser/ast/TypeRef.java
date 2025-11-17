@@ -19,7 +19,7 @@ public final class TypeRef {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append(name);
 
-		for(Token cap : arrayCapacities) {
+		for (Token cap : arrayCapacities) {
 			stringBuilder.append("[").append(cap).append("]");
 		}
 		return stringBuilder.toString();
