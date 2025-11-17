@@ -4,20 +4,18 @@
     "name" : "count",
     "type" : {
       "name" : "int",
-      "arrayDepth" : 0
+      "arrayDepth" : 2,
+      "arrayCapacities[0]" : "3",
+      "arrayCapacities[1]" : "7"
     },
     "init" : {
-      "expr" : "call",
-      "callee" : {
-        "expr" : "var",
-        "name" : "factoriel"
+      "expr" : "action",
+      "type" : {
+        "name" : "int",
+        "arrayDepth" : 1,
+        "arrayCapacities[0]" : "3"
       },
-      "args" : [ {
-        "expr" : "binary",
-        "op" : "+",
-        "left" : 5,
-        "right" : 3
-      } ]
+      "initializer" : [ 1, 2, 3 ]
     },
     "decl" : "var"
   }, {
@@ -32,7 +30,8 @@
       "name" : "args",
       "type" : {
         "name" : "string",
-        "arrayDepth" : 1
+        "arrayDepth" : 1,
+        "arrayCapacities[0]" : "undefined-size"
       }
     } ],
     "body" : [ ],

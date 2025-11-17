@@ -101,7 +101,7 @@ public final class Parser {
 
 		TypeRef retType;
 		if (match(TokenType.SCRAP)) {
-			retType = new TypeRef(previous(), 0);
+			retType = new TypeRef(previous(), new ArrayList<>());
 		}
 		else {
 			retType = parseTypeRef();
@@ -388,8 +388,8 @@ public final class Parser {
 					}
 					while (match(TokenType.COMMA));
 				}
-				Token paren = consume(TokenType.RIGHT_PAREN, "Expected ')' after arguments.");
-				expr = new Call(expr, paren, args);
+				consume(TokenType.RIGHT_PAREN, "Expected ')' after arguments.");
+				expr = new Call(expr, args);
 			}
 			else if (match(TokenType.LEFT_BRACKET)) {
 				Expr index = expression();
@@ -451,7 +451,7 @@ public final class Parser {
 					while (match(TokenType.COMMA));
 				}
 				consume(TokenType.RIGHT_PAREN, "Expected ')' after constructor args.");
-				return new ActionNew(action, type, args, null, null);
+				return new ActionNew(action, type, args, null);
 			}
 			else if (match(TokenType.LEFT_BRACE)) {
 				List<Expr> elements = new ArrayList<>();
@@ -462,23 +462,7 @@ public final class Parser {
 					while (match(TokenType.COMMA));
 				}
 				consume(TokenType.RIGHT_BRACE, "Expected '}' after array literal.");
-				return new ArrayLiteral(elements);
-			}
-			else if (match(TokenType.LEFT_BRACKET)) {
-				Expr capacity = expression();
-				consume(TokenType.RIGHT_BRACKET, "Expected ']' after array capacity.");
-				List<Expr> init = null;
-				if (match(TokenType.LEFT_BRACE)) {
-					init = new ArrayList<>();
-					if (!check(TokenType.RIGHT_BRACE)) {
-						do {
-							init.add(expression());
-						}
-						while (match(TokenType.COMMA));
-					}
-					consume(TokenType.RIGHT_BRACE, "Expected '}' after array initializer.");
-				}
-				return new ActionNew(action, type, null, capacity, init);
+				return new ActionNew(action, type, null, elements);
 			}
 			else {
 				error(peek(), "Expected '(' for constructor call or '[' for array capacity after type in 'action'.");
@@ -495,18 +479,35 @@ public final class Parser {
 	}
 
 	private TypeRef parseTypeRef() {
+		List<Token> arrayCapacities = new ArrayList<>();
 		if (match(TokenType.INT, TokenType.DOUBLE, TokenType.CHAR, TokenType.STRING, TokenType.BOOL, TokenType.IDENTIFIER)) {
 			Token name = previous();
-			int depth = 0;
-			while (check(TokenType.LEFT_BRACKET) && checkNext(TokenType.RIGHT_BRACKET)) {
+			while (check(TokenType.LEFT_BRACKET)) {
 				advance();
-				advance();
-				depth++;
+				if (!check(TokenType.RIGHT_BRACKET)) {
+					if (check(TokenType.INT_LITERAL)) {
+						Token intLiteral = consume(TokenType.INT_LITERAL, "Expected array size literal.");
+						arrayCapacities.add(intLiteral);
+					}
+					else {
+						error(peek(), "Expected array size literal.");
+					}
+				}
+				else {
+					arrayCapacities.add(new Token(
+						TokenType.STRING,
+						"undefined-size",
+						"",
+						0,
+						0
+					));
+				}
+				consume(TokenType.RIGHT_BRACKET, "Expected right bracket after array size expression.");
 			}
-			return new TypeRef(name, depth);
+			return new TypeRef(name, arrayCapacities);
 		}
 		error(peek(), "Expected a type name.");
-		return new TypeRef(previous(), 0);
+		return new TypeRef(previous(), new ArrayList<>());
 	}
 
 	private boolean match(TokenType... types) {

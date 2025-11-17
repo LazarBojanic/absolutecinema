@@ -92,7 +92,10 @@ public final class JsonAstPrinter {
 	private ObjectNode printType(TypeRef t) {
 		ObjectNode o = mapper.createObjectNode();
 		o.put("name", t.name.getLexeme());
-		o.put("arrayDepth", t.arrayDepth);
+		o.put("arrayDepth", t.arrayCapacities.size());
+		for(int i = 0; i < t.arrayCapacities.size(); i++) {
+			o.put("arrayCapacities[" + i + "]", t.arrayCapacities.get(i).getLexeme());
+		}
 		return o;
 	}
 
@@ -308,9 +311,6 @@ public final class JsonAstPrinter {
 					ArrayNode a = mapper.createArrayNode();
 					for (Expr ex : n.args) a.add(printExpr(ex));
 					o.set("args", a);
-				}
-				if (n.arrayCapacity != null) {
-					o.set("capacity", printExpr(n.arrayCapacity));
 				}
 				if (n.arrayInitializer != null) {
 					ArrayNode a = mapper.createArrayNode();

@@ -8,14 +8,12 @@ public final class ActionNew implements Expr {
 	public final Token action;
 	public final TypeRef type;
 	public final List<Expr> args;
-	public final Expr arrayCapacity;
 	public final List<Expr> arrayInitializer;
 
-	public ActionNew(Token action, TypeRef type, List<Expr> args, Expr arrayCapacity, List<Expr> arrayInitializer) {
+	public ActionNew(Token action, TypeRef type, List<Expr> args, List<Expr> arrayInitializer) {
 		this.action = action;
 		this.type = type;
 		this.args = args;
-		this.arrayCapacity = arrayCapacity;
 		this.arrayInitializer = arrayInitializer;
 	}
 

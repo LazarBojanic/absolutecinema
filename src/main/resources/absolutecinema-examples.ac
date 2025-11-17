@@ -1,4 +1,4 @@
-var count: int = factoriel(5+3);
+var count: int[3][7] = action int[3] {1,2,3};
 scene entrance(var args: string[]): scrap {
 
 }

@@ -6,12 +6,10 @@ import java.util.List;
 
 public final class Call implements Expr {
 	public final Expr callee;
-	public final Token paren;
 	public final List<Expr> arguments;
 
-	public Call(Expr callee, Token paren, List<Expr> arguments) {
+	public Call(Expr callee, List<Expr> arguments) {
 		this.callee = callee;
-		this.paren = paren;
 		this.arguments = arguments;
 	}
 
