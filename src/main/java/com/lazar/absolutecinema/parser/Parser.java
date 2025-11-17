@@ -33,7 +33,7 @@ public final class Parser {
 				items.add(parseTopLevelVarDecl());
 			}
 			else {
-				items.add(statement());
+				error(peek(), "Invalid top level statement. Expected 'setup', 'scene', or 'var'.");
 			}
 		}
 		return new Program(items);
@@ -369,7 +369,7 @@ public final class Parser {
 	}
 
 	private Expr unary() {
-		if (match(TokenType.BANG, TokenType.MINUS, TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
+		if (match(TokenType.BANG, TokenType.MINUS, TokenType.PLUS, TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
 			Token op = previous();
 			Expr right = unary();
 			return new Unary(op, right);

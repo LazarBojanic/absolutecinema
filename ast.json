@@ -1,76 +1,41 @@
 {
-	"type": "program",
-	"declarations": [
-		{
-			"name": "shirt",
-			"type": {
-				"name": "Shirt",
-				"arrayDepth": 0
-			},
-			"init": {
-				"expr": "action",
-				"type": {
-					"name": "Shirt",
-					"arrayDepth": 0
-				},
-				"args": [
-					"red",
-					10
-				]
-			},
-			"decl": "var"
-		},
-		{
-			"stmt": "expr",
-			"expr": {
-				"expr": "call",
-				"callee": {
-					"expr": "get",
-					"object": {
-						"expr": "var",
-						"name": "shirt"
-					},
-					"name": "getColor"
-				},
-				"args": []
-			}
-		},
-		{
-			"stmt": "expr",
-			"expr": {
-				"expr": "assign",
-				"target": {
-					"expr": "var",
-					"name": "tshirt"
-				},
-				"op": "=",
-				"value": {
-					"expr": "action",
-					"type": {
-						"name": "Shirt",
-						"arrayDepth": 0
-					},
-					"args": [
-						"blue",
-						20
-					]
-				}
-			}
-		},
-		{
-			"stmt": "expr",
-			"expr": {
-				"expr": "call",
-				"callee": {
-					"expr": "get",
-					"object": {
-						"expr": "var",
-						"name": "tshirt"
-					},
-					"name": "getColor"
-				},
-				"args": []
-			}
-		}
-	]
+  "type" : "program",
+  "declarations" : [ {
+    "name" : "count",
+    "type" : {
+      "name" : "int",
+      "arrayDepth" : 0
+    },
+    "init" : {
+      "expr" : "call",
+      "callee" : {
+        "expr" : "var",
+        "name" : "factoriel"
+      },
+      "args" : [ {
+        "expr" : "binary",
+        "op" : "+",
+        "left" : 5,
+        "right" : 3
+      } ]
+    },
+    "decl" : "var"
+  }, {
+    "kind" : "scene",
+    "name" : "entrance",
+    "isMethod" : false,
+    "returnType" : {
+      "name" : "scrap",
+      "arrayDepth" : 0
+    },
+    "params" : [ {
+      "name" : "args",
+      "type" : {
+        "name" : "string",
+        "arrayDepth" : 1
+      }
+    } ],
+    "body" : [ ],
+    "decl" : "scene"
+  } ]
 }

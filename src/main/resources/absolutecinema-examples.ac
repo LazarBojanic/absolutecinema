@@ -1,4 +1,4 @@
-var shirt : Shirt = action Shirt("red", 10);
-shirt.getColor();
-tshirt = action Shirt("blue", 20);
-tshirt.getColor();
+var count: int = factoriel(5+3);
+scene entrance(var args: string[]): scrap {
+
+}
