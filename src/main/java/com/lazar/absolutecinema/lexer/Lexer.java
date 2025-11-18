@@ -114,15 +114,27 @@ public class Lexer {
 				break;
 			}
 			case '+': {
-				if (match('+')) add(TokenType.PLUS_PLUS);
-				else if (match('=')) add(TokenType.PLUS_EQUAL);
-				else add(TokenType.PLUS);
+				if (match('+')){
+					add(TokenType.PLUS_PLUS);
+				}
+				else if (match('=')){
+					add(TokenType.PLUS_EQUAL);
+				}
+				else {
+					add(TokenType.PLUS);
+				}
 				break;
 			}
 			case '-': {
-				if (match('-')) add(TokenType.MINUS_MINUS);
-				else if (match('=')) add(TokenType.MINUS_EQUAL);
-				else add(TokenType.MINUS);
+				if (match('-')) {
+					add(TokenType.MINUS_MINUS);
+				}
+				else if (match('=')) {
+					add(TokenType.MINUS_EQUAL);
+				}
+				else {
+					add(TokenType.MINUS);
+				}
 				break;
 			}
 			case '*': {
@@ -130,18 +142,30 @@ public class Lexer {
 				break;
 			}
 			case '&': {
-				if (match('&')) add(TokenType.AND_AND);
-				else error("Unexpected '&' (did you mean '&&'?)");
+				if (match('&')){
+					add(TokenType.AND_AND);
+				}
+				else {
+					error("Unexpected '&' (did you mean '&&'?)");
+				}
 				break;
 			}
 			case '|': {
-				if (match('|')) add(TokenType.OR_OR);
-				else error("Unexpected '|' (did you mean '||'?)");
+				if (match('|')){
+					add(TokenType.OR_OR);
+				}
+				else {
+					error("Unexpected '|' (did you mean '||'?)");
+				}
 				break;
 			}
 			case '/': {
-				if (match('=')) add(TokenType.SLASH_EQUAL);
-				else add(TokenType.SLASH);
+				if (match('=')){
+					add(TokenType.SLASH_EQUAL);
+				}
+				else {
+					add(TokenType.SLASH);
+				}
 				break;
 			}
 			case '%': {
@@ -172,11 +196,18 @@ public class Lexer {
 
 	private void number() {
 		boolean isDouble = false;
-		while (isDigit(peek())) advance();
+		while (isDigit(peek())){
+			advance();
+		}
 		if (peek() == '.' && isDigit(peekNext())) {
 			isDouble = true;
 			do advance();
 			while (isDigit(peek()));
+		}
+		else{
+			if(isAlpha(peek())){
+				error("Unexpected character: '" + peek() + "'");
+			}
 		}
 		String lexeme = source.substring(start, current);
 		if (isDouble) {

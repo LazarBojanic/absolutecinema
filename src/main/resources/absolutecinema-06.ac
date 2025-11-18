@@ -4,7 +4,7 @@ scene entrance(var args: string[]): scrap{
 	project("Who invented the telephone?");
 	var answer2: string = capture();
 	if(answer1 == "Alan Turing" && answer2 == "Babbage"){
-		project("You are right!");
+		project("You are right!);
 	}
 	else{
 		project("You are wrong!");
