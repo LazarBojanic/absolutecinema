@@ -66,7 +66,8 @@ RBRACK: ']';
 
 // Literals
 IDENT: [a-zA-Z_][a-zA-Z0-9_]*;
-NUMBER: [0-9]+ ('.' [0-9]+)?;
+DOUBLE_LITERAL: [0-9]+ '.' [0-9]+;
+INT_LITERAL: [0-9]+;
 STRING_LITERAL: '"' (~["\\] | '\\' .)* '"';
 CHAR_LITERAL: '\'' (~['\\] | '\\' .) '\'';
 
@@ -74,15 +75,15 @@ CHAR_LITERAL: '\'' (~['\\] | '\\' .) '\'';
 WS: [ \t\r\n]+ -> skip;
 
 // Parser Rules
-program: declaration* EOF;
+program: (setupDecl | sceneDecl | varDecl)* EOF; // top-level statements are not allowed
 
-declaration: setupDecl | sceneDecl | varDecl | statement;
+declaration: setupDecl | sceneDecl | varDecl; // helper (not used at top-level rule directly)
 
-setupDecl: SETUP IDENT LBRACE (fieldDecl | ctorDecl | methodDecl)* RBRACE;
+setupDecl: SETUP IDENT LBRACE (fieldDecl | ctorDecl | methodDecl | SEMI)* RBRACE;
 
 fieldDecl: VAR IDENT COLON type (ASSIGN expression)? SEMI;
 
-ctorDecl: IDENT LPAREN params? RPAREN block;
+ctorDecl: IDENT LPAREN params? RPAREN block; // name equality to setup name is enforced by the parser code, not the grammar
 
 methodDecl: SCENE IDENT LPAREN params? RPAREN COLON (SCRAP | type) block;
 
@@ -92,13 +93,15 @@ varDecl: VAR IDENT COLON type (ASSIGN expression)? SEMI;
 
 params: param (COMMA param)*;
 
-param: (VAR)? IDENT COLON type;
+param: VAR? IDENT COLON type;
 
-// Types
-type: (INT | DOUBLE | CHAR | STRING | BOOL | IDENT) (LBRACK RBRACK)*;
+// Types — allow optional dimension sizes as integer literals; empty [] means undefined-size
+// Example: int[3][], MyType[][10]
+// The size, when omitted, is handled in code as "undefined-size".
+type: (INT | DOUBLE | CHAR | STRING | BOOL | IDENT) (LBRACK INT_LITERAL? RBRACK)*;
 
 // Statements
-block: LBRACE declaration* RBRACE;
+block: LBRACE (varDecl | statement | SEMI)* RBRACE; // varDecl allowed inside blocks
 
 statement:
     exprStmt
@@ -108,7 +111,8 @@ statement:
     | returnStmt
     | assignStmt
     | block
-    | emptyStmt;
+    | emptyStmt
+    ;
 
 exprStmt: expression SEMI;
 
@@ -141,7 +145,8 @@ term: factor ((PLUS | MINUS) factor)*;
 
 factor: unary ((MULT | DIV | MOD) unary)*;
 
-unary: (NOT | MINUS | INCREMENT | DECREMENT) unary | postfix;
+// include unary PLUS to match parser
+unary: (NOT | PLUS | MINUS | INCREMENT | DECREMENT) unary | postfix;
 
 postfix: primary ( LPAREN arguments? RPAREN | LBRACK expression RBRACK | DOT IDENT | INCREMENT | DECREMENT )*;
 
@@ -151,17 +156,19 @@ primary:
     | AT
     | LPAREN expression RPAREN
     | arrayLiteral
-    | objectInstantiation;
+    | objectInstantiation
+    ;
 
 // Access expressions (for assignment LHS)
 accessExpression:
     (IDENT | AT | LPAREN expression RPAREN) ( DOT IDENT | LBRACK expression RBRACK | LPAREN arguments? RPAREN )*;
 
 // Literals and special expressions
-literal: NUMBER | STRING_LITERAL | CHAR_LITERAL | TRUE | FALSE | NULL;
+literal: INT_LITERAL | DOUBLE_LITERAL | STRING_LITERAL | CHAR_LITERAL | TRUE | FALSE | NULL;
 
-arrayLiteral: ACTION type LBRACK expression? RBRACK (LBRACE (expression (COMMA expression)*)? RBRACE)?;
+// In code, `action` takes a type, then either constructs with (args) or provides an array literal with {...}
+arrayLiteral: ACTION type LBRACE (expression (COMMA expression)*)? RBRACE;
 
-objectInstantiation: ACTION IDENT LPAREN arguments? RPAREN;
+objectInstantiation: ACTION type LPAREN arguments? RPAREN;
 
 arguments: expression (COMMA expression)*;
