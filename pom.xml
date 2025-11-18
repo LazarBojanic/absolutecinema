@@ -92,11 +92,6 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.5.0</version>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugin-tools</groupId>
-                <artifactId>maven-plugin-annotations</artifactId>
-                <version>3.15.2</version>
-            </plugin>
         </plugins>
     </build>
 </project>
