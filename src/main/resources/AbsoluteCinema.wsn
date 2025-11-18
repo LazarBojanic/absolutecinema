@@ -10,10 +10,8 @@ varDecl          → "var" IDENT ":" type ("=" expression)? ";"
 params           → param ("," param)*
 param            → ("var")? IDENT ":" type
 
-// Types with optional dimensions (empty [] = undefined-size)
 type             → ("int" | "double" | "char" | "string" | "bool" | IDENT) ("[" INT "]" | "[" "]")*
 
-// Statements
 block            → "{" (varDecl | statement | ";")* "}"
 statement        → exprStmt | ifStmt | whileStmt | forStmt | returnStmt | assignStmt | block | emptyStmt
 exprStmt         → expression ";"
@@ -21,10 +19,9 @@ ifStmt           → "if" "(" expression ")" block ("elif" "(" expression ")" bl
 whileStmt        → "keepRollingIf" "(" expression ")" block
 forStmt          → "keepRollingDuring" "(" (varDecl | exprStmt | ";") expression? ";" expression? ")" block
 returnStmt       → "cut" expression? ";"
-assignStmt       → accessExpression "=" expression ";"
+assignStmt       → accessExpression ("=" | "+=" | "-=") expression ";"
 emptyStmt        → ";"
 
-// Expressions
 expression       → assignment
 assignment       → accessExpression "=" assignment | logical_or
 logical_or       → logical_and ("||" logical_and)*
@@ -37,11 +34,9 @@ unary            → ("!" | "+" | "-" | "++" | "--") unary | postfix
 postfix          → primary ( "(" arguments? ")" | "[" expression "]" | "." IDENT | "++" | "--" )*
 primary          → literal | IDENT | "@" | "(" expression ")" | arrayLiteral | objectInstantiation
 
-// Access (for assignment LHS)
 accessExpression → (IDENT | "@" | "(" expression ")") ( "." IDENT | "[" expression "]" | "(" arguments? ")" )*
 
-// Literals and special expressions
 literal          → INT | DOUBLE | STRING | CHAR | "true" | "false" | "null"
-arrayLiteral     → "action" type "{" (expression ("," expression)*)? "}"
+arrayLiteral     → "{" (expression ("," expression)*)? "}"
 objectInstantiation → "action" type "(" arguments? ")"
 arguments        → expression ("," expression)*
