@@ -1,0 +1,9 @@
+var 0movie: Movie = null;
+scene entrance(var args: string[]): scrap{
+	if(movie.getYear() > 2010) {
+		project("Movie is modern");
+	}
+	else{
+		project("Movie is old");
+	}
+}

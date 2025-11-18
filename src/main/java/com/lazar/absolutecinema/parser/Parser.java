@@ -82,6 +82,7 @@ public final class Parser {
 				methods.add(parseSceneDecl(true));
 			}
 			else if (match(TokenType.SEMICOLON)) {
+
 			}
 			else {
 				error(peek(), "Expected field, constructor, or scene method in setup: '" + name.getLexeme() + "'.");
@@ -292,7 +293,7 @@ public final class Parser {
 
 	private Expr assignment() {
 		Expr expr = or();
-		if (match(TokenType.EQUAL)) {
+		if (match(TokenType.EQUAL, TokenType.PLUS_EQUAL, TokenType.MINUS_EQUAL)) {
 			Token op = previous();
 			Expr value = assignment();
 			if (expr instanceof Variable || expr instanceof Get || expr instanceof Index) {
@@ -443,6 +444,10 @@ public final class Parser {
 			Token action = previous();
 			TypeRef type = parseTypeRef();
 			if (match(TokenType.LEFT_PAREN)) {
+				String lexeme = type.name.getLexeme();
+				if(lexeme.equals("int") || lexeme.equals("bool") || lexeme.equals("char") || lexeme.equals("string")){
+					error(peek(), "Cannot use constructor for primitive type.");
+				}
 				List<Expr> args = new ArrayList<>();
 				if (!check(TokenType.RIGHT_PAREN)) {
 					do {
@@ -465,7 +470,12 @@ public final class Parser {
 				return new ActionNew(action, type, null, elements);
 			}
 			else {
-				error(peek(), "Expected '(' for constructor call or '[' for array capacity after type in 'action'.");
+				if(check(TokenType.SEMICOLON)){
+					return new ActionNew(action, type, null, null);
+				}
+				else{
+					error(peek(), "Expected '{' or '(' after action name.");
+				}
 			}
 		}
 

@@ -1,23 +1,97 @@
 {
   "type" : "program",
   "declarations" : [ {
-    "name" : "count",
-    "type" : {
-      "name" : "int",
-      "arrayDepth" : 2,
-      "arrayCapacities[0]" : "3",
-      "arrayCapacities[1]" : "7"
-    },
-    "init" : {
-      "expr" : "action",
+    "decl" : "setup",
+    "name" : "Phone",
+    "fields" : [ {
+      "name" : "width",
       "type" : {
         "name" : "int",
-        "arrayDepth" : 1,
-        "arrayCapacities[0]" : "3"
-      },
-      "initializer" : [ 1, 2, 3 ]
+        "arrayDepth" : 0
+      }
+    }, {
+      "name" : "height",
+      "type" : {
+        "name" : "int",
+        "arrayDepth" : 0
+      }
+    }, {
+      "name" : "color",
+      "type" : {
+        "name" : "string",
+        "arrayDepth" : 0
+      }
+    } ],
+    "ctor" : {
+      "kind" : "ctor",
+      "name" : "Phone",
+      "params" : [ {
+        "name" : "width",
+        "type" : {
+          "name" : "int",
+          "arrayDepth" : 0
+        }
+      }, {
+        "name" : "height",
+        "type" : {
+          "name" : "int",
+          "arrayDepth" : 0
+        }
+      }, {
+        "name" : "color",
+        "type" : {
+          "name" : "string",
+          "arrayDepth" : 0
+        }
+      } ],
+      "body" : [ {
+        "stmt" : "expr",
+        "expr" : {
+          "expr" : "set",
+          "object" : {
+            "expr" : "var",
+            "name" : "this"
+          },
+          "name" : "width",
+          "op" : "=",
+          "value" : {
+            "expr" : "var",
+            "name" : "width"
+          }
+        }
+      }, {
+        "stmt" : "expr",
+        "expr" : {
+          "expr" : "set",
+          "object" : {
+            "expr" : "var",
+            "name" : "this"
+          },
+          "name" : "height",
+          "op" : "=",
+          "value" : {
+            "expr" : "var",
+            "name" : "height"
+          }
+        }
+      }, {
+        "stmt" : "expr",
+        "expr" : {
+          "expr" : "set",
+          "object" : {
+            "expr" : "var",
+            "name" : "this"
+          },
+          "name" : "color",
+          "op" : "=",
+          "value" : {
+            "expr" : "var",
+            "name" : "color"
+          }
+        }
+      } ]
     },
-    "decl" : "var"
+    "methods" : [ ]
   }, {
     "kind" : "scene",
     "name" : "entrance",
@@ -34,7 +108,53 @@
         "arrayCapacities[0]" : "undefined-size"
       }
     } ],
-    "body" : [ ],
+    "body" : [ {
+      "stmt" : "var",
+      "decl" : {
+        "name" : "phone",
+        "type" : {
+          "name" : "Phone",
+          "arrayDepth" : 0
+        },
+        "init" : {
+          "expr" : "action",
+          "type" : {
+            "name" : "Phone",
+            "arrayDepth" : 0
+          },
+          "args" : [ 1080, 1920, "blue" ]
+        }
+      }
+    }, {
+      "stmt" : "expr",
+      "expr" : {
+        "expr" : "set",
+        "object" : {
+          "expr" : "var",
+          "name" : "phone"
+        },
+        "name" : "width",
+        "op" : "=",
+        "value" : 1440
+      }
+    }, {
+      "stmt" : "expr",
+      "expr" : {
+        "expr" : "call",
+        "callee" : {
+          "expr" : "var",
+          "name" : "project"
+        },
+        "args" : [ {
+          "expr" : "get",
+          "object" : {
+            "expr" : "var",
+            "name" : "phone"
+          },
+          "name" : "width"
+        } ]
+      }
+    } ],
     "decl" : "scene"
   } ]
 }

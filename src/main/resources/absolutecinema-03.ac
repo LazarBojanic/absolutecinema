@@ -1,0 +1,12 @@
+scene entrance(var args: string[]): scrap {
+	var n: int = capture();
+	cut fib(n);
+}
+scene fib(var n: int) : int{
+	if(n <= 1){
+		cut n;
+	}
+	else{
+		cut fib(n-1) + fib(n-2);
+	}
+}

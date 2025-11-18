@@ -1,0 +1,29 @@
+setup Player{
+	var x: int;
+	var y: int;
+	var health: int;
+	var speed: double;
+
+	Player(){
+		@.x = 0;
+		@.y = 0;
+		@.health = 100;
+		@.speed = 1.0;
+	}
+
+	scene gainHealth(var amount: int): scrap{
+		@.health += amount;
+	}
+	scene loseHealth(var amount: int): scrap{
+		@.health -= amount;
+	}
+	scene move(var dx: int, var dy: int): scrap{
+		@.x += dx * speed;
+		@.y += dy * speed;
+	}
+}
+scene entrance(var args: string[]): scrap{
+	var player: Player = action Player();
+	player.move(5, 4);
+	player.gainHealth(10);
+}

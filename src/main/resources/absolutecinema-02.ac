@@ -1,0 +1,16 @@
+setup Phone{
+	var width: int;
+	var height: int;
+	var color: string;
+	Phone(var width: int, var height: int, var color: string) {
+		this.width = width;
+		this.height = height;
+		this.color = color;
+	}
+}
+
+scene entrance(var args: string[]): scrap {
+	var phone : Phone = action Phone(1080, 1920, "blue");
+	phone.width = 1440;
+	project(phone.width);
+}
