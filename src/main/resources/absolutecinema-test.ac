@@ -1,0 +1,10 @@
+scene subtract(var a: int, var b: int): int {
+	cut a - b;
+}
+scene add(var a: int, var b: int): int {
+	cut -subtract(a, b);
+}
+scene entrance(var args: string[]): scrap {
+	project(subtract(10, 3));
+	project(add(8, 5));
+}
