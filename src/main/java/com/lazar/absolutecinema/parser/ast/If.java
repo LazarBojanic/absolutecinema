@@ -1,13 +1,15 @@
 package com.lazar.absolutecinema.parser.ast;
 
-public final class If implements Stmt {
-	public final Expr condition;
-	public final Stmt thenBranch;
-	public final Stmt elseBranch;
+import java.util.List;
 
-	public If(Expr condition, Stmt thenBranch, Stmt elseBranch) {
-		this.condition = condition;
-		this.thenBranch = thenBranch;
+public final class If implements Stmt {
+	public final Branch ifBranch;
+	public final List<Branch> elifBranchList;
+	public final Branch elseBranch;
+
+	public If(Branch ifBranch, List<Branch> elifBranchList, Branch elseBranch) {
+		this.ifBranch = ifBranch;
+		this.elifBranchList = elifBranchList;
 		this.elseBranch = elseBranch;
 	}
 

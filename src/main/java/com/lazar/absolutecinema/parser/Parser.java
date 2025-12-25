@@ -208,32 +208,29 @@ public final class Parser {
 
 	private Stmt parseIf() {
 		consume(TokenType.LEFT_PAREN, "Expected '(' after 'if'.");
-		Expr baseCond = expression();
+		Expr ifCondition = expression();
 		consume(TokenType.RIGHT_PAREN, "Expected ')' after if condition.");
 		consume(TokenType.LEFT_BRACE, "Expected '{' to start 'if' block.");
-		Block baseThen = parseBlockFromAlreadyConsumedBrace();
-
-		List<IfBranch> elifs = new ArrayList<>();
+		Block ifBlock = parseBlockFromAlreadyConsumedBrace();
+		Branch ifBranch = new Branch(ConditionalType.IF, ifCondition, ifBlock);
+		List<Branch> elifs = new ArrayList<>();
 		while (match(TokenType.ELIF)) {
 			consume(TokenType.LEFT_PAREN, "Expected '(' after 'elif'.");
-			Expr cond = expression();
+			Expr elifCondition = expression();
 			consume(TokenType.RIGHT_PAREN, "Expected ')' after elif condition.");
 			consume(TokenType.LEFT_BRACE, "Expected '{' to start 'elif' block.");
-			Block thenB = parseBlockFromAlreadyConsumedBrace();
-			elifs.add(new IfBranch(cond, thenB));
+			Block elifBlock = parseBlockFromAlreadyConsumedBrace();
+			Branch elifBranch = new Branch(ConditionalType.ELIF, elifCondition, elifBlock);
+			elifs.add(elifBranch);
 		}
-
-		Stmt elseBranch = null;
+		Block elseBlock = null;
 		if (match(TokenType.ELSE)) {
 			consume(TokenType.LEFT_BRACE, "Expected '{' to start 'else' block.");
-			elseBranch = parseBlockFromAlreadyConsumedBrace();
+			elseBlock = parseBlockFromAlreadyConsumedBrace();
 		}
+		Branch elseBranch = new Branch(ConditionalType.ELSE, null, elseBlock);
 
-		for (int i = elifs.size() - 1; i >= 0; i--) {
-			IfBranch b = elifs.get(i);
-			elseBranch = new If(b.cond, b.thenBlock, elseBranch);
-		}
-		return new If(baseCond, baseThen, elseBranch);
+		return new If(ifBranch, elifs, elseBranch);
 	}
 
 

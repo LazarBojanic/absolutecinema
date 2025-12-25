@@ -56,7 +56,7 @@ public final class AstJsonConverter {
 			}
 		}
 		ObjectNode o = mapper.createObjectNode();
-		o.put("decl", "unknown");
+		o.put("decl", "null");
 		return o;
 	}
 
@@ -102,9 +102,11 @@ public final class AstJsonConverter {
 		ObjectNode o = mapper.createObjectNode();
 		o.put("name", t.name.getLexeme());
 		o.put("dimension", t.dimension);
+		ArrayNode dimNums = mapper.createArrayNode();
 		for (int i = 0; i < t.dimension; i++) {
-			o.put("dimNum: " + i, t.arrayCapacities.get(i).getLexeme());
+			dimNums.add(t.arrayCapacities.get(i).getLexeme());
 		}
+		o.set("dimNums", dimNums);
 		return o;
 	}
 
@@ -147,10 +149,31 @@ public final class AstJsonConverter {
 			}
 			case If i -> {
 				ObjectNode o = mapper.createObjectNode();
-				o.put("stmt", "if");
-				o.set("cond", convertExpr(i.condition));
-				o.set("then", convertStmt(i.thenBranch));
-				if (i.elseBranch != null) o.set("else", convertStmt(i.elseBranch));
+				o.put("stmt", "if_stmt");
+
+				ObjectNode ifNode = mapper.createObjectNode();
+				String conditionalTypeString = i.ifBranch.conditionalType.name().toLowerCase();
+				ifNode.put("type", conditionalTypeString);
+				ifNode.set("cond", convertExpr(i.ifBranch.cond));
+				ifNode.set("block", convertStmt(i.ifBranch.block));
+				o.set("if", ifNode);
+
+				ArrayNode elifs = mapper.createArrayNode();
+				for(Branch elif : i.elifBranchList){
+					ObjectNode elifNode = mapper.createObjectNode();
+					elifNode.put("type", conditionalTypeString);
+					elifNode.set("cond", convertExpr(elif.cond));
+					elifNode.set("block", convertStmt(elif.block));
+					elifs.add(elifNode);
+				}
+				o.set("elifs", elifs);
+				if (i.elseBranch != null) {
+					ObjectNode elseNode = mapper.createObjectNode();
+					elseNode.put("type", conditionalTypeString);
+					elseNode.set("cond", convertExpr(i.elseBranch.cond));
+					elseNode.set("block", convertStmt(i.elseBranch.block));
+					o.set("else", elseNode);
+				}
 				return o;
 			}
 			case While w -> {
@@ -190,7 +213,7 @@ public final class AstJsonConverter {
 			}
 		}
 		ObjectNode o = mapper.createObjectNode();
-		o.put("stmt", "unknown");
+		o.put("stmt", "null");
 		return o;
 	}
 
@@ -216,7 +239,7 @@ public final class AstJsonConverter {
 			}
 		}
 		ObjectNode o = mapper.createObjectNode();
-		o.put("node", "unknown");
+		o.put("node", "null");
 		return o;
 	}
 
@@ -340,7 +363,7 @@ public final class AstJsonConverter {
 			}
 		}
 		ObjectNode o = mapper.createObjectNode();
-		o.put("expr", "unknown");
+		o.put("expr", "null");
 		return o;
 	}
 
