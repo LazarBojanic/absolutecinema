@@ -1,134 +1,136 @@
 {
   "type" : "program",
   "declarations" : [ {
-    "kind" : "scene",
-    "name" : "subtract",
-    "isMethod" : false,
-    "returnType" : {
-      "name" : "int",
-      "arrayDepth" : 0
-    },
-    "params" : [ {
-      "name" : "a",
+    "decl" : "setup",
+    "name" : "Shirt",
+    "fields" : [ {
+      "name" : "color",
       "type" : {
-        "name" : "int",
-        "arrayDepth" : 0
+        "name" : "string",
+        "dimension" : 0
       }
     }, {
-      "name" : "b",
+      "name" : "size",
       "type" : {
         "name" : "int",
-        "arrayDepth" : 0
+        "dimension" : 0
       }
     } ],
-    "body" : [ {
-      "stmt" : "return",
-      "value" : {
-        "expr" : "binary",
-        "op" : "-",
-        "left" : {
-          "expr" : "var",
-          "name" : "a"
-        },
-        "right" : {
-          "expr" : "var",
-          "name" : "b"
+    "ctor" : {
+      "kind" : "ctor",
+      "name" : "Shirt",
+      "params" : [ {
+        "name" : "color",
+        "type" : {
+          "name" : "string",
+          "dimension" : 0
         }
-      }
-    } ],
-    "decl" : "scene"
-  }, {
-    "kind" : "scene",
-    "name" : "add",
-    "isMethod" : false,
-    "returnType" : {
-      "name" : "int",
-      "arrayDepth" : 0
-    },
-    "params" : [ {
-      "name" : "a",
-      "type" : {
-        "name" : "int",
-        "arrayDepth" : 0
-      }
-    }, {
-      "name" : "b",
-      "type" : {
-        "name" : "int",
-        "arrayDepth" : 0
-      }
-    } ],
-    "body" : [ {
-      "stmt" : "return",
-      "value" : {
-        "expr" : "unary",
-        "op" : "-",
-        "right" : {
-          "expr" : "call",
-          "callee" : {
-            "expr" : "var",
-            "name" : "subtract"
+      }, {
+        "name" : "size",
+        "type" : {
+          "name" : "int",
+          "dimension" : 0
+        }
+      } ],
+      "body" : [ {
+        "stmt" : "expr",
+        "expr" : {
+          "expr" : "set",
+          "object" : {
+            "expr" : "this"
           },
-          "args" : [ {
+          "name" : "color",
+          "op" : "=",
+          "value" : {
             "expr" : "var",
-            "name" : "a"
-          }, {
-            "expr" : "var",
-            "name" : "b"
-          } ]
+            "name" : "color"
+          }
         }
-      }
-    } ],
-    "decl" : "scene"
+      }, {
+        "stmt" : "expr",
+        "expr" : {
+          "expr" : "set",
+          "object" : {
+            "expr" : "this"
+          },
+          "name" : "size",
+          "op" : "=",
+          "value" : {
+            "expr" : "var",
+            "name" : "size"
+          }
+        }
+      } ]
+    },
+    "methods" : [ {
+      "kind" : "scene",
+      "name" : "getColor",
+      "isMethod" : true,
+      "returnType" : {
+        "name" : "string",
+        "dimension" : 0
+      },
+      "params" : [ ],
+      "body" : [ {
+        "stmt" : "return",
+        "value" : {
+          "expr" : "get",
+          "object" : {
+            "expr" : "this"
+          },
+          "name" : "color"
+        }
+      } ]
+    } ]
   }, {
     "kind" : "scene",
     "name" : "entrance",
     "isMethod" : false,
     "returnType" : {
       "name" : "scrap",
-      "arrayDepth" : 0
+      "dimension" : 0
     },
     "params" : [ {
       "name" : "args",
       "type" : {
         "name" : "string",
-        "arrayDepth" : 1,
-        "arrayCapacities[0]" : "undefined-size"
+        "dimension" : 1
       }
     } ],
     "body" : [ {
-      "stmt" : "expr",
-      "expr" : {
-        "expr" : "call",
-        "callee" : {
-          "expr" : "var",
-          "name" : "project"
+      "stmt" : "var",
+      "decl" : {
+        "name" : "shirt",
+        "type" : {
+          "name" : "Shirt",
+          "dimension" : 0
         },
-        "args" : [ {
-          "expr" : "call",
-          "callee" : {
-            "expr" : "var",
-            "name" : "subtract"
+        "init" : {
+          "expr" : "action",
+          "type" : {
+            "name" : "Shirt",
+            "dimension" : 0
           },
-          "args" : [ 10, 3 ]
-        } ]
+          "args" : [ "red", 32 ]
+        }
       }
     }, {
-      "stmt" : "expr",
-      "expr" : {
-        "expr" : "call",
-        "callee" : {
-          "expr" : "var",
-          "name" : "project"
+      "stmt" : "var",
+      "decl" : {
+        "name" : "shirtArray",
+        "type" : {
+          "name" : "Shirt",
+          "dimension" : 2
         },
-        "args" : [ {
-          "expr" : "call",
-          "callee" : {
-            "expr" : "var",
-            "name" : "add"
-          },
-          "args" : [ 8, 5 ]
-        } ]
+        "init" : {
+          "expr" : "action",
+          "type" : {
+            "name" : "Shirt",
+            "dimension" : 2,
+            "dimNum: 0" : "2",
+            "dimNum: 1" : "2"
+          }
+        }
       }
     } ],
     "decl" : "scene"

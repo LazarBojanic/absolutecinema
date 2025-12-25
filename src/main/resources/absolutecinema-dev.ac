@@ -1,0 +1,15 @@
+setup Shirt{
+	var color: string;
+	var size: int;
+	Shirt(var color: string, var size: int){
+		@.color = color;
+		@.size = size;
+	}
+	scene getColor() : string{
+		cut @.color;
+	}
+}
+scene entrance(var args: string[]): scrap {
+	var shirt: Shirt = action Shirt("red", 32);
+	var shirtArray: Shirt[][] = action Shirt[2][2];
+}

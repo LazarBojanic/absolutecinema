@@ -1,17 +1,16 @@
 <program> ::= (<setupDecl> | <sceneDecl> | <varDecl>)* EOF
 
-<declaration> ::= <setupDecl> | <sceneDecl> | <varDecl>
 <setupDecl> ::= "setup" IDENT "{" (<fieldDecl> | <ctorDecl> | <methodDecl> | ";")* "}"
-<fieldDecl> ::= "var" IDENT ":" <type> ("=" <expression>)? ";"
+<fieldDecl> ::= "var" IDENT ":" <lType> ("=" <expression>)? ";"
 <ctorDecl> ::= IDENT "(" <params>? ")" <block>
-<methodDecl> ::= "scene" IDENT "(" <params>? ")" ":" ("scrap" | <type>) <block>
-<sceneDecl> ::= "scene" IDENT "(" <params>? ")" ":" ("scrap" | <type>) <block>
-<varDecl> ::= "var" IDENT ":" <type> ("=" <expression>)? ";"
+<methodDecl> ::= "scene" IDENT "(" <params>? ")" ":" ("scrap" | <lType>) <block>
+<sceneDecl> ::= "scene" IDENT "(" <params>? ")" ":" ("scrap" | <lType>) <block>
+<varDecl> ::= "var" IDENT ":" <lType> ("=" <expression>)? ";"
 <params> ::= <param> ("," <param>)*
-<param> ::= ("var")? IDENT ":" <type>
+<param> ::= ("var")? IDENT ":" <lType>
 
-// Types with optional dimensions; empty [] means undefined-size
-<type> ::= ("int" | "double" | "char" | "string" | "bool" | IDENT) ("[" INT "]" | "[" "]")*
+<lType> ::= ("int" | "double" | "char" | "string" | "bool" | IDENT)("[" "]")*
+<rType> ::= ("int" | "double" | "char" | "string" | "bool" | IDENT)("["INT"]")*
 
 // Statements
 <block> ::= "{" (<varDecl> | <statement> | ";")* "}"
@@ -42,6 +41,6 @@
 
 // Literals and special expressions
 <literal> ::= INT | DOUBLE | STRING | CHAR | "true" | "false" | "null"
-<arrayLiteral> ::= "action" <type> "{" (<expression> ("," <expression>)*)? "}"
-<objectInstantiation> ::= "action" <type> "(" <arguments>? ")"
+<arrayLiteral> ::= "action" <rType> "{" (<expression> ("," <expression>)*)? "}"
+<objectInstantiation> ::= "action" <rType> "(" <arguments>? ")"
 <arguments> ::= <expression> ("," <expression>)*

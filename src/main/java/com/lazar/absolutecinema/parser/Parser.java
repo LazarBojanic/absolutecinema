@@ -42,7 +42,7 @@ public final class Parser {
 	private Decl parseTopLevelVarDecl() {
 		Token name = consume(TokenType.IDENTIFIER, "Expected variable name.");
 		consume(TokenType.COLON, "Expected ':' after variable name.");
-		TypeRef type = parseTypeRef();
+		LType type = parseLType();
 		Expr init = null;
 		if (match(TokenType.EQUAL)) {
 			init = expression();
@@ -62,7 +62,7 @@ public final class Parser {
 			if (match(TokenType.VAR)) {
 				Token fname = consume(TokenType.IDENTIFIER, "Expected field name.");
 				consume(TokenType.COLON, "Expected ':' after field name.");
-				TypeRef ftype = parseTypeRef();
+				LType ftype = parseLType();
 				Expr init = null;
 				if (match(TokenType.EQUAL)) {
 					init = expression();
@@ -100,12 +100,12 @@ public final class Parser {
 		consume(TokenType.RIGHT_PAREN, "Expected ')' after parameters.");
 		consume(TokenType.COLON, "Expected ':' before return type.");
 
-		TypeRef retType;
+		LType retType;
 		if (match(TokenType.SCRAP)) {
-			retType = new TypeRef(previous(), new ArrayList<>());
+			retType = new LType(previous(), 0);
 		}
 		else {
-			retType = parseTypeRef();
+			retType = parseLType();
 		}
 
 		Block body = parseBlock();
@@ -121,13 +121,13 @@ public final class Parser {
 			if (match(TokenType.VAR)) {
 				Token pname = consume(TokenType.IDENTIFIER, "Expected parameter name.");
 				consume(TokenType.COLON, "Expected ':' after parameter name.");
-				TypeRef ptype = parseTypeRef();
+				LType ptype = parseLType();
 				params.add(new Param(pname, ptype));
 			}
 			else {
 				Token pname = consume(TokenType.IDENTIFIER, "Expected parameter name (use 'var name: Type').");
 				consume(TokenType.COLON, "Expected ':' after parameter name.");
-				TypeRef ptype = parseTypeRef();
+				LType ptype = parseLType();
 				params.add(new Param(pname, ptype));
 			}
 		}
@@ -175,7 +175,7 @@ public final class Parser {
 	private VarDecl parseLocalVarDecl() {
 		Token name = consume(TokenType.IDENTIFIER, "Expected variable name.");
 		consume(TokenType.COLON, "Expected ':' after variable name.");
-		TypeRef type = parseTypeRef();
+		LType type = parseLType();
 		Expr init = null;
 		if (match(TokenType.EQUAL)) {
 			init = expression();
@@ -442,7 +442,7 @@ public final class Parser {
 
 		if (match(TokenType.ACTION)) {
 			Token action = previous();
-			TypeRef type = parseTypeRef();
+			RType type = parseRType();
 			if (match(TokenType.LEFT_PAREN)) {
 				String lexeme = type.name.getLexeme();
 				if(lexeme.equals("int") || lexeme.equals("bool") || lexeme.equals("char") || lexeme.equals("string")){
@@ -488,7 +488,26 @@ public final class Parser {
 		return new Literal(null);
 	}
 
-	private TypeRef parseTypeRef() {
+	private LType parseLType() {
+		int dimension = 0;
+		if (match(TokenType.INT, TokenType.DOUBLE, TokenType.CHAR, TokenType.STRING, TokenType.BOOL, TokenType.IDENTIFIER)) {
+			Token name = previous();
+			while (check(TokenType.LEFT_BRACKET)) {
+				advance();
+				if (!check(TokenType.RIGHT_BRACKET)) {
+					error(peek(), "Expected right bracket.");
+				}
+				consume(TokenType.RIGHT_BRACKET, "Expected right bracket after array size expression.");
+				dimension++;
+			}
+			return new LType(name, dimension);
+		}
+		error(peek(), "Expected a type name.");
+		return new LType(previous(), dimension);
+	}
+
+
+	private RType parseRType() {
 		List<Token> arrayCapacities = new ArrayList<>();
 		if (match(TokenType.INT, TokenType.DOUBLE, TokenType.CHAR, TokenType.STRING, TokenType.BOOL, TokenType.IDENTIFIER)) {
 			Token name = previous();
@@ -504,21 +523,16 @@ public final class Parser {
 					}
 				}
 				else {
-					arrayCapacities.add(new Token(
-						TokenType.STRING,
-						"undefined-size",
-						"",
-						0,
-						0
-					));
+					error(peek(), "Expected array size literal.");
 				}
 				consume(TokenType.RIGHT_BRACKET, "Expected right bracket after array size expression.");
 			}
-			return new TypeRef(name, arrayCapacities);
+			return new RType(name, arrayCapacities);
 		}
 		error(peek(), "Expected a type name.");
-		return new TypeRef(previous(), new ArrayList<>());
+		return new RType(previous(), new ArrayList<>());
 	}
+
 
 	private boolean match(TokenType... types) {
 		for (TokenType t : types) {

@@ -6,6 +6,8 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
 
+import java.util.List;
+
 public final class AstJsonConverter {
 	private final ObjectMapper mapper = new ObjectMapper();
 
@@ -72,29 +74,36 @@ public final class AstJsonConverter {
 		o.put("kind", "scene");
 		o.put("name", s.name.getLexeme());
 		o.put("isMethod", s.isMethod);
-		o.set("returnType", convertType(s.returnType));
+		o.set("returnType", convertLType(s.returnType));
 		o.set("params", convertParams(s.params));
 		o.set("body", convertBlock(s.body));
 		return o;
 	}
 
-	private ArrayNode convertParams(java.util.List<Param> params) {
+	private ArrayNode convertParams(List<Param> params) {
 		ArrayNode a = mapper.createArrayNode();
 		for (Param p : params) {
 			ObjectNode o = mapper.createObjectNode();
 			o.put("name", p.name.getLexeme());
-			o.set("type", convertType(p.type));
+			o.set("type", convertLType(p.type));
 			a.add(o);
 		}
 		return a;
 	}
 
-	private ObjectNode convertType(TypeRef t) {
+	private ObjectNode convertLType(LType t) {
 		ObjectNode o = mapper.createObjectNode();
 		o.put("name", t.name.getLexeme());
-		o.put("arrayDepth", t.arrayCapacities.size());
-		for (int i = 0; i < t.arrayCapacities.size(); i++) {
-			o.put("arrayCapacities[" + i + "]", t.arrayCapacities.get(i).getLexeme());
+		o.put("dimension", t.dimension);
+		return o;
+	}
+
+	private ObjectNode convertRType(RType t) {
+		ObjectNode o = mapper.createObjectNode();
+		o.put("name", t.name.getLexeme());
+		o.put("dimension", t.dimension);
+		for (int i = 0; i < t.dimension; i++) {
+			o.put("dimNum: " + i, t.arrayCapacities.get(i).getLexeme());
 		}
 		return o;
 	}
@@ -188,7 +197,7 @@ public final class AstJsonConverter {
 	private ObjectNode convertVarDecl(VarDecl v) {
 		ObjectNode o = mapper.createObjectNode();
 		o.put("name", v.name.getLexeme());
-		o.set("type", convertType(v.type));
+		o.set("type", convertLType(v.type));
 		if (v.initializer != null) {
 			o.set("init", convertExpr(v.initializer));
 		}
@@ -306,7 +315,7 @@ public final class AstJsonConverter {
 			case ActionNew n -> {
 				ObjectNode o = mapper.createObjectNode();
 				o.put("expr", "action");
-				o.set("type", convertType(n.type));
+				o.set("type", convertRType(n.type));
 				if (n.args != null) {
 					ArrayNode a = mapper.createArrayNode();
 					for (Expr ex : n.args) a.add(convertExpr(ex));

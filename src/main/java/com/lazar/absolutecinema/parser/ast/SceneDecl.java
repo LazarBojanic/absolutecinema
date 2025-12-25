@@ -7,11 +7,11 @@ import java.util.List;
 public final class SceneDecl implements Decl {
 	public final Token name;
 	public final List<Param> params;
-	public final TypeRef returnType;
+	public final LType returnType;
 	public final Block body;
 	public final boolean isMethod;
 
-	public SceneDecl(Token name, List<Param> params, TypeRef returnType, Block body, boolean isMethod) {
+	public SceneDecl(Token name, List<Param> params, LType returnType, Block body, boolean isMethod) {
 		this.name = name;
 		this.params = params;
 		this.returnType = returnType;

@@ -4,10 +4,10 @@ import com.lazar.absolutecinema.lexer.Token;
 
 public final class VarDecl implements Decl {
 	public final Token name;
-	public final TypeRef type;
+	public final LType type;
 	public final Expr initializer;
 
-	public VarDecl(Token name, TypeRef type, Expr initializer) {
+	public VarDecl(Token name, LType type, Expr initializer) {
 		this.name = name;
 		this.type = type;
 		this.initializer = initializer;

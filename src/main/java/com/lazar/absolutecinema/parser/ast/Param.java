@@ -4,9 +4,9 @@ import com.lazar.absolutecinema.lexer.Token;
 
 public final class Param {
 	public final Token name;
-	public final TypeRef type;
+	public final LType type;
 
-	public Param(Token name, TypeRef type) {
+	public Param(Token name, LType type) {
 		this.name = name;
 		this.type = type;
 	}

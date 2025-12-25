@@ -5,13 +5,16 @@ import com.lazar.absolutecinema.lexer.Token;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class TypeRef {
+public final class RType {
 	public final Token name;
-	public final List<Token> arrayCapacities = new ArrayList<>();
+	public final List<Token> arrayCapacities;
+	public final Integer dimension;
 
-	public TypeRef(Token name, List<Token> arrayCapacities) {
+	public RType(Token name, List<Token> arrayCapacities) {
 		this.name = name;
+		this.arrayCapacities = new ArrayList<>();
 		this.arrayCapacities.addAll(arrayCapacities);
+		this.dimension = arrayCapacities.size();
 	}
 
 	@Override

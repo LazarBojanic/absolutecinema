@@ -6,4 +6,5 @@ public interface DeclVisitor<R> {
 	R visitScene(SceneDecl d);
 
 	R visitVar(VarDecl d);
+
 }

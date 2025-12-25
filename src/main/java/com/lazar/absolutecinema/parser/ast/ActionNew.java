@@ -6,11 +6,11 @@ import java.util.List;
 
 public final class ActionNew implements Expr {
 	public final Token action;
-	public final TypeRef type;
+	public final RType type;
 	public final List<Expr> args;
 	public final List<Expr> arrayInitializer;
 
-	public ActionNew(Token action, TypeRef type, List<Expr> args, List<Expr> arrayInitializer) {
+	public ActionNew(Token action, RType type, List<Expr> args, List<Expr> arrayInitializer) {
 		this.action = action;
 		this.type = type;
 		this.args = args;
