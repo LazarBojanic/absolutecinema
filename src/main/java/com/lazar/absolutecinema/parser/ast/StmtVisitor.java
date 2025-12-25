@@ -7,8 +7,6 @@ public interface StmtVisitor<R> {
 
 	R visitExpr(ExprStmt s);
 
-	R visitOtherIf(OtherIf s);
-
 	R visitIf(If s);
 
 	R visitWhile(While s);

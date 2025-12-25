@@ -1,161 +1,138 @@
 {
-	"type": "program",
-	"declarations": [
-		{
-			"kind": "scene",
-			"name": "entrance",
-			"isMethod": false,
-			"returnType": {
-				"name": "scrap",
-				"dimension": 0
-			},
-			"params": [
-				{
-					"name": "args",
-					"type": {
-						"name": "string",
-						"dimension": 1
-					}
-				}
-			],
-			"body": [
-				{
-					"stmt": "var",
-					"decl": {
-						"name": "arr",
-						"type": {
-							"name": "int",
-							"dimension": 2
-						},
-						"init": {
-							"expr": "action",
-							"type": {
-								"name": "int",
-								"dimension": 2,
-								"dimNums": [
-									"5",
-									"6"
-								]
-							}
-						}
-					}
-				},
-				{
-					"stmt": "var",
-					"decl": {
-						"name": "x",
-						"type": {
-							"name": "int",
-							"dimension": 0
-						},
-						"init": 1
-					}
-				},
-				{
-					"stmt": "var",
-					"decl": {
-						"name": "y",
-						"type": {
-							"name": "int",
-							"dimension": 0
-						},
-						"init": 2
-					}
-				},
-				{
-					"stmt": "if_stmt",
-					"if": {
-						"type": "if",
-						"cond": {
-							"expr": "binary",
-							"op": ">",
-							"left": {
-								"expr": "var",
-								"name": "x"
-							},
-							"right": {
-								"expr": "var",
-								"name": "y"
-							}
-						},
-						"block": {
-							"stmt": "block",
-							"body": [
-								{
-									"stmt": "return",
-									"value": true
-								}
-							]
-						}
-					},
-					"elifs": [
-						{
-							"type": "if",
-							"cond": {
-								"expr": "binary",
-								"op": "==",
-								"left": {
-									"expr": "var",
-									"name": "y"
-								},
-								"right": {
-									"expr": "var",
-									"name": "x"
-								}
-							},
-							"block": {
-								"stmt": "block",
-								"body": [
-									{
-										"stmt": "return",
-										"value": false
-									}
-								]
-							}
-						},
-						{
-							"type": "if",
-							"cond": {
-								"expr": "binary",
-								"op": "<=",
-								"left": {
-									"expr": "var",
-									"name": "y"
-								},
-								"right": {
-									"expr": "var",
-									"name": "x"
-								}
-							},
-							"block": {
-								"stmt": "block",
-								"body": [
-									{
-										"stmt": "return",
-										"value": false
-									}
-								]
-							}
-						}
-					],
-					"else": {
-						"type": "if",
-						"cond": {
-							"expr": "null"
-						},
-						"block": {
-							"stmt": "block",
-							"body": [
-								{
-									"stmt": "return",
-									"value": false
-								}
-							]
-						}
-					}
-				}
-			],
-			"decl": "scene"
-		}
-	]
+  "type" : "program",
+  "declarations" : [ {
+    "kind" : "scene",
+    "name" : "entrance",
+    "isMethod" : false,
+    "returnType" : {
+      "name" : "scrap",
+      "dimension" : 0
+    },
+    "params" : [ {
+      "name" : "args",
+      "type" : {
+        "name" : "string",
+        "dimension" : 1
+      }
+    } ],
+    "body" : [ {
+      "stmt" : "var",
+      "decl" : {
+        "name" : "arr",
+        "type" : {
+          "name" : "int",
+          "dimension" : 2
+        },
+        "init" : {
+          "expr" : "action",
+          "type" : {
+            "name" : "int",
+            "dimension" : 2,
+            "dimNums" : [ "5", "6" ]
+          }
+        }
+      }
+    }, {
+      "stmt" : "var",
+      "decl" : {
+        "name" : "x",
+        "type" : {
+          "name" : "int",
+          "dimension" : 0
+        },
+        "init" : 1
+      }
+    }, {
+      "stmt" : "var",
+      "decl" : {
+        "name" : "y",
+        "type" : {
+          "name" : "int",
+          "dimension" : 0
+        },
+        "init" : 2
+      }
+    }, {
+      "stmt" : "if_stmt",
+      "if" : {
+        "type" : "if",
+        "cond" : {
+          "expr" : "binary",
+          "op" : ">",
+          "left" : {
+            "expr" : "var",
+            "name" : "x"
+          },
+          "right" : {
+            "expr" : "var",
+            "name" : "y"
+          }
+        },
+        "block" : {
+          "stmt" : "block",
+          "body" : [ {
+            "stmt" : "return",
+            "value" : true
+          } ]
+        }
+      },
+      "elifs" : [ {
+        "type" : "if",
+        "cond" : {
+          "expr" : "binary",
+          "op" : "==",
+          "left" : {
+            "expr" : "var",
+            "name" : "y"
+          },
+          "right" : {
+            "expr" : "var",
+            "name" : "x"
+          }
+        },
+        "block" : {
+          "stmt" : "block",
+          "body" : [ {
+            "stmt" : "return",
+            "value" : false
+          } ]
+        }
+      }, {
+        "type" : "if",
+        "cond" : {
+          "expr" : "binary",
+          "op" : "<=",
+          "left" : {
+            "expr" : "var",
+            "name" : "y"
+          },
+          "right" : {
+            "expr" : "var",
+            "name" : "x"
+          }
+        },
+        "block" : {
+          "stmt" : "block",
+          "body" : [ {
+            "stmt" : "return",
+            "value" : false
+          } ]
+        }
+      } ],
+      "else" : {
+        "type" : "if",
+        "cond" : {
+          "expr" : "null"
+        },
+        "block" : {
+          "stmt" : "block",
+          "body" : [ {
+            "stmt" : "return",
+            "value" : false
+          } ]
+        }
+      }
+    } ],
+    "decl" : "scene"
+  } ]
 }
