@@ -1,88 +1,6 @@
 {
   "type" : "program",
   "declarations" : [ {
-    "decl" : "setup",
-    "name" : "Shirt",
-    "fields" : [ {
-      "name" : "color",
-      "type" : {
-        "name" : "string",
-        "dimension" : 0
-      }
-    }, {
-      "name" : "size",
-      "type" : {
-        "name" : "int",
-        "dimension" : 0
-      }
-    } ],
-    "ctor" : {
-      "kind" : "ctor",
-      "name" : "Shirt",
-      "params" : [ {
-        "name" : "color",
-        "type" : {
-          "name" : "string",
-          "dimension" : 0
-        }
-      }, {
-        "name" : "size",
-        "type" : {
-          "name" : "int",
-          "dimension" : 0
-        }
-      } ],
-      "body" : [ {
-        "stmt" : "expr",
-        "expr" : {
-          "expr" : "set",
-          "object" : {
-            "expr" : "this"
-          },
-          "name" : "color",
-          "op" : "=",
-          "value" : {
-            "expr" : "var",
-            "name" : "color"
-          }
-        }
-      }, {
-        "stmt" : "expr",
-        "expr" : {
-          "expr" : "set",
-          "object" : {
-            "expr" : "this"
-          },
-          "name" : "size",
-          "op" : "=",
-          "value" : {
-            "expr" : "var",
-            "name" : "size"
-          }
-        }
-      } ]
-    },
-    "methods" : [ {
-      "kind" : "scene",
-      "name" : "getColor",
-      "isMethod" : true,
-      "returnType" : {
-        "name" : "string",
-        "dimension" : 0
-      },
-      "params" : [ ],
-      "body" : [ {
-        "stmt" : "return",
-        "value" : {
-          "expr" : "get",
-          "object" : {
-            "expr" : "this"
-          },
-          "name" : "color"
-        }
-      } ]
-    } ]
-  }, {
     "kind" : "scene",
     "name" : "entrance",
     "isMethod" : false,
@@ -100,35 +18,92 @@
     "body" : [ {
       "stmt" : "var",
       "decl" : {
-        "name" : "shirt",
+        "name" : "x",
         "type" : {
-          "name" : "Shirt",
+          "name" : "int",
           "dimension" : 0
         },
-        "init" : {
-          "expr" : "action",
-          "type" : {
-            "name" : "Shirt",
-            "dimension" : 0
-          },
-          "args" : [ "red", 32 ]
-        }
+        "init" : 1
       }
     }, {
       "stmt" : "var",
       "decl" : {
-        "name" : "shirtArray",
+        "name" : "y",
         "type" : {
-          "name" : "Shirt",
-          "dimension" : 2
+          "name" : "int",
+          "dimension" : 0
         },
-        "init" : {
-          "expr" : "action",
-          "type" : {
-            "name" : "Shirt",
-            "dimension" : 2,
-            "dimNum: 0" : "2",
-            "dimNum: 1" : "2"
+        "init" : 2
+      }
+    }, {
+      "stmt" : "if",
+      "cond" : {
+        "expr" : "binary",
+        "op" : ">",
+        "left" : {
+          "expr" : "var",
+          "name" : "x"
+        },
+        "right" : {
+          "expr" : "var",
+          "name" : "y"
+        }
+      },
+      "then" : {
+        "stmt" : "block",
+        "body" : [ {
+          "stmt" : "return",
+          "value" : true
+        } ]
+      },
+      "else" : {
+        "stmt" : "if",
+        "cond" : {
+          "expr" : "binary",
+          "op" : "==",
+          "left" : {
+            "expr" : "var",
+            "name" : "y"
+          },
+          "right" : {
+            "expr" : "var",
+            "name" : "x"
+          }
+        },
+        "then" : {
+          "stmt" : "block",
+          "body" : [ {
+            "stmt" : "return",
+            "value" : false
+          } ]
+        },
+        "else" : {
+          "stmt" : "if",
+          "cond" : {
+            "expr" : "binary",
+            "op" : "<=",
+            "left" : {
+              "expr" : "var",
+              "name" : "y"
+            },
+            "right" : {
+              "expr" : "var",
+              "name" : "x"
+            }
+          },
+          "then" : {
+            "stmt" : "block",
+            "body" : [ {
+              "stmt" : "return",
+              "value" : false
+            } ]
+          },
+          "else" : {
+            "stmt" : "block",
+            "body" : [ {
+              "stmt" : "return",
+              "value" : false
+            } ]
           }
         }
       }
