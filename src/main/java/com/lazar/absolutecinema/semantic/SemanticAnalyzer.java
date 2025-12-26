@@ -14,9 +14,8 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	private SetupSymbol currentSetup = null;
 
 	public void analyze(Program program) {
-		// Pass 0: Register Standard Library
 		registerStdLib();
-		// Pass 1: Global declarations (Setups, Scenes, Global Vars)
+		// Pass 1: Global declarations
 		for (Node node : program.items) {
 			if (node instanceof SetupDecl) {
 				declareSetup((SetupDecl) node);
@@ -37,12 +36,8 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	}
 
 	private void registerStdLib() {
-		// project(val: string): scrap
-		currentScope.define(new FunctionSymbol("project", Type.VOID,
-			Collections.singletonList(Type.STRING)));
-		// capture(): string
-		currentScope.define(new FunctionSymbol("capture", Type.STRING,
-			Collections.emptyList()));
+		currentScope.define(new FunctionSymbol("project", Type.VOID, Collections.singletonList(Type.STRING)));
+		currentScope.define(new FunctionSymbol("capture", Type.STRING, Collections.emptyList()));
 	}
 
 	private void declareSetup(SetupDecl d) {
@@ -52,16 +47,12 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 			ss.members.put(field.name.getLexeme(), new VarSymbol(field.name.getLexeme(), mapType(field.type)));
 		}
 		for (SceneDecl method : d.methods) {
-			ss.members.put(method.name.getLexeme(), new FunctionSymbol(method.name.getLexeme(),
-				mapType(method.returnType),
-				method.params.stream().map(p -> mapType(p.type)).collect(Collectors.toList())));
+			ss.members.put(method.name.getLexeme(), new FunctionSymbol(method.name.getLexeme(), mapType(method.returnType), method.params.stream().map(p -> mapType(p.type)).collect(Collectors.toList())));
 		}
 	}
 
 	private void declareScene(SceneDecl d) {
-		currentScope.define(new FunctionSymbol(d.name.getLexeme(),
-			mapType(d.returnType),
-			d.params.stream().map(p -> mapType(p.type)).collect(Collectors.toList())));
+		currentScope.define(new FunctionSymbol(d.name.getLexeme(), mapType(d.returnType), d.params.stream().map(p -> mapType(p.type)).collect(Collectors.toList())));
 	}
 
 	private void declareGlobalVar(VarDecl d) {
@@ -69,27 +60,22 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	}
 
 	private Type mapType(LType lType) {
-		if (lType == null) {
-			return Type.VOID;
-		}
-		return new Type(lType.name.getLexeme(), lType.dimension);
+		return lType == null ? Type.VOID : new Type(lType.name.getLexeme(), lType.dimension);
 	}
 
 	private Type mapType(RType rType) {
-		if (rType == null) {
-			return Type.VOID;
-		}
-		return new Type(rType.name.getLexeme(), rType.dimension);
+		return rType == null ? Type.VOID : new Type(rType.name.getLexeme(), rType.dimension);
 	}
 
-	// --- DeclVisitor ---
 	@Override
 	public Void visitSetup(SetupDecl d) {
-		SetupSymbol ss = (SetupSymbol) currentScope.resolve(d.name.getLexeme());
-		currentSetup = ss;
+		currentSetup = (SetupSymbol) currentScope.resolve(d.name.getLexeme());
 		currentScope = new Scope(currentScope);
 		for (VarDecl field : d.fields) {
-			field.accept(this);
+			currentScope.define(new VarSymbol(field.name.getLexeme(), mapType(field.type)));
+		}
+		for (SceneDecl method : d.methods) {
+			currentScope.define(new FunctionSymbol(method.name.getLexeme(), mapType(method.returnType), method.params.stream().map(p -> mapType(p.type)).collect(Collectors.toList())));
 		}
 		if (d.ctor != null) {
 			expectedReturnType = Type.VOID;
@@ -135,7 +121,6 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 		currentScope = currentScope.getParent();
 	}
 
-	// --- StmtVisitor ---
 	@Override
 	public Void visitBlock(Block s) {
 		currentScope = new Scope(currentScope);
@@ -155,39 +140,34 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	public Void visitReturn(Return s) {
 		Type actual = s.value != null ? s.value.accept(this) : Type.VOID;
 		if (expectedReturnType != null && !actual.isAssignableTo(expectedReturnType)) {
-			error(s.keyword, "Expected return type " + expectedReturnType + " but got " + actual);
+			error(s.keyword, "Expected " + expectedReturnType + " but got " + actual);
 		}
 		return null;
 	}
 
 	@Override
 	public Void visitIf(If s) {
-		checkCondition(s.ifBranch.cond, TokenType.IF);
+		checkCondition(s.ifBranch.cond);
 		s.ifBranch.block.accept(this);
 		for (Branch elif : s.elifBranchList) {
-			checkCondition(elif.cond, TokenType.ELIF);
+			checkCondition(elif.cond);
 			elif.block.accept(this);
 		}
-		if (s.elseBranch != null) {
+		if (s.elseBranch.block != null) {
 			s.elseBranch.block.accept(this);
 		}
 		return null;
 	}
 
-	private void checkCondition(Expr cond, TokenType type) {
-		if (cond != null) {
-			Type t = cond.accept(this);
-			if (!t.equals(Type.BOOL)) {
-				throw new SemanticError("SEMANTIC ERROR: Condition must be bool, got " + t);
-			}
+	private void checkCondition(Expr cond) {
+		if (cond != null && !cond.accept(this).equals(Type.BOOL)) {
+			throw new RuntimeException("SEMANTIC ERROR: Condition must be bool");
 		}
 	}
 
 	@Override
 	public Void visitWhile(While s) {
-		if (!s.condition.accept(this).equals(Type.BOOL)) {
-			throw new SemanticError("SEMANTIC ERROR: 'keepRollingIf' condition must be bool");
-		}
+		checkCondition(s.condition);
 		s.body.accept(this);
 		return null;
 	}
@@ -207,17 +187,13 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	@Override
 	public Void visitFor(For s) {
 		currentScope = new Scope(currentScope);
-		if (s.initializer != null) {
-			if (s.initializer instanceof Decl) {
-				((Decl) s.initializer).accept(this);
-			}
-			else if (s.initializer instanceof Stmt) {
-				((Stmt) s.initializer).accept(this);
-			}
+		if (s.initializer instanceof Decl) {
+			((Decl) s.initializer).accept(this);
 		}
-		if (s.condition != null && !s.condition.accept(this).equals(Type.BOOL)) {
-			throw new SemanticError("SEMANTIC ERROR: 'keepRollingDuring' condition must be bool");
+		else if (s.initializer instanceof Stmt) {
+			((Stmt) s.initializer).accept(this);
 		}
+		checkCondition(s.condition);
 		if (s.increment != null) {
 			s.increment.accept(this);
 		}
@@ -236,7 +212,6 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 		return null;
 	}
 
-	// --- ExprVisitor ---
 	@Override
 	public Type visitLiteral(Literal e) {
 		if (e.value instanceof Integer) {
@@ -254,10 +229,7 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 		if (e.value instanceof Boolean) {
 			return Type.BOOL;
 		}
-		if (e.value == null) {
-			return Type.NULL;
-		}
-		return Type.ERROR;
+		return Type.NULL;
 	}
 
 	@Override
@@ -265,58 +237,29 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 		Symbol s = currentScope.resolve(e.name.getLexeme());
 		if (s == null) {
 			error(e.name, "Undefined variable '" + e.name.getLexeme() + "'");
-			return Type.ERROR;
 		}
 		return s.type;
 	}
 
 	@Override
 	public Type visitBinary(Binary e) {
-		Type left = e.left.accept(this);
-		Type right = e.right.accept(this);
-		switch (e.op.getType()) {
-			case PLUS:
-				if (left.equals(Type.STRING) || right.equals(Type.STRING)) {
-					return Type.STRING;
-				}
-			case MINUS:
-			case STAR:
-			case SLASH:
-			case PERCENT:
-				if (left.equals(Type.INT) && right.equals(Type.INT)) {
-					return Type.INT;
-				}
-				if ((left.equals(Type.INT) || left.equals(Type.DOUBLE)) &&
-					(right.equals(Type.INT) || right.equals(Type.DOUBLE))) {
-					return Type.DOUBLE;
-				}
-				break;
-			case GREATER:
-			case GREATER_EQUAL:
-			case LESS:
-			case LESS_EQUAL:
-				if ((left.equals(Type.INT) || left.equals(Type.DOUBLE)) &&
-					(right.equals(Type.INT) || right.equals(Type.DOUBLE))) {
-					return Type.BOOL;
-				}
-				break;
-			case EQUAL_EQUAL:
-			case BANG_EQUAL:
-				if (left.equals(right) || left.isAssignableTo(right) || right.isAssignableTo(left)) {
-					return Type.BOOL;
-				}
-				break;
-		}
-		error(e.op, "Operator '" + e.op.getLexeme() + "' cannot be applied to " + left + " and " + right);
-		return Type.ERROR;
+		Type left = e.left.accept(this), right = e.right.accept(this);
+		return switch (e.op.getType()) {
+			case PLUS ->
+				(left.equals(Type.STRING) || right.equals(Type.STRING)) ? Type.STRING : ((left.equals(Type.INT) && right.equals(Type.INT)) ? Type.INT : Type.DOUBLE);
+			case MINUS, STAR, SLASH, PERCENT ->
+				(left.equals(Type.INT) && right.equals(Type.INT)) ? Type.INT : Type.DOUBLE;
+			case GREATER, GREATER_EQUAL, LESS, LESS_EQUAL -> Type.BOOL;
+			case EQUAL_EQUAL, BANG_EQUAL -> Type.BOOL;
+			default -> Type.ERROR;
+		};
 	}
 
 	@Override
 	public Type visitAssign(Assign e) {
-		Type target = e.target.accept(this);
-		Type value = e.value.accept(this);
+		Type target = e.target.accept(this), value = e.value.accept(this);
 		if (!value.isAssignableTo(target)) {
-			error(e.op, "Type mismatch in assignment. Cannot assign " + value + " to " + target);
+			error(e.op, "Type mismatch in assignment");
 		}
 		return target;
 	}
@@ -324,28 +267,23 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	@Override
 	public Type visitCall(Call e) {
 		Type calleeType = e.callee.accept(this);
-		FunctionSymbol fs = null;
-		if (e.callee instanceof Variable) {
-			Symbol s = currentScope.resolve(((Variable) e.callee).name.getLexeme());
-			if (s instanceof FunctionSymbol) {
-				fs = (FunctionSymbol) s;
-			}
-		}
-		if (fs != null) {
-			if (fs.params.size() != e.arguments.size()) {
-				error(null, "Expected " + fs.params.size() + " arguments but got " + e.arguments.size());
-			}
-			for (int i = 0; i < fs.params.size(); i++) {
-				Type argType = e.arguments.get(i).accept(this);
-				// Special case: project() can take anything that can be converted to string
-				if (fs.name.equals("project") && argType.isPrimitive()) {
-					continue;
+		if (e.callee instanceof Variable v) {
+			Symbol s = currentScope.resolve(v.name.getLexeme());
+			if (s instanceof FunctionSymbol fs) {
+				if (fs.params.size() != e.arguments.size()) {
+					error(v.name, "Arg count mismatch");
 				}
-				if (!argType.isAssignableTo(fs.params.get(i))) {
-					error(null, "Argument " + i + " expected " + fs.params.get(i) + " but got " + argType);
+				for (int i = 0; i < fs.params.size(); i++) {
+					Type arg = e.arguments.get(i).accept(this);
+					if (fs.name.equals("project") && arg.isPrimitive()) {
+						continue;
+					}
+					if (!arg.isAssignableTo(fs.params.get(i))) {
+						error(v.name, "Arg type mismatch");
+					}
 				}
+				return fs.type;
 			}
-			return fs.type;
 		}
 		return calleeType;
 	}
@@ -353,48 +291,27 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	@Override
 	public Type visitThis(This e) {
 		if (currentSetup == null) {
-			error(e.atToken, "Cannot use '@' outside of a setup");
+			error(e.atToken, "Cannot use '@' outside setup");
 		}
-		return currentSetup != null ? currentSetup.type : Type.ERROR;
+		return currentSetup.type;
 	}
 
 	@Override
 	public Type visitLogical(Logical e) {
-		Type left = e.left.accept(this);
-		Type right = e.right.accept(this);
-		if (!left.equals(Type.BOOL) || !right.equals(Type.BOOL)) {
-			error(e.op, "Operands of logical operator must be bool");
+		if (!e.left.accept(this).equals(Type.BOOL) || !e.right.accept(this).equals(Type.BOOL)) {
+			error(e.op, "Logical operands must be bool");
 		}
 		return Type.BOOL;
 	}
 
 	@Override
 	public Type visitUnary(Unary e) {
-		Type right = e.right.accept(this);
-		switch (e.op.getType()) {
-			case BANG:
-				if (right.equals(Type.BOOL)) {
-					return Type.BOOL;
-				}
-				break;
-			case MINUS:
-			case PLUS:
-				if (right.equals(Type.INT)) {
-					return Type.INT;
-				}
-				if (right.equals(Type.DOUBLE)) {
-					return Type.DOUBLE;
-				}
-				break;
-			case PLUS_PLUS:
-			case MINUS_MINUS:
-				if (right.equals(Type.INT) || right.equals(Type.DOUBLE)) {
-					return right;
-				}
-				break;
-		}
-		error(e.op, "Unary operator '" + e.op.getLexeme() + "' cannot be applied to " + right);
-		return Type.ERROR;
+		Type r = e.right.accept(this);
+		return switch (e.op.getType()) {
+			case BANG -> Type.BOOL;
+			case MINUS, PLUS, PLUS_PLUS, MINUS_MINUS -> r;
+			default -> Type.ERROR;
+		};
 	}
 
 	@Override
@@ -404,57 +321,42 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 
 	@Override
 	public Type visitGet(Get e) {
-		Type objType = e.object.accept(this);
-		Symbol setup = currentScope.resolve(objType.getName());
-		if (setup instanceof SetupSymbol) {
-			Symbol member = ((SetupSymbol) setup).members.get(e.name.getLexeme());
-			if (member != null) {
-				return member.type;
+		Type obj = e.object.accept(this);
+		Symbol s = currentScope.resolve(obj.getName());
+		if (s instanceof SetupSymbol ss) {
+			Symbol m = ss.members.get(e.name.getLexeme());
+			if (m != null) {
+				return m.type;
 			}
-			error(e.name, "Member '" + e.name.getLexeme() + "' not found in setup '" + objType.getName() + "'");
 		}
+		error(e.name, "Member not found");
 		return Type.ERROR;
 	}
 
 	@Override
 	public Type visitSet(Set e) {
-		Type objType = e.object.accept(this);
-		Type valType = e.value.accept(this);
-		Symbol setup = currentScope.resolve(objType.getName());
-		if (setup instanceof SetupSymbol) {
-			Symbol member = ((SetupSymbol) setup).members.get(e.name.getLexeme());
-			if (member != null) {
-				if (!valType.isAssignableTo(member.type)) {
-					error(e.op, "Type mismatch");
-				}
-				return member.type;
+		Type obj = e.object.accept(this), val = e.value.accept(this);
+		Symbol s = currentScope.resolve(obj.getName());
+		if (s instanceof SetupSymbol ss) {
+			Symbol m = ss.members.get(e.name.getLexeme());
+			if (m != null && val.isAssignableTo(m.type)) {
+				return m.type;
 			}
 		}
+		error(e.name, "Invalid member assignment");
 		return Type.ERROR;
 	}
 
 	@Override
 	public Type visitIndex(Index e) {
-		Type arrType = e.array.accept(this);
-		Type idxType = e.index.accept(this);
-		if (!idxType.equals(Type.INT)) {
-			error(null, "Array index must be int");
-		}
-		if (arrType.getDimensions() == 0) {
-			error(null, "Cannot index non-array type");
-		}
-		return new Type(arrType.getName(), arrType.getDimensions() - 1);
+		Type arr = e.array.accept(this);
+		e.index.accept(this);
+		return new Type(arr.getName(), arr.getDimensions() - 1);
 	}
 
 	@Override
 	public Type visitPostfix(Postfix e) {
-		Type target = e.target.accept(this);
-		if (e.op.getType() == TokenType.PLUS_PLUS || e.op.getType() == TokenType.MINUS_MINUS) {
-			if (!target.equals(Type.INT) && !target.equals(Type.DOUBLE)) {
-				error(e.op, "Postfix operator '" + e.op.getLexeme() + "' must be applied to a numeric type");
-			}
-		}
-		return target;
+		return e.target.accept(this);
 	}
 
 	@Override
@@ -464,29 +366,11 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 
 	@Override
 	public Type visitArrayLiteral(ArrayLiteral e) {
-		if (e.elements.isEmpty()) {
-			return Type.ERROR;
-		}
-		Type elementType = e.elements.get(0).accept(this);
-		for (Expr element : e.elements) {
-			Type t = element.accept(this);
-			if (!t.isAssignableTo(elementType)) {
-				throw new SemanticError("SEMANTIC ERROR: Array literal elements must have consistent types");
-			}
-		}
-		return new Type(elementType.getName(), elementType.getDimensions() + 1);
+		Type first = e.elements.get(0).accept(this);
+		return new Type(first.getName(), first.getDimensions() + 1);
 	}
 
-	private void error(Token token, String message) {
-		String where = (token == null || token.getType() == TokenType.EOF) ? " at end" : " at '" + token.getLexeme() + "'";
-		int line = token != null ? token.getLine() : 0;
-		int col = token != null ? token.getColumn() : 0;
-		throw new SemanticError("SEMANTIC ERROR" + where + ": " + message + " (line: " + line + ", col: " + col + ")");
-	}
-
-	private static final class SemanticError extends RuntimeException {
-		SemanticError(String msg) {
-			super(msg);
-		}
+	private void error(Token t, String msg) {
+		throw new RuntimeException("SEMANTIC ERROR at '" + t.getLexeme() + "': " + msg + " (" + t.getLine() + ":" + t.getColumn() + ")");
 	}
 }
