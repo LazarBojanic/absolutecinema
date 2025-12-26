@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.List;
 
 public final class Parser {
-
 	private final List<Token> tokens;
 	private int current = 0;
 
@@ -57,7 +56,6 @@ public final class Parser {
 		List<VarDecl> fields = new ArrayList<>();
 		ConstructorDecl ctor = null;
 		List<SceneDecl> methods = new ArrayList<>();
-
 		while (!check(TokenType.RIGHT_BRACE) && !isAtEnd()) {
 			if (match(TokenType.VAR)) {
 				Token fname = consume(TokenType.IDENTIFIER, "Expected field name.");
@@ -82,13 +80,11 @@ public final class Parser {
 				methods.add(parseSceneDecl(true));
 			}
 			else if (match(TokenType.SEMICOLON)) {
-
 			}
 			else {
 				error(peek(), "Expected field, constructor, or scene method in setup: '" + name.getLexeme() + "'.");
 			}
 		}
-
 		consume(TokenType.RIGHT_BRACE, "Expected '}' after setup body.");
 		return new SetupDecl(name, fields, ctor, methods);
 	}
@@ -99,7 +95,6 @@ public final class Parser {
 		List<Param> params = parseParamList();
 		consume(TokenType.RIGHT_PAREN, "Expected ')' after parameters.");
 		consume(TokenType.COLON, "Expected ':' before return type.");
-
 		LType retType;
 		if (match(TokenType.SCRAP)) {
 			retType = new LType(previous(), 0);
@@ -107,7 +102,6 @@ public final class Parser {
 		else {
 			retType = parseLType();
 		}
-
 		Block body = parseBlock();
 		return new SceneDecl(name, params, retType, body, isMethod);
 	}
@@ -229,10 +223,8 @@ public final class Parser {
 			elseBlock = parseBlockFromAlreadyConsumedBrace();
 		}
 		Branch elseBranch = new Branch(ConditionalType.ELSE, null, elseBlock);
-
 		return new If(ifBranch, elifs, elseBranch);
 	}
-
 
 	private Stmt parseWhile() {
 		consume(TokenType.LEFT_PAREN, "Expected '(' after 'keepRollingIf'.");
@@ -282,7 +274,6 @@ public final class Parser {
 		consume(TokenType.SEMICOLON, "Expected ';' after 'cut' value.");
 		return new Return(kw, value);
 	}
-
 
 	private Expr expression() {
 		return assignment();
@@ -436,13 +427,12 @@ public final class Parser {
 		if (match(TokenType.AT)) {
 			return new This(previous());
 		}
-
 		if (match(TokenType.ACTION)) {
 			Token action = previous();
 			RType type = parseRType();
 			if (match(TokenType.LEFT_PAREN)) {
 				String lexeme = type.name.getLexeme();
-				if(lexeme.equals("int") || lexeme.equals("bool") || lexeme.equals("char") || lexeme.equals("string")){
+				if (lexeme.equals("int") || lexeme.equals("bool") || lexeme.equals("char") || lexeme.equals("string")) {
 					error(peek(), "Cannot use constructor for primitive type.");
 				}
 				List<Expr> args = new ArrayList<>();
@@ -467,15 +457,14 @@ public final class Parser {
 				return new ActionNew(action, type, null, elements);
 			}
 			else {
-				if(check(TokenType.SEMICOLON)){
+				if (check(TokenType.SEMICOLON)) {
 					return new ActionNew(action, type, null, null);
 				}
-				else{
+				else {
 					error(peek(), "Expected '{' or '(' after action name.");
 				}
 			}
 		}
-
 		if (match(TokenType.LEFT_PAREN)) {
 			Expr expr = expression();
 			consume(TokenType.RIGHT_PAREN, "Expected ')' after expression.");
@@ -491,8 +480,10 @@ public final class Parser {
 			Token name = previous();
 			while (check(TokenType.LEFT_BRACKET)) {
 				advance();
+				// FIXED: Allow empty brackets for array type dimensions
 				if (!check(TokenType.RIGHT_BRACKET)) {
-					error(peek(), "Expected right bracket.");
+					// If there is an expression inside, we handle it as a dimension but LType usually doesn't store capacity
+					expression();
 				}
 				consume(TokenType.RIGHT_BRACKET, "Expected right bracket after array size expression.");
 				dimension++;
@@ -503,24 +494,26 @@ public final class Parser {
 		return new LType(previous(), dimension);
 	}
 
-
 	private RType parseRType() {
 		List<Token> arrayCapacities = new ArrayList<>();
 		if (match(TokenType.INT, TokenType.DOUBLE, TokenType.CHAR, TokenType.STRING, TokenType.BOOL, TokenType.IDENTIFIER)) {
 			Token name = previous();
 			while (check(TokenType.LEFT_BRACKET)) {
 				advance();
+				// FIXED: dimension parsing logic. If it's not a closing bracket, look for a literal.
 				if (!check(TokenType.RIGHT_BRACKET)) {
 					if (check(TokenType.INT_LITERAL)) {
 						Token intLiteral = consume(TokenType.INT_LITERAL, "Expected array size literal.");
 						arrayCapacities.add(intLiteral);
 					}
 					else {
+						// Other expressions could be allowed here in the future, but for now we stick to literals or empty
 						error(peek(), "Expected array size literal.");
 					}
 				}
 				else {
-					error(peek(), "Expected array size literal.");
+					// FIXED: Support empty brackets [] by adding a null/empty indicator to capacities to maintain dimension count
+					arrayCapacities.add(null);
 				}
 				consume(TokenType.RIGHT_BRACKET, "Expected right bracket after array size expression.");
 			}
@@ -529,7 +522,6 @@ public final class Parser {
 		error(peek(), "Expected a type name.");
 		return new RType(previous(), new ArrayList<>());
 	}
-
 
 	private boolean match(TokenType... types) {
 		for (TokenType t : types) {

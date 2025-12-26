@@ -1,275 +1,321 @@
 {
-  "type" : "program",
-  "declarations" : [ {
-    "kind" : "scene",
-    "name" : "entrance",
-    "isMethod" : false,
-    "returnType" : {
-      "name" : "scrap",
-      "dimension" : 0
-    },
-    "params" : [ {
-      "name" : "args",
-      "type" : {
-        "name" : "string",
-        "dimension" : 1
-      }
-    } ],
-    "body" : [ {
-      "stmt" : "var",
-      "decl" : {
-        "name" : "arr",
-        "type" : {
-          "name" : "int",
-          "dimension" : 2
-        },
-        "init" : {
-          "expr" : "action",
-          "type" : {
-            "name" : "int",
-            "dimension" : 2,
-            "dimNums" : [ "5", "6" ]
-          }
-        }
-      }
-    }, {
-      "stmt" : "expr",
-      "expr" : {
-        "expr" : "assign",
-        "target" : {
-          "expr" : "index",
-          "array" : {
-            "expr" : "index",
-            "array" : {
-              "expr" : "var",
-              "name" : "arr"
-            },
-            "index" : 0
-          },
-          "index" : 0
-        },
-        "op" : "=",
-        "value" : 1
-      }
-    }, {
-      "stmt" : "var",
-      "decl" : {
-        "name" : "x",
-        "type" : {
-          "name" : "int",
-          "dimension" : 0
-        },
-        "init" : {
-          "expr" : "index",
-          "array" : {
-            "expr" : "index",
-            "array" : {
-              "expr" : "var",
-              "name" : "arr"
-            },
-            "index" : 0
-          },
-          "index" : 0
-        }
-      }
-    }, {
-      "stmt" : "var",
-      "decl" : {
-        "name" : "y",
-        "type" : {
-          "name" : "int",
-          "dimension" : 0
-        },
-        "init" : 0
-      }
-    }, {
-      "stmt" : "if_stmt",
-      "if" : {
-        "type" : "if",
-        "cond" : {
-          "expr" : "logical",
-          "op" : "&&",
-          "left" : {
-            "expr" : "binary",
-            "op" : ">",
-            "left" : {
-              "expr" : "var",
-              "name" : "x"
-            },
-            "right" : 5
-          },
-          "right" : {
-            "expr" : "binary",
-            "op" : "<",
-            "left" : {
-              "expr" : "var",
-              "name" : "x"
-            },
-            "right" : 10
-          }
-        },
-        "block" : {
-          "stmt" : "block",
-          "body" : [ {
-            "stmt" : "expr",
-            "expr" : {
-              "expr" : "assign",
-              "target" : {
-                "expr" : "var",
-                "name" : "y"
-              },
-              "op" : "=",
-              "value" : 7
-            }
-          } ]
-        }
-      },
-      "elifs" : [ {
-        "type" : "if",
-        "cond" : {
-          "expr" : "logical",
-          "op" : "&&",
-          "left" : {
-            "expr" : "binary",
-            "op" : ">",
-            "left" : {
-              "expr" : "var",
-              "name" : "x"
-            },
-            "right" : 10
-          },
-          "right" : {
-            "expr" : "binary",
-            "op" : "<",
-            "left" : {
-              "expr" : "var",
-              "name" : "x"
-            },
-            "right" : 15
-          }
-        },
-        "block" : {
-          "stmt" : "block",
-          "body" : [ {
-            "stmt" : "expr",
-            "expr" : {
-              "expr" : "assign",
-              "target" : {
-                "expr" : "var",
-                "name" : "y"
-              },
-              "op" : "=",
-              "value" : 12
-            }
-          } ]
-        }
-      }, {
-        "type" : "if",
-        "cond" : {
-          "expr" : "logical",
-          "op" : "&&",
-          "left" : {
-            "expr" : "binary",
-            "op" : ">",
-            "left" : {
-              "expr" : "var",
-              "name" : "x"
-            },
-            "right" : 15
-          },
-          "right" : {
-            "expr" : "binary",
-            "op" : "<",
-            "left" : {
-              "expr" : "var",
-              "name" : "x"
-            },
-            "right" : 20
-          }
-        },
-        "block" : {
-          "stmt" : "block",
-          "body" : [ {
-            "stmt" : "expr",
-            "expr" : {
-              "expr" : "assign",
-              "target" : {
-                "expr" : "var",
-                "name" : "y"
-              },
-              "op" : "=",
-              "value" : 17
-            }
-          } ]
-        }
-      } ],
-      "else" : {
-        "type" : "if",
-        "cond" : {
-          "expr" : "null"
-        },
-        "block" : {
-          "stmt" : "block",
-          "body" : [ {
-            "stmt" : "expr",
-            "expr" : {
-              "expr" : "assign",
-              "target" : {
-                "expr" : "var",
-                "name" : "y"
-              },
-              "op" : "=",
-              "value" : 22
-            }
-          } ]
-        }
-      }
-    }, {
-      "stmt" : "expr",
-      "expr" : {
-        "expr" : "call",
-        "callee" : {
-          "expr" : "var",
-          "name" : "project"
-        },
-        "args" : [ "Enter your name: " ]
-      }
-    }, {
-      "stmt" : "var",
-      "decl" : {
-        "name" : "name",
-        "type" : {
-          "name" : "string",
-          "dimension" : 0
-        },
-        "init" : {
-          "expr" : "call",
-          "callee" : {
-            "expr" : "var",
-            "name" : "capture"
-          },
-          "args" : [ ]
-        }
-      }
-    }, {
-      "stmt" : "expr",
-      "expr" : {
-        "expr" : "call",
-        "callee" : {
-          "expr" : "var",
-          "name" : "project"
-        },
-        "args" : [ {
-          "expr" : "binary",
-          "op" : "+",
-          "left" : "Hello, ",
-          "right" : {
-            "expr" : "var",
-            "name" : "name"
-          }
-        } ]
-      }
-    } ],
-    "decl" : "scene"
-  } ]
+	"type": "program",
+	"declarations": [
+		{
+			"decl": "setup",
+			"name": "Shirt",
+			"fields": [
+				{
+					"name": "color",
+					"type": {
+						"name": "string",
+						"dimension": 0
+					}
+				},
+				{
+					"name": "size",
+					"type": {
+						"name": "int",
+						"dimension": 0
+					}
+				}
+			],
+			"ctor": {
+				"kind": "ctor",
+				"name": "Shirt",
+				"params": [
+					{
+						"name": "color",
+						"type": {
+							"name": "string",
+							"dimension": 0
+						}
+					},
+					{
+						"name": "size",
+						"type": {
+							"name": "int",
+							"dimension": 0
+						}
+					}
+				],
+				"body": [
+					{
+						"stmt": "expr",
+						"expr": {
+							"expr": "set",
+							"object": {
+								"expr": "this"
+							},
+							"name": "color",
+							"op": "=",
+							"value": {
+								"expr": "var",
+								"name": "color"
+							}
+						}
+					},
+					{
+						"stmt": "expr",
+						"expr": {
+							"expr": "set",
+							"object": {
+								"expr": "this"
+							},
+							"name": "size",
+							"op": "=",
+							"value": {
+								"expr": "var",
+								"name": "size"
+							}
+						}
+					}
+				]
+			},
+			"methods": [
+				{
+					"kind": "scene",
+					"name": "getColor",
+					"isMethod": true,
+					"returnType": {
+						"name": "string",
+						"dimension": 0
+					},
+					"params": [],
+					"body": [
+						{
+							"stmt": "return",
+							"value": {
+								"expr": "get",
+								"object": {
+									"expr": "this"
+								},
+								"name": "color"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"kind": "scene",
+			"name": "entrance",
+			"isMethod": false,
+			"returnType": {
+				"name": "scrap",
+				"dimension": 0
+			},
+			"params": [
+				{
+					"name": "args",
+					"type": {
+						"name": "string",
+						"dimension": 1
+					}
+				}
+			],
+			"body": [
+				{
+					"stmt": "var",
+					"decl": {
+						"name": "shirt",
+						"type": {
+							"name": "Shirt",
+							"dimension": 0
+						},
+						"init": {
+							"expr": "action",
+							"type": {
+								"name": "Shirt",
+								"dimension": 0,
+								"dimNums": []
+							},
+							"args": [
+								"red",
+								32
+							]
+						}
+					}
+				},
+				{
+					"stmt": "expr",
+					"expr": {
+						"expr": "call",
+						"callee": {
+							"expr": "var",
+							"name": "project"
+						},
+						"args": [
+							{
+								"expr": "call",
+								"callee": {
+									"expr": "get",
+									"object": {
+										"expr": "var",
+										"name": "shirt"
+									},
+									"name": "getColor"
+								},
+								"args": []
+							}
+						]
+					}
+				},
+				{
+					"stmt": "if_stmt",
+					"if": {
+						"type": "if",
+						"cond": {
+							"expr": "binary",
+							"op": ">",
+							"left": {
+								"expr": "get",
+								"object": {
+									"expr": "var",
+									"name": "shirt"
+								},
+								"name": "size"
+							},
+							"right": 30
+						},
+						"block": {
+							"stmt": "block",
+							"body": [
+								{
+									"stmt": "expr",
+									"expr": {
+										"expr": "call",
+										"callee": {
+											"expr": "var",
+											"name": "project"
+										},
+										"args": [
+											"large"
+										]
+									}
+								}
+							]
+						}
+					},
+					"elifs": [
+						{
+							"type": "if",
+							"cond": {
+								"expr": "logical",
+								"op": "&&",
+								"left": {
+									"expr": "binary",
+									"op": ">",
+									"left": {
+										"expr": "get",
+										"object": {
+											"expr": "var",
+											"name": "shirt"
+										},
+										"name": "size"
+									},
+									"right": 20
+								},
+								"right": {
+									"expr": "binary",
+									"op": "<=",
+									"left": {
+										"expr": "get",
+										"object": {
+											"expr": "var",
+											"name": "shirt"
+										},
+										"name": "size"
+									},
+									"right": 30
+								}
+							},
+							"block": {
+								"stmt": "block",
+								"body": [
+									{
+										"stmt": "expr",
+										"expr": {
+											"expr": "call",
+											"callee": {
+												"expr": "var",
+												"name": "project"
+											},
+											"args": [
+												"medium"
+											]
+										}
+									}
+								]
+							}
+						}
+					],
+					"else": {
+						"type": "if",
+						"cond": {
+							"expr": "null"
+						},
+						"block": {
+							"stmt": "block",
+							"body": [
+								{
+									"stmt": "expr",
+									"expr": {
+										"expr": "call",
+										"callee": {
+											"expr": "var",
+											"name": "project"
+										},
+										"args": [
+											"small"
+										]
+									}
+								}
+							]
+						}
+					}
+				},
+				{
+					"stmt": "var",
+					"decl": {
+						"name": "shirtArr",
+						"type": {
+							"name": "Shirt",
+							"dimension": 1
+						},
+						"init": {
+							"expr": "action",
+							"type": {
+								"name": "Shirt",
+								"dimension": 1,
+								"dimNums": [
+									"5"
+								]
+							}
+						}
+					}
+				},
+				{
+					"stmt": "expr",
+					"expr": {
+						"expr": "assign",
+						"target": {
+							"expr": "index",
+							"array": {
+								"expr": "var",
+								"name": "shirtArr"
+							},
+							"index": 0
+						},
+						"op": "=",
+						"value": {
+							"expr": "var",
+							"name": "shirt"
+						}
+					}
+				}
+			],
+			"decl": "scene"
+		}
+	]
 }
