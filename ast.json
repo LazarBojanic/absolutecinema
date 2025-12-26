@@ -33,6 +33,25 @@
         }
       }
     }, {
+      "stmt" : "expr",
+      "expr" : {
+        "expr" : "assign",
+        "target" : {
+          "expr" : "index",
+          "array" : {
+            "expr" : "index",
+            "array" : {
+              "expr" : "var",
+              "name" : "arr"
+            },
+            "index" : 0
+          },
+          "index" : 0
+        },
+        "op" : "=",
+        "value" : 1
+      }
+    }, {
       "stmt" : "var",
       "decl" : {
         "name" : "x",
@@ -40,7 +59,18 @@
           "name" : "int",
           "dimension" : 0
         },
-        "init" : 1
+        "init" : {
+          "expr" : "index",
+          "array" : {
+            "expr" : "index",
+            "array" : {
+              "expr" : "var",
+              "name" : "arr"
+            },
+            "index" : 0
+          },
+          "index" : 0
+        }
       }
     }, {
       "stmt" : "var",
@@ -50,72 +80,126 @@
           "name" : "int",
           "dimension" : 0
         },
-        "init" : 2
+        "init" : 0
       }
     }, {
       "stmt" : "if_stmt",
       "if" : {
         "type" : "if",
         "cond" : {
-          "expr" : "binary",
-          "op" : ">",
+          "expr" : "logical",
+          "op" : "&&",
           "left" : {
-            "expr" : "var",
-            "name" : "x"
+            "expr" : "binary",
+            "op" : ">",
+            "left" : {
+              "expr" : "var",
+              "name" : "x"
+            },
+            "right" : 5
           },
           "right" : {
-            "expr" : "var",
-            "name" : "y"
+            "expr" : "binary",
+            "op" : "<",
+            "left" : {
+              "expr" : "var",
+              "name" : "x"
+            },
+            "right" : 10
           }
         },
         "block" : {
           "stmt" : "block",
           "body" : [ {
-            "stmt" : "return",
-            "value" : true
+            "stmt" : "expr",
+            "expr" : {
+              "expr" : "assign",
+              "target" : {
+                "expr" : "var",
+                "name" : "y"
+              },
+              "op" : "=",
+              "value" : 7
+            }
           } ]
         }
       },
       "elifs" : [ {
         "type" : "if",
         "cond" : {
-          "expr" : "binary",
-          "op" : "==",
+          "expr" : "logical",
+          "op" : "&&",
           "left" : {
-            "expr" : "var",
-            "name" : "y"
+            "expr" : "binary",
+            "op" : ">",
+            "left" : {
+              "expr" : "var",
+              "name" : "x"
+            },
+            "right" : 10
           },
           "right" : {
-            "expr" : "var",
-            "name" : "x"
+            "expr" : "binary",
+            "op" : "<",
+            "left" : {
+              "expr" : "var",
+              "name" : "x"
+            },
+            "right" : 15
           }
         },
         "block" : {
           "stmt" : "block",
           "body" : [ {
-            "stmt" : "return",
-            "value" : false
+            "stmt" : "expr",
+            "expr" : {
+              "expr" : "assign",
+              "target" : {
+                "expr" : "var",
+                "name" : "y"
+              },
+              "op" : "=",
+              "value" : 12
+            }
           } ]
         }
       }, {
         "type" : "if",
         "cond" : {
-          "expr" : "binary",
-          "op" : "<=",
+          "expr" : "logical",
+          "op" : "&&",
           "left" : {
-            "expr" : "var",
-            "name" : "y"
+            "expr" : "binary",
+            "op" : ">",
+            "left" : {
+              "expr" : "var",
+              "name" : "x"
+            },
+            "right" : 15
           },
           "right" : {
-            "expr" : "var",
-            "name" : "x"
+            "expr" : "binary",
+            "op" : "<",
+            "left" : {
+              "expr" : "var",
+              "name" : "x"
+            },
+            "right" : 20
           }
         },
         "block" : {
           "stmt" : "block",
           "body" : [ {
-            "stmt" : "return",
-            "value" : false
+            "stmt" : "expr",
+            "expr" : {
+              "expr" : "assign",
+              "target" : {
+                "expr" : "var",
+                "name" : "y"
+              },
+              "op" : "=",
+              "value" : 17
+            }
           } ]
         }
       } ],
@@ -127,8 +211,16 @@
         "block" : {
           "stmt" : "block",
           "body" : [ {
-            "stmt" : "return",
-            "value" : false
+            "stmt" : "expr",
+            "expr" : {
+              "expr" : "assign",
+              "target" : {
+                "expr" : "var",
+                "name" : "y"
+              },
+              "op" : "=",
+              "value" : 22
+            }
           } ]
         }
       }

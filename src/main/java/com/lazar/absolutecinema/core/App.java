@@ -3,6 +3,7 @@ package com.lazar.absolutecinema.core;
 import com.lazar.absolutecinema.lexer.Lexer;
 import com.lazar.absolutecinema.parser.Parser;
 import com.lazar.absolutecinema.parser.ast.Program;
+import com.lazar.absolutecinema.semantic.SemanticAnalyzer;
 import com.lazar.absolutecinema.util.AstJsonConverter;
 import com.lazar.absolutecinema.util.JsonAstSwingViewer;
 import com.lazar.absolutecinema.util.Util;
@@ -31,7 +32,6 @@ public class App {
 			else {
 				resourceName = args[0];
 			}
-
 			try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourceName)) {
 				if (inputStream == null) {
 					System.out.println("Resource does not exist: " + resourceName);
@@ -54,21 +54,28 @@ public class App {
 
 	public void run() {
 		try {
+			System.out.println("Lexing...");
 			lexer = new Lexer(sourceCode);
 			var tokens = lexer.lex();
 			Util.printTokenTable(tokens);
+			System.out.println("Lexing successful!");
+			System.out.println("Parsing...");
 			parser = new Parser(tokens);
 			Program program = parser.parseProgram();
-
+			System.out.println("Parsing successful!");
+			System.out.println("Performing semantic analysis...");
+			SemanticAnalyzer analyzer = new SemanticAnalyzer();
+			analyzer.analyze(program);
+			System.out.println("Semantic analysis successful!");
+			System.out.println("Converting AST to JSON...");
 			AstJsonConverter printer = new AstJsonConverter();
 			String json = printer.convert(program);
 			Files.writeString(Path.of("./ast.json"), json);
+			System.out.println("AST to JSON conversion successful!");
 			System.out.println("AST printed to ./ast.json");
-
+			System.out.println("Showing AST in Swing...");
 			Path jsonFile = Path.of("ast.json");
-
 			JsonAstSwingViewer.show(jsonFile);
-
 		}
 		catch (Exception e) {
 			System.out.println(e.getMessage());
