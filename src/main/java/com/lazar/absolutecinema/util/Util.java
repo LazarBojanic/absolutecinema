@@ -2,6 +2,10 @@ package com.lazar.absolutecinema.util;
 
 import com.lazar.absolutecinema.lexer.Token;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +13,6 @@ public class Util {
 	public static void printTokenTable(List<Token> tokens) {
 		String[] headers = {"#", "Type", "Lexeme", "Literal", "Line", "Col"};
 		boolean[] rightAlign = {true, false, false, false, true, true};
-
 		List<String[]> rows = new ArrayList<>();
 		int index = 1;
 		for (var t : tokens) {
@@ -24,14 +27,11 @@ public class Util {
 				String.valueOf(t.getColumn())
 			});
 		}
-
 		int[] widths = computeWidths(headers, rows);
 		String border = buildBorder(widths);
-
 		System.out.println(border);
 		System.out.println(renderRow(headers, widths, new boolean[headers.length]));
 		System.out.println(border);
-
 		for (var r : rows) {
 			System.out.println(renderRow(r, widths, rightAlign));
 		}
@@ -97,5 +97,34 @@ public class Util {
 			}
 		}
 		return widths;
+	}
+
+	public static File loadFileFromResources(String fileName) throws FileNotFoundException {
+		ClassLoader classLoader = Util.class.getClassLoader();
+		var url = classLoader.getResource(fileName);
+		if (url != null) {
+			return new File(url.getFile());
+		}
+		throw new FileNotFoundException("File not found: " + fileName);
+	}
+
+	public static boolean writeStringToFile(String content, String fileName) {
+		try {
+			Files.writeString(Path.of(fileName), content);
+			return true;
+		}
+		catch (Exception e) {
+			return false;
+		}
+	}
+
+	public static boolean writeBytesToFile(byte[] content, String fileName) {
+		try {
+			Files.write(Path.of(fileName), content);
+			return true;
+		}
+		catch (Exception e) {
+			return false;
+		}
 	}
 }

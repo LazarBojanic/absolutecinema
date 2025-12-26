@@ -9,11 +9,16 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, ExprVisitor<Type> {
+	private final Program program;
 	private Scope currentScope = new Scope(null);
 	private Type expectedReturnType = null;
 	private SetupSymbol currentSetup = null;
 
-	public void analyze(Program program) {
+	public SemanticAnalyzer(Program program) {
+		this.program = program;
+	}
+
+	public void analyze() {
 		registerStdLib();
 		// Pass 1: Global declarations
 		for (Node node : program.items) {
@@ -366,6 +371,12 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 
 	@Override
 	public Type visitArrayLiteral(ArrayLiteral e) {
+		if (e.elements.isEmpty()) {
+			// Fallback or handle based on context if possible,
+			// but typically array literals should have at least one element
+			// to infer type, or be part of an ActionNew which has the type.
+			return Type.ERROR;
+		}
 		Type first = e.elements.get(0).accept(this);
 		return new Type(first.getName(), first.getDimensions() + 1);
 	}

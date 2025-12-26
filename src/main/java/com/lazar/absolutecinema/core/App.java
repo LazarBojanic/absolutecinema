@@ -1,5 +1,6 @@
 package com.lazar.absolutecinema.core;
 
+import com.lazar.absolutecinema.generator.*;
 import com.lazar.absolutecinema.lexer.Lexer;
 import com.lazar.absolutecinema.parser.Parser;
 import com.lazar.absolutecinema.parser.ast.Program;
@@ -15,41 +16,31 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class App {
-	private static App instance;
 	private Lexer lexer;
 	private Parser parser;
+	private SemanticAnalyzer semanticAnalyzer;
+	private IGenerator generator;
 	private File sourceFile;
 	private String sourceCode;
+	private GeneratorType generatorType;
+	private GeneratorMode generatorMode;
+	private GenerationResult generationResult;
 
-	private App(String[] args) {
+	public App(String[] args) {
 		try {
-			String resourceName;
-			if (args.length == 0) {
-				System.out.println("Please provide a resource name");
-				System.exit(1);
-				return;
+			if (args.length == 3) {
+				sourceFile = Util.loadFileFromResources(args[0]);
+				sourceCode = Files.readString(sourceFile.toPath(), StandardCharsets.UTF_8);
+				generatorType = GeneratorType.valueOf(args[1].toUpperCase());
+				generatorMode = GeneratorMode.valueOf(args[2].toUpperCase());
 			}
 			else {
-				resourceName = args[0];
-			}
-			try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(resourceName)) {
-				if (inputStream == null) {
-					System.out.println("Resource does not exist: " + resourceName);
-					System.exit(1);
-				}
-				sourceCode = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+				throw new IllegalArgumentException("Invalid number of arguments");
 			}
 		}
 		catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
-	}
-
-	public static App getInstance(String[] args) {
-		if (instance == null) {
-			instance = new App(args);
-		}
-		return instance;
 	}
 
 	public void run() {
@@ -64,9 +55,26 @@ public class App {
 			Program program = parser.parseProgram();
 			System.out.println("Parsing successful!");
 			System.out.println("Performing semantic analysis...");
-			SemanticAnalyzer analyzer = new SemanticAnalyzer();
-			analyzer.analyze(program);
+			semanticAnalyzer = new SemanticAnalyzer(program);
+			semanticAnalyzer.analyze();
 			System.out.println("Semantic analysis successful!");
+			System.out.println("Generating IR...");
+			if (generatorType.equals(GeneratorType.JVM)) {
+				generator = new JVMGenerator(generatorMode);
+			}
+			else {
+				generator = new LLVMGenerator(generatorMode);
+			}
+			generationResult = generator.generate(program);
+			if (generator instanceof JVMGenerator) {
+				Util.writeStringToFile(generationResult.getPlainTextIR(), "./output.j");
+				Util.writeBytesToFile(generationResult.getBinaryIR(), "./output.class");
+			}
+			else {
+				Util.writeStringToFile(generationResult.getPlainTextIR(), "./output.ll");
+				Util.writeBytesToFile(generationResult.getBinaryIR(), "./output.bc");
+			}
+			System.out.println("IR generation successful!");
 			System.out.println("Converting AST to JSON...");
 			AstJsonConverter printer = new AstJsonConverter();
 			String json = printer.convert(program);
