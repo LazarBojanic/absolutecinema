@@ -14,6 +14,8 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	private SetupSymbol currentSetup = null;
 
 	public void analyze(Program program) {
+		// Pass 0: Register Standard Library
+		registerStdLib();
 		// Pass 1: Global declarations (Setups, Scenes, Global Vars)
 		for (Node node : program.items) {
 			if (node instanceof SetupDecl) {
@@ -34,10 +36,18 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 		}
 	}
 
+	private void registerStdLib() {
+		// project(val: string): scrap
+		currentScope.define(new FunctionSymbol("project", Type.VOID,
+			Collections.singletonList(Type.STRING)));
+		// capture(): string
+		currentScope.define(new FunctionSymbol("capture", Type.STRING,
+			Collections.emptyList()));
+	}
+
 	private void declareSetup(SetupDecl d) {
 		SetupSymbol ss = new SetupSymbol(d.name.getLexeme());
 		currentScope.define(ss);
-		// Pre-populate members for member access resolution
 		for (VarDecl field : d.fields) {
 			ss.members.put(field.name.getLexeme(), new VarSymbol(field.name.getLexeme(), mapType(field.type)));
 		}
@@ -78,7 +88,6 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 		SetupSymbol ss = (SetupSymbol) currentScope.resolve(d.name.getLexeme());
 		currentSetup = ss;
 		currentScope = new Scope(currentScope);
-		// Re-define members in the local scope of the class for '@' access
 		for (VarDecl field : d.fields) {
 			field.accept(this);
 		}
@@ -270,7 +279,6 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 				if (left.equals(Type.STRING) || right.equals(Type.STRING)) {
 					return Type.STRING;
 				}
-				// Fallthrough
 			case MINUS:
 			case STAR:
 			case SLASH:
@@ -316,21 +324,28 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	@Override
 	public Type visitCall(Call e) {
 		Type calleeType = e.callee.accept(this);
-		// If it's a direct variable call, we can check the FunctionSymbol
+		FunctionSymbol fs = null;
 		if (e.callee instanceof Variable) {
 			Symbol s = currentScope.resolve(((Variable) e.callee).name.getLexeme());
 			if (s instanceof FunctionSymbol) {
-				FunctionSymbol fs = (FunctionSymbol) s;
-				if (fs.params.size() != e.arguments.size()) {
-					error(((Variable) e.callee).name, "Expected " + fs.params.size() + " arguments but got " + e.arguments.size());
+				fs = (FunctionSymbol) s;
+			}
+		}
+		if (fs != null) {
+			if (fs.params.size() != e.arguments.size()) {
+				error(null, "Expected " + fs.params.size() + " arguments but got " + e.arguments.size());
+			}
+			for (int i = 0; i < fs.params.size(); i++) {
+				Type argType = e.arguments.get(i).accept(this);
+				// Special case: project() can take anything that can be converted to string
+				if (fs.name.equals("project") && argType.isPrimitive()) {
+					continue;
 				}
-				for (int i = 0; i < fs.params.size(); i++) {
-					Type argType = e.arguments.get(i).accept(this);
-					if (!argType.isAssignableTo(fs.params.get(i))) {
-						error(((Variable) e.callee).name, "Argument " + i + " expected " + fs.params.get(i) + " but got " + argType);
-					}
+				if (!argType.isAssignableTo(fs.params.get(i))) {
+					error(null, "Argument " + i + " expected " + fs.params.get(i) + " but got " + argType);
 				}
 			}
+			return fs.type;
 		}
 		return calleeType;
 	}

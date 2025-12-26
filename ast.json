@@ -224,6 +224,51 @@
           } ]
         }
       }
+    }, {
+      "stmt" : "expr",
+      "expr" : {
+        "expr" : "call",
+        "callee" : {
+          "expr" : "var",
+          "name" : "project"
+        },
+        "args" : [ "Enter your name: " ]
+      }
+    }, {
+      "stmt" : "var",
+      "decl" : {
+        "name" : "name",
+        "type" : {
+          "name" : "string",
+          "dimension" : 0
+        },
+        "init" : {
+          "expr" : "call",
+          "callee" : {
+            "expr" : "var",
+            "name" : "capture"
+          },
+          "args" : [ ]
+        }
+      }
+    }, {
+      "stmt" : "expr",
+      "expr" : {
+        "expr" : "call",
+        "callee" : {
+          "expr" : "var",
+          "name" : "project"
+        },
+        "args" : [ {
+          "expr" : "binary",
+          "op" : "+",
+          "left" : "Hello, ",
+          "right" : {
+            "expr" : "var",
+            "name" : "name"
+          }
+        } ]
+      }
     } ],
     "decl" : "scene"
   } ]

@@ -15,4 +15,7 @@ scene entrance(var args: string[]): scrap {
 	else{
 		y = 22;
 	}
+	project("Enter your name: ");
+    var name: string = capture();
+    project("Hello, " + name);
 }
