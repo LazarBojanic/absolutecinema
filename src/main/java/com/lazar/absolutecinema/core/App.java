@@ -87,7 +87,7 @@ public class App {
 			JsonAstSwingViewer.show(jsonFile);
 		}
 		catch (Exception e) {
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 }
