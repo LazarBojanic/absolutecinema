@@ -20,10 +20,10 @@ public class LLVMGenerator implements IGenerator {
 	}
 
 	private GenerationResult generateWithLibrary(Program program) {
-		return new GenerationResult("", new byte[0]);
+		return new GenerationResult("; Library mode not implemented.", new byte[0]);
 	}
 
 	private GenerationResult generateManually(Program program) {
-		return new GenerationResult("", new byte[0]);
+		return new GenerationResult("; Library mode not implemented.", new byte[0]);
 	}
 }
