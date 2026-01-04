@@ -22,7 +22,7 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	 * Registers the built-in functions (Standard Library) into the global scope.
 	 */
 	private void registerBuiltins() {
-		// Register 'project' (printline): takes any type (modeled here as string for simplicity) and returns scrap
+		// Register 'project' (printline): takes any type and returns scrap
 		Token projectToken = new Token(TokenType.IDENTIFIER, "project", null, 0, 0);
 		Token paramToken = new Token(TokenType.IDENTIFIER, "value", null, 0, 0);
 		Token stringTypeToken = new Token(TokenType.STRING, "string", null, 0, 0);
@@ -177,7 +177,7 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	@Override
 	public Void visitReturn(Return s) {
 		if (currentScene == null) {
-			throw new RuntimeException("'cut' (return) used outside of scene at line " + s.keyword.getLine());
+			throw new RuntimeException("'cut' outside scene at line " + s.keyword.getLine());
 		}
 		ResolvedType actual = (s.value != null) ? s.value.accept(this) : ResolvedType.SCRAP;
 		checkTypeMatch(resolveType(currentScene.returnType), actual, s.keyword, "Return type mismatch");
@@ -364,7 +364,7 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	@Override
 	public ResolvedType visitThis(This e) {
 		if (currentSetup == null) {
-			throw new RuntimeException("'@' (this) used outside of setup context at line " + e.atToken.getLine());
+			throw new RuntimeException("'@' used outside setup at line " + e.atToken.getLine());
 		}
 		ResolvedType t = new ResolvedType(currentSetup.name.getLexeme(), 0);
 		e.setType(t);
@@ -401,10 +401,10 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 
 	private void validateArgs(List<Param> params, List<ResolvedType> args, Token t) {
 		if (params.size() != args.size()) {
-			throw new RuntimeException("Argument count mismatch for '" + t.getLexeme() + "'. Expected " + params.size() + " but got " + args.size());
+			throw new RuntimeException("Arg count mismatch for '" + t.getLexeme() + "'.");
 		}
 		for (int i = 0; i < params.size(); i++) {
-			checkTypeMatch(resolveType(params.get(i).type), args.get(i), t, "Parameter type mismatch");
+			checkTypeMatch(resolveType(params.get(i).type), args.get(i), t, "Param mismatch");
 		}
 	}
 
