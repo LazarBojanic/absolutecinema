@@ -7,13 +7,6 @@ import java.util.*;
 
 public class JVMGenerator implements IGenerator {
 	private final GeneratorMode generatorMode;
-	private ClassWriter cw;
-	private MethodVisitor mv;
-	private final Map<Node, Integer> localVars = new HashMap<>();
-	private int nextLocalSlot = 0;
-	private String className = "Output";
-	private final Stack<Label> loopBreakLabels = new Stack<>();
-	private final Stack<Label> loopContinueLabels = new Stack<>();
 
 	public JVMGenerator(GeneratorMode generatorMode) {
 		this.generatorMode = generatorMode;
