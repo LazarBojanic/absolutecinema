@@ -4,6 +4,7 @@ import com.lazar.absolutecinema.generator.*;
 import com.lazar.absolutecinema.lexer.Lexer;
 import com.lazar.absolutecinema.parser.Parser;
 import com.lazar.absolutecinema.parser.ast.Program;
+import com.lazar.absolutecinema.semantic.SemanticAnalyzer;
 import com.lazar.absolutecinema.util.AstJsonConverter;
 import com.lazar.absolutecinema.util.JsonAstSwingViewer;
 import com.lazar.absolutecinema.util.Util;
@@ -16,6 +17,7 @@ import java.nio.file.Path;
 public class App {
 	private Lexer lexer;
 	private Parser parser;
+	private SemanticAnalyzer semanticAnalyzer;
 	private IGenerator generator;
 	private File sourceFile;
 	private String sourceCode;
@@ -52,7 +54,10 @@ public class App {
 			Program program = parser.parseProgram();
 			System.out.println("Parsing successful!");
 			System.out.println("Performing semantic analysis...");
-			//TODO semantic analysis here. what should be the input to semantic analysis, what should be the output, what should it modify?
+
+			semanticAnalyzer = new SemanticAnalyzer(program);
+			semanticAnalyzer.analyze();
+
 			System.out.println("Semantic analysis successful!");
 			System.out.println("Generating IR...");
 			if (generatorType.equals(GeneratorType.JVM)) {
@@ -61,7 +66,6 @@ public class App {
 			else {
 				generator = new LLVMGenerator(generatorMode);
 			}
-			//TODO what should be the input to generate?
 			generationResult = generator.generate(program);
 			if (generator instanceof JVMGenerator) {
 				Util.writeStringToFile(generationResult.getPlainTextIR(), "./Output.j");

@@ -1,6 +1,7 @@
 package com.lazar.absolutecinema.util;
 
 import com.lazar.absolutecinema.parser.ast.*;
+import com.lazar.absolutecinema.semantic.ResolvedType;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
@@ -34,11 +35,17 @@ public final class AstJsonConverter {
 				o.put("decl", "setup");
 				o.put("name", s.name.getLexeme());
 				ArrayNode fields = mapper.createArrayNode();
-				for (VarDecl f : s.fields) fields.add(convertVarDecl(f));
+				for (VarDecl f : s.fields) {
+					fields.add(convertVarDecl(f));
+				}
 				o.set("fields", fields);
-				if (s.ctor != null) o.set("ctor", convertCtor(s.ctor));
+				if (s.ctor != null) {
+					o.set("ctor", convertCtor(s.ctor));
+				}
 				ArrayNode methods = mapper.createArrayNode();
-				for (SceneDecl m : s.methods) methods.add(convertScene(m));
+				for (SceneDecl m : s.methods) {
+					methods.add(convertScene(m));
+				}
 				o.set("methods", methods);
 				return o;
 			}
@@ -150,16 +157,14 @@ public final class AstJsonConverter {
 			case If i -> {
 				ObjectNode o = mapper.createObjectNode();
 				o.put("stmt", "if_stmt");
-
 				ObjectNode ifNode = mapper.createObjectNode();
 				String conditionalTypeString = i.ifBranch.conditionalType.name().toLowerCase();
 				ifNode.put("type", conditionalTypeString);
 				ifNode.set("cond", convertExpr(i.ifBranch.cond));
 				ifNode.set("block", convertStmt(i.ifBranch.block));
 				o.set("if", ifNode);
-
 				ArrayNode elifs = mapper.createArrayNode();
-				for(Branch elif : i.elifBranchList){
+				for (Branch elif : i.elifBranchList) {
 					ObjectNode elifNode = mapper.createObjectNode();
 					elifNode.put("type", conditionalTypeString);
 					elifNode.set("cond", convertExpr(elif.cond));
@@ -186,17 +191,27 @@ public final class AstJsonConverter {
 			case For f -> {
 				ObjectNode o = mapper.createObjectNode();
 				o.put("stmt", "for");
-				if (f.initializer != null) o.set("init", convertNode(f.initializer));
-				if (f.condition != null) o.set("cond", convertExpr(f.condition));
-				if (f.increment != null) o.set("incr", convertExpr(f.increment));
+				if (f.initializer != null) {
+					o.set("init", convertNode(f.initializer));
+				}
+				if (f.condition != null) {
+					o.set("cond", convertExpr(f.condition));
+				}
+				if (f.increment != null) {
+					o.set("incr", convertExpr(f.increment));
+				}
 				o.set("body", convertStmt(f.body));
 				return o;
 			}
 			case Return r -> {
 				ObjectNode o = mapper.createObjectNode();
 				o.put("stmt", "return");
-				if (r.value != null) o.set("value", convertExpr(r.value));
-				else o.putNull("value");
+				if (r.value != null) {
+					o.set("value", convertExpr(r.value));
+				}
+				else {
+					o.putNull("value");
+				}
 				return o;
 			}
 			case Break aBreak -> {
@@ -244,18 +259,38 @@ public final class AstJsonConverter {
 	}
 
 	private JsonNode convertExpr(Expr e) {
+		if (e == null) {
+			ObjectNode o = mapper.createObjectNode();
+			o.put("expr", "null");
+			return o;
+		}
+		ObjectNode o = mapper.createObjectNode();
+		// Enrichment: Add resolved type if present
+		if (e.getType() != null) {
+			ResolvedType rt = e.getType();
+			o.put("resolvedType", rt.name() + "[]".repeat(rt.dimensions()));
+		}
 		switch (e) {
 			case Literal l -> {
-				return convertLiteral(l);
+				o.put("expr", "literal");
+				o.set("value", convertLiteralValue(l.value));
+				return o;
 			}
 			case Variable v -> {
-				ObjectNode o = mapper.createObjectNode();
 				o.put("expr", "var");
 				o.put("name", v.name.getLexeme());
+				if (v.resolvedDecl != null) {
+					// Link back to where it was defined
+					if (v.resolvedDecl instanceof VarDecl vd) {
+						o.put("resolvedDecl", "var:" + vd.name.getLexeme());
+					}
+					else if (v.resolvedDecl instanceof Param p) {
+						o.put("resolvedDecl", "param:" + p.name.getLexeme());
+					}
+				}
 				return o;
 			}
 			case Assign a -> {
-				ObjectNode o = mapper.createObjectNode();
 				o.put("expr", "assign");
 				o.set("target", convertExpr(a.target));
 				o.put("op", a.op.getLexeme());
@@ -263,7 +298,6 @@ public final class AstJsonConverter {
 				return o;
 			}
 			case Binary b -> {
-				ObjectNode o = mapper.createObjectNode();
 				o.put("expr", "binary");
 				o.put("op", b.op.getLexeme());
 				o.set("left", convertExpr(b.left));
@@ -271,7 +305,6 @@ public final class AstJsonConverter {
 				return o;
 			}
 			case Logical l -> {
-				ObjectNode o = mapper.createObjectNode();
 				o.put("expr", "logical");
 				o.put("op", l.op.getLexeme());
 				o.set("left", convertExpr(l.left));
@@ -279,36 +312,33 @@ public final class AstJsonConverter {
 				return o;
 			}
 			case Unary u -> {
-				ObjectNode o = mapper.createObjectNode();
 				o.put("expr", "unary");
 				o.put("op", u.op.getLexeme());
 				o.set("right", convertExpr(u.right));
 				return o;
 			}
 			case Grouping g -> {
-				ObjectNode o = mapper.createObjectNode();
 				o.put("expr", "group");
 				o.set("inner", convertExpr(g.expr));
 				return o;
 			}
 			case Call c -> {
-				ObjectNode o = mapper.createObjectNode();
 				o.put("expr", "call");
 				o.set("callee", convertExpr(c.callee));
 				ArrayNode args = mapper.createArrayNode();
-				for (Expr ex : c.arguments) args.add(convertExpr(ex));
+				for (Expr ex : c.arguments) {
+					args.add(convertExpr(ex));
+				}
 				o.set("args", args);
 				return o;
 			}
 			case Get g -> {
-				ObjectNode o = mapper.createObjectNode();
 				o.put("expr", "get");
 				o.set("object", convertExpr(g.object));
 				o.put("name", g.name.getLexeme());
 				return o;
 			}
 			case Set s -> {
-				ObjectNode o = mapper.createObjectNode();
 				o.put("expr", "set");
 				o.set("object", convertExpr(s.object));
 				o.put("name", s.name.getLexeme());
@@ -317,58 +347,57 @@ public final class AstJsonConverter {
 				return o;
 			}
 			case Index i -> {
-				ObjectNode o = mapper.createObjectNode();
 				o.put("expr", "index");
 				o.set("array", convertExpr(i.array));
 				o.set("index", convertExpr(i.index));
 				return o;
 			}
 			case Postfix p -> {
-				ObjectNode o = mapper.createObjectNode();
 				o.put("expr", "postfix");
 				o.set("target", convertExpr(p.target));
 				o.put("op", p.op.getLexeme());
 				return o;
 			}
 			case This aThis -> {
-				ObjectNode o = mapper.createObjectNode();
 				o.put("expr", "this");
 				return o;
 			}
 			case ActionNew n -> {
-				ObjectNode o = mapper.createObjectNode();
 				o.put("expr", "action");
 				o.set("type", convertRType(n.type));
 				if (n.args != null) {
 					ArrayNode a = mapper.createArrayNode();
-					for (Expr ex : n.args) a.add(convertExpr(ex));
+					for (Expr ex : n.args) {
+						a.add(convertExpr(ex));
+					}
 					o.set("args", a);
 				}
 				if (n.arrayInitializer != null) {
 					ArrayNode a = mapper.createArrayNode();
-					for (Expr ex : n.arrayInitializer) a.add(convertExpr(ex));
+					for (Expr ex : n.arrayInitializer) {
+						a.add(convertExpr(ex));
+					}
 					o.set("initializer", a);
 				}
 				return o;
 			}
 			case ArrayLiteral al -> {
-				ObjectNode o = mapper.createObjectNode();
 				o.put("expr", "arrayLiteral");
 				ArrayNode a = mapper.createArrayNode();
-				for (Expr ex : al.elements) a.add(convertExpr(ex));
+				for (Expr ex : al.elements) {
+					a.add(convertExpr(ex));
+				}
 				o.set("elements", a);
 				return o;
 			}
 			case null, default -> {
+				o.put("expr", "null");
+				return o;
 			}
 		}
-		ObjectNode o = mapper.createObjectNode();
-		o.put("expr", "null");
-		return o;
 	}
 
-	private JsonNode convertLiteral(Literal l) {
-		Object v = l.value;
+	private JsonNode convertLiteralValue(Object v) {
 		return switch (v) {
 			case null -> mapper.getNodeFactory().nullNode();
 			case String s -> mapper.getNodeFactory().stringNode(s);

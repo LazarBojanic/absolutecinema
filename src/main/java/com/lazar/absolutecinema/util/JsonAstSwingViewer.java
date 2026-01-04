@@ -31,21 +31,24 @@ public final class JsonAstSwingViewer {
 	public static void showJson(String json) {
 		SwingUtilities.invokeLater(() -> {
 			ObjectMapper mapper = new ObjectMapper();
-			JsonNode root = mapper.readTree(json);
-			DefaultMutableTreeNode treeRoot = toTreeNode(root, rootLabel(root));
-
-			JTree tree = new JTree(treeRoot);
-			tree.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-			for (int i = 0; i < tree.getRowCount(); i++) {
-				tree.expandRow(i);
+			try {
+				JsonNode root = mapper.readTree(json);
+				DefaultMutableTreeNode treeRoot = toTreeNode(root, rootLabel(root));
+				JTree tree = new JTree(treeRoot);
+				tree.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+				for (int i = 0; i < tree.getRowCount(); i++) {
+					tree.expandRow(i);
+				}
+				JFrame f = new JFrame("AbsoluteCinema AST (JSON)");
+				f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+				f.add(new JScrollPane(tree), BorderLayout.CENTER);
+				f.setSize(1000, 800);
+				f.setLocationByPlatform(true);
+				f.setVisible(true);
 			}
-
-			JFrame f = new JFrame("AbsoluteCinema AST (JSON)");
-			f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-			f.add(new JScrollPane(tree), BorderLayout.CENTER);
-			f.setSize(1000, 800);
-			f.setLocationByPlatform(true);
-			f.setVisible(true);
+			catch (Exception e) {
+				e.printStackTrace();
+			}
 		});
 	}
 
@@ -54,20 +57,18 @@ public final class JsonAstSwingViewer {
 		if (node == null || node.isNull()) {
 			return me;
 		}
-
 		if (node.isObject()) {
 			ObjectNode obj = (ObjectNode) node;
 			Set<Map.Entry<String, JsonNode>> properties = obj.properties();
 			for (Map.Entry<String, JsonNode> property : properties) {
 				String key = property.getKey();
 				JsonNode val = property.getValue();
-
+				// Skip purely internal identifier keys that are already in the label
 				if ((key.equals("decl") && label.startsWith("decl:")) ||
 					(key.equals("stmt") && label.startsWith("stmt:")) ||
 					(key.equals("expr") && label.startsWith("expr:"))) {
 					continue;
 				}
-
 				String childLabelKey = key + ": " + shortLabel(val, key);
 				DefaultMutableTreeNode child = toTreeNode(val, childLabelKey);
 				me.add(child);
@@ -85,7 +86,10 @@ public final class JsonAstSwingViewer {
 	}
 
 	private static String rootLabel(JsonNode node) {
-		if (node != null && node.isObject() && node.has("type")) return node.get("type").asString();
+		if (node != null && node.isObject() && node.has("type")) {
+			JsonNode typeNode = node.get("type");
+			return typeNode.isTextual() ? typeNode.asText() : "root";
+		}
 		return "root";
 	}
 
@@ -94,10 +98,10 @@ public final class JsonAstSwingViewer {
 			return "null";
 		}
 		if (node.isString()) {
-			return "\"" + node.asString() + "\"";
+			return "\"" + node.asText() + "\"";
 		}
 		if (node.isNumber()) {
-			return node.asString();
+			return node.asText();
 		}
 		if (node.isBoolean()) {
 			return String.valueOf(node.booleanValue());
@@ -105,27 +109,35 @@ public final class JsonAstSwingViewer {
 		if (node.isArray()) {
 			return "[]";
 		}
-
 		if (node.isObject()) {
-			if (node.has("expr")) {
-				JsonNode expr = node.get("expr");
-				return expr.isString() ? "expr:" + expr.asString() : "expr:{ }";
+			StringBuilder sb = new StringBuilder();
+			// Main identifier with safety checks
+			if (node.has("expr") && node.get("expr").isTextual()) {
+				sb.append("expr:").append(node.get("expr").asText());
 			}
-			if (node.has("stmt")) {
-				JsonNode stmt = node.get("stmt");
-				return stmt.isString() ? "stmt:" + stmt.asString() : "stmt:{ }";
+			else if (node.has("stmt") && node.get("stmt").isTextual()) {
+				sb.append("stmt:").append(node.get("stmt").asText());
 			}
-			if (node.has("decl")) {
-				JsonNode decl = node.get("decl");
-				return decl.isString() ? "decl:" + decl.asString() : "decl:{ }";
+			else if (node.has("decl") && node.get("decl").isTextual()) {
+				sb.append("decl:").append(node.get("decl").asText());
 			}
-			if (node.has("name")) {
-				JsonNode name = node.get("name");
-				return name.isString() ? name.asString() : "{ }";
+			else if (node.has("name") && node.get("name").isTextual()) {
+				sb.append(node.get("name").asText());
 			}
-			return "{ }";
+			else {
+				sb.append("{ }");
+			}
+			// Add resolved semantic information to the label
+			if (node.has("resolvedType")) {
+				JsonNode rt = node.get("resolvedType");
+				sb.append(" <type: ").append(rt.isTextual() ? rt.asText() : "complex").append(">");
+			}
+			if (node.has("resolvedDecl")) {
+				JsonNode rd = node.get("resolvedDecl");
+				sb.append(" <ref: ").append(rd.isTextual() ? rd.asText() : "complex").append(">");
+			}
+			return sb.toString();
 		}
-
 		return node.toString();
 	}
 }

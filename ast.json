@@ -1,321 +1,348 @@
 {
-	"type": "program",
-	"declarations": [
-		{
-			"decl": "setup",
-			"name": "Shirt",
-			"fields": [
-				{
-					"name": "color",
-					"type": {
-						"name": "string",
-						"dimension": 0
-					}
-				},
-				{
-					"name": "size",
-					"type": {
-						"name": "int",
-						"dimension": 0
-					}
-				}
-			],
-			"ctor": {
-				"kind": "ctor",
-				"name": "Shirt",
-				"params": [
-					{
-						"name": "color",
-						"type": {
-							"name": "string",
-							"dimension": 0
-						}
-					},
-					{
-						"name": "size",
-						"type": {
-							"name": "int",
-							"dimension": 0
-						}
-					}
-				],
-				"body": [
-					{
-						"stmt": "expr",
-						"expr": {
-							"expr": "set",
-							"object": {
-								"expr": "this"
-							},
-							"name": "color",
-							"op": "=",
-							"value": {
-								"expr": "var",
-								"name": "color"
-							}
-						}
-					},
-					{
-						"stmt": "expr",
-						"expr": {
-							"expr": "set",
-							"object": {
-								"expr": "this"
-							},
-							"name": "size",
-							"op": "=",
-							"value": {
-								"expr": "var",
-								"name": "size"
-							}
-						}
-					}
-				]
-			},
-			"methods": [
-				{
-					"kind": "scene",
-					"name": "getColor",
-					"isMethod": true,
-					"returnType": {
-						"name": "string",
-						"dimension": 0
-					},
-					"params": [],
-					"body": [
-						{
-							"stmt": "return",
-							"value": {
-								"expr": "get",
-								"object": {
-									"expr": "this"
-								},
-								"name": "color"
-							}
-						}
-					]
-				}
-			]
-		},
-		{
-			"kind": "scene",
-			"name": "entrance",
-			"isMethod": false,
-			"returnType": {
-				"name": "scrap",
-				"dimension": 0
-			},
-			"params": [
-				{
-					"name": "args",
-					"type": {
-						"name": "string",
-						"dimension": 1
-					}
-				}
-			],
-			"body": [
-				{
-					"stmt": "var",
-					"decl": {
-						"name": "shirt",
-						"type": {
-							"name": "Shirt",
-							"dimension": 0
-						},
-						"init": {
-							"expr": "action",
-							"type": {
-								"name": "Shirt",
-								"dimension": 0,
-								"dimNums": []
-							},
-							"args": [
-								"red",
-								32
-							]
-						}
-					}
-				},
-				{
-					"stmt": "expr",
-					"expr": {
-						"expr": "call",
-						"callee": {
-							"expr": "var",
-							"name": "project"
-						},
-						"args": [
-							{
-								"expr": "call",
-								"callee": {
-									"expr": "get",
-									"object": {
-										"expr": "var",
-										"name": "shirt"
-									},
-									"name": "getColor"
-								},
-								"args": []
-							}
-						]
-					}
-				},
-				{
-					"stmt": "if_stmt",
-					"if": {
-						"type": "if",
-						"cond": {
-							"expr": "binary",
-							"op": ">",
-							"left": {
-								"expr": "get",
-								"object": {
-									"expr": "var",
-									"name": "shirt"
-								},
-								"name": "size"
-							},
-							"right": 30
-						},
-						"block": {
-							"stmt": "block",
-							"body": [
-								{
-									"stmt": "expr",
-									"expr": {
-										"expr": "call",
-										"callee": {
-											"expr": "var",
-											"name": "project"
-										},
-										"args": [
-											"large"
-										]
-									}
-								}
-							]
-						}
-					},
-					"elifs": [
-						{
-							"type": "if",
-							"cond": {
-								"expr": "logical",
-								"op": "&&",
-								"left": {
-									"expr": "binary",
-									"op": ">",
-									"left": {
-										"expr": "get",
-										"object": {
-											"expr": "var",
-											"name": "shirt"
-										},
-										"name": "size"
-									},
-									"right": 20
-								},
-								"right": {
-									"expr": "binary",
-									"op": "<=",
-									"left": {
-										"expr": "get",
-										"object": {
-											"expr": "var",
-											"name": "shirt"
-										},
-										"name": "size"
-									},
-									"right": 30
-								}
-							},
-							"block": {
-								"stmt": "block",
-								"body": [
-									{
-										"stmt": "expr",
-										"expr": {
-											"expr": "call",
-											"callee": {
-												"expr": "var",
-												"name": "project"
-											},
-											"args": [
-												"medium"
-											]
-										}
-									}
-								]
-							}
-						}
-					],
-					"else": {
-						"type": "if",
-						"cond": {
-							"expr": "null"
-						},
-						"block": {
-							"stmt": "block",
-							"body": [
-								{
-									"stmt": "expr",
-									"expr": {
-										"expr": "call",
-										"callee": {
-											"expr": "var",
-											"name": "project"
-										},
-										"args": [
-											"small"
-										]
-									}
-								}
-							]
-						}
-					}
-				},
-				{
-					"stmt": "var",
-					"decl": {
-						"name": "shirtArr",
-						"type": {
-							"name": "Shirt",
-							"dimension": 1
-						},
-						"init": {
-							"expr": "action",
-							"type": {
-								"name": "Shirt",
-								"dimension": 1,
-								"dimNums": [
-									"5"
-								]
-							}
-						}
-					}
-				},
-				{
-					"stmt": "expr",
-					"expr": {
-						"expr": "assign",
-						"target": {
-							"expr": "index",
-							"array": {
-								"expr": "var",
-								"name": "shirtArr"
-							},
-							"index": 0
-						},
-						"op": "=",
-						"value": {
-							"expr": "var",
-							"name": "shirt"
-						}
-					}
-				}
-			],
-			"decl": "scene"
-		}
-	]
+  "type" : "program",
+  "declarations" : [ {
+    "decl" : "setup",
+    "name" : "Shirt",
+    "fields" : [ {
+      "name" : "color",
+      "type" : {
+        "name" : "string",
+        "dimension" : 0
+      }
+    }, {
+      "name" : "size",
+      "type" : {
+        "name" : "int",
+        "dimension" : 0
+      }
+    } ],
+    "ctor" : {
+      "kind" : "ctor",
+      "name" : "Shirt",
+      "params" : [ {
+        "name" : "color",
+        "type" : {
+          "name" : "string",
+          "dimension" : 0
+        }
+      }, {
+        "name" : "size",
+        "type" : {
+          "name" : "int",
+          "dimension" : 0
+        }
+      } ],
+      "body" : [ {
+        "stmt" : "expr",
+        "expr" : {
+          "resolvedType" : "string",
+          "expr" : "set",
+          "object" : {
+            "resolvedType" : "Shirt",
+            "expr" : "this"
+          },
+          "name" : "color",
+          "op" : "=",
+          "value" : {
+            "resolvedType" : "string",
+            "expr" : "var",
+            "name" : "color",
+            "resolvedDecl" : "param:color"
+          }
+        }
+      }, {
+        "stmt" : "expr",
+        "expr" : {
+          "resolvedType" : "int",
+          "expr" : "set",
+          "object" : {
+            "resolvedType" : "Shirt",
+            "expr" : "this"
+          },
+          "name" : "size",
+          "op" : "=",
+          "value" : {
+            "resolvedType" : "int",
+            "expr" : "var",
+            "name" : "size",
+            "resolvedDecl" : "param:size"
+          }
+        }
+      } ]
+    },
+    "methods" : [ {
+      "kind" : "scene",
+      "name" : "getColor",
+      "isMethod" : true,
+      "returnType" : {
+        "name" : "string",
+        "dimension" : 0
+      },
+      "params" : [ ],
+      "body" : [ {
+        "stmt" : "return",
+        "value" : {
+          "resolvedType" : "string",
+          "expr" : "get",
+          "object" : {
+            "resolvedType" : "Shirt",
+            "expr" : "this"
+          },
+          "name" : "color"
+        }
+      } ]
+    } ]
+  }, {
+    "kind" : "scene",
+    "name" : "entrance",
+    "isMethod" : false,
+    "returnType" : {
+      "name" : "scrap",
+      "dimension" : 0
+    },
+    "params" : [ {
+      "name" : "args",
+      "type" : {
+        "name" : "string",
+        "dimension" : 1
+      }
+    } ],
+    "body" : [ {
+      "stmt" : "var",
+      "decl" : {
+        "name" : "shirt",
+        "type" : {
+          "name" : "Shirt",
+          "dimension" : 0
+        },
+        "init" : {
+          "resolvedType" : "Shirt",
+          "expr" : "action",
+          "type" : {
+            "name" : "Shirt",
+            "dimension" : 0,
+            "dimNums" : [ ]
+          },
+          "args" : [ {
+            "expr" : "literal",
+            "value" : "red"
+          }, {
+            "expr" : "literal",
+            "value" : 32
+          } ]
+        }
+      }
+    }, {
+      "stmt" : "expr",
+      "expr" : {
+        "resolvedType" : "scrap",
+        "expr" : "call",
+        "callee" : {
+          "expr" : "var",
+          "name" : "project"
+        },
+        "args" : [ {
+          "resolvedType" : "string",
+          "expr" : "call",
+          "callee" : {
+            "expr" : "get",
+            "object" : {
+              "resolvedType" : "Shirt",
+              "expr" : "var",
+              "name" : "shirt",
+              "resolvedDecl" : "var:shirt"
+            },
+            "name" : "getColor"
+          },
+          "args" : [ ]
+        } ]
+      }
+    }, {
+      "stmt" : "if_stmt",
+      "if" : {
+        "type" : "if",
+        "cond" : {
+          "resolvedType" : "int",
+          "expr" : "binary",
+          "op" : ">",
+          "left" : {
+            "resolvedType" : "int",
+            "expr" : "get",
+            "object" : {
+              "resolvedType" : "Shirt",
+              "expr" : "var",
+              "name" : "shirt",
+              "resolvedDecl" : "var:shirt"
+            },
+            "name" : "size"
+          },
+          "right" : {
+            "resolvedType" : "int",
+            "expr" : "literal",
+            "value" : 30
+          }
+        },
+        "block" : {
+          "stmt" : "block",
+          "body" : [ {
+            "stmt" : "expr",
+            "expr" : {
+              "resolvedType" : "scrap",
+              "expr" : "call",
+              "callee" : {
+                "expr" : "var",
+                "name" : "project"
+              },
+              "args" : [ {
+                "resolvedType" : "string",
+                "expr" : "literal",
+                "value" : "large"
+              } ]
+            }
+          } ]
+        }
+      },
+      "elifs" : [ {
+        "type" : "if",
+        "cond" : {
+          "resolvedType" : "bool",
+          "expr" : "logical",
+          "op" : "&&",
+          "left" : {
+            "resolvedType" : "int",
+            "expr" : "binary",
+            "op" : ">",
+            "left" : {
+              "resolvedType" : "int",
+              "expr" : "get",
+              "object" : {
+                "resolvedType" : "Shirt",
+                "expr" : "var",
+                "name" : "shirt",
+                "resolvedDecl" : "var:shirt"
+              },
+              "name" : "size"
+            },
+            "right" : {
+              "resolvedType" : "int",
+              "expr" : "literal",
+              "value" : 20
+            }
+          },
+          "right" : {
+            "resolvedType" : "int",
+            "expr" : "binary",
+            "op" : "<=",
+            "left" : {
+              "resolvedType" : "int",
+              "expr" : "get",
+              "object" : {
+                "resolvedType" : "Shirt",
+                "expr" : "var",
+                "name" : "shirt",
+                "resolvedDecl" : "var:shirt"
+              },
+              "name" : "size"
+            },
+            "right" : {
+              "resolvedType" : "int",
+              "expr" : "literal",
+              "value" : 30
+            }
+          }
+        },
+        "block" : {
+          "stmt" : "block",
+          "body" : [ {
+            "stmt" : "expr",
+            "expr" : {
+              "resolvedType" : "scrap",
+              "expr" : "call",
+              "callee" : {
+                "expr" : "var",
+                "name" : "project"
+              },
+              "args" : [ {
+                "resolvedType" : "string",
+                "expr" : "literal",
+                "value" : "medium"
+              } ]
+            }
+          } ]
+        }
+      } ],
+      "else" : {
+        "type" : "if",
+        "cond" : {
+          "expr" : "null"
+        },
+        "block" : {
+          "stmt" : "block",
+          "body" : [ {
+            "stmt" : "expr",
+            "expr" : {
+              "resolvedType" : "scrap",
+              "expr" : "call",
+              "callee" : {
+                "expr" : "var",
+                "name" : "project"
+              },
+              "args" : [ {
+                "resolvedType" : "string",
+                "expr" : "literal",
+                "value" : "small"
+              } ]
+            }
+          } ]
+        }
+      }
+    }, {
+      "stmt" : "var",
+      "decl" : {
+        "name" : "shirtArr",
+        "type" : {
+          "name" : "Shirt",
+          "dimension" : 1
+        },
+        "init" : {
+          "resolvedType" : "Shirt[]",
+          "expr" : "action",
+          "type" : {
+            "name" : "Shirt",
+            "dimension" : 1,
+            "dimNums" : [ "5" ]
+          }
+        }
+      }
+    }, {
+      "stmt" : "expr",
+      "expr" : {
+        "resolvedType" : "Shirt",
+        "expr" : "assign",
+        "target" : {
+          "resolvedType" : "Shirt",
+          "expr" : "index",
+          "array" : {
+            "resolvedType" : "Shirt[]",
+            "expr" : "var",
+            "name" : "shirtArr",
+            "resolvedDecl" : "var:shirtArr"
+          },
+          "index" : {
+            "resolvedType" : "int",
+            "expr" : "literal",
+            "value" : 0
+          }
+        },
+        "op" : "=",
+        "value" : {
+          "resolvedType" : "Shirt",
+          "expr" : "var",
+          "name" : "shirt",
+          "resolvedDecl" : "var:shirt"
+        }
+      }
+    } ],
+    "decl" : "scene"
+  } ]
 }

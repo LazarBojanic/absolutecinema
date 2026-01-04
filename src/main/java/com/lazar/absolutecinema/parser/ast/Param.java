@@ -2,7 +2,7 @@ package com.lazar.absolutecinema.parser.ast;
 
 import com.lazar.absolutecinema.lexer.Token;
 
-public final class Param {
+public final class Param implements Node{
 	public final Token name;
 	public final LType type;
 
