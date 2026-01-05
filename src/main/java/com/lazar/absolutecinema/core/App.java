@@ -68,12 +68,12 @@ public class App {
 			}
 			generationResult = generator.generate(program);
 			if (generator instanceof JVMGenerator) {
-				Util.writeStringToFile(generationResult.getPlainTextIR(), "./Output.j");
-				Util.writeBytesToFile(generationResult.getBinaryIR(), "./Output.class");
+				Util.writeStringToFile(generationResult.getPlainTextIR(), "./Main.j");
+				Util.writeBytesToFile(generationResult.getBinaryIR(), "./Main.class");
 			}
 			else {
-				Util.writeStringToFile(generationResult.getPlainTextIR(), "./Output.ll");
-				Util.writeBytesToFile(generationResult.getBinaryIR(), "./Output.bc");
+				Util.writeStringToFile(generationResult.getPlainTextIR(), "./Main.ll");
+				Util.writeBytesToFile(generationResult.getBinaryIR(), "./Main.bc");
 			}
 			System.out.println("IR generation successful!");
 			System.out.println("Converting AST to JSON...");
