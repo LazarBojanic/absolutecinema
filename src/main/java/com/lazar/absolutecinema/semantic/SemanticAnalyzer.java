@@ -8,6 +8,7 @@ import com.lazar.absolutecinema.parser.ast.Set;
 import java.util.*;
 
 public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, ExprVisitor<ResolvedType> {
+
 	private final Program program;
 	private final SymbolTable symbolTable = new SymbolTable();
 	private SetupDecl currentSetup = null;
@@ -18,63 +19,59 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 		registerBuiltins();
 	}
 
-	/**
-	 * Registers the built-in functions (Standard Library) into the global scope.
-	 */
+	/* ================= BUILTINS ================= */
+
 	private void registerBuiltins() {
-		// Register 'project' (printline): takes any type and returns scrap
 		Token projectToken = new Token(TokenType.IDENTIFIER, "project", null, 0, 0);
 		Token paramToken = new Token(TokenType.IDENTIFIER, "value", null, 0, 0);
 		Token stringTypeToken = new Token(TokenType.STRING, "string", null, 0, 0);
 		Token scrapTypeToken = new Token(TokenType.SCRAP, "scrap", null, 0, 0);
+
 		Param projectParam = new Param(paramToken, new LType(stringTypeToken, 0));
-		SceneDecl projectScene = new SceneDecl(projectToken, List.of(projectParam), new LType(scrapTypeToken, 0), null, false);
+		SceneDecl projectScene =
+			new SceneDecl(projectToken, List.of(projectParam), new LType(scrapTypeToken, 0), null, false);
 		symbolTable.defineScene(projectScene);
-		// Register 'capture' (readline): takes no arguments and returns string
+
 		Token captureToken = new Token(TokenType.IDENTIFIER, "capture", null, 0, 0);
-		SceneDecl captureScene = new SceneDecl(captureToken, new ArrayList<>(), new LType(stringTypeToken, 0), null, false);
+		SceneDecl captureScene =
+			new SceneDecl(captureToken, new ArrayList<>(), new LType(stringTypeToken, 0), null, false);
 		symbolTable.defineScene(captureScene);
 	}
 
+	/* ================= ENTRY ================= */
+
 	public void analyze() {
-		// Phase 1: Register top-level symbols (Setup, Scene, Global Var)
 		for (Node item : program.items) {
-			if (item instanceof SetupDecl d) {
-				symbolTable.defineSetup(d);
-			}
-			else if (item instanceof SceneDecl d) {
-				symbolTable.defineScene(d);
-			}
-			else if (item instanceof VarDecl d) {
-				symbolTable.defineGlobalVar(d);
-			}
+			if (item instanceof SetupDecl d) symbolTable.defineSetup(d);
+			else if (item instanceof SceneDecl d) symbolTable.defineScene(d);
+			else if (item instanceof VarDecl d) symbolTable.defineGlobalVar(d);
 		}
-		// Phase 2: Recursive Enrichment
 		for (Node item : program.items) {
-			if (item instanceof Decl d) {
-				d.accept(this);
-			}
+			if (item instanceof Decl d) d.accept(this);
 		}
 	}
+
+	/* ================= DECL VISITORS ================= */
 
 	@Override
 	public Void visitSetup(SetupDecl d) {
 		currentSetup = d;
 		symbolTable.enterScope();
-		for (VarDecl field : d.fields) {
+
+		for (VarDecl field : d.fields)
 			symbolTable.define(field.name, resolveType(field.type), field);
-		}
+
 		if (d.ctor != null) {
 			symbolTable.enterScope();
-			for (Param p : d.ctor.params) {
+			for (Param p : d.ctor.params)
 				symbolTable.define(p.name, resolveType(p.type), p);
-			}
 			d.ctor.body.accept(this);
 			symbolTable.exitScope();
 		}
-		for (SceneDecl method : d.methods) {
+
+		for (SceneDecl method : d.methods)
 			method.accept(this);
-		}
+
 		symbolTable.exitScope();
 		currentSetup = null;
 		return null;
@@ -84,13 +81,13 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	public Void visitScene(SceneDecl d) {
 		SceneDecl prev = currentScene;
 		currentScene = d;
+
 		symbolTable.enterScope();
-		for (Param p : d.params) {
+		for (Param p : d.params)
 			symbolTable.define(p.name, resolveType(p.type), p);
-		}
-		if (d.body != null) {
-			d.body.accept(this);
-		}
+
+		if (d.body != null) d.body.accept(this);
+
 		symbolTable.exitScope();
 		currentScene = prev;
 		return null;
@@ -107,31 +104,23 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 		return null;
 	}
 
+	/* ================= STATEMENTS ================= */
+
 	@Override
 	public Void visitBlock(Block s) {
 		symbolTable.enterScope();
 		for (Node n : s.statements) {
-			if (n instanceof Decl d) {
-				d.accept(this);
-			}
-			else if (n instanceof Stmt st) {
-				st.accept(this);
-			}
+			if (n instanceof Decl d) d.accept(this);
+			else ((Stmt) n).accept(this);
 		}
 		symbolTable.exitScope();
 		return null;
 	}
 
-	@Override
-	public Void visitVar(Var s) {
-		return s.decl.accept(this);
-	}
-
-	@Override
-	public Void visitExpr(ExprStmt s) {
-		s.expr.accept(this);
-		return null;
-	}
+	@Override public Void visitVar(Var s) { return s.decl.accept(this); }
+	@Override public Void visitExpr(ExprStmt s) { s.expr.accept(this); return null; }
+	@Override public Void visitBreak(Break s) { return null; }
+	@Override public Void visitContinue(Continue s) { return null; }
 
 	@Override
 	public Void visitIf(If s) {
@@ -141,9 +130,7 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 			b.cond.accept(this);
 			b.block.accept(this);
 		}
-		if (s.elseBranch != null) {
-			s.elseBranch.block.accept(this);
-		}
+		if (s.elseBranch != null) s.elseBranch.block.accept(this);
 		return null;
 	}
 
@@ -157,18 +144,23 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	@Override
 	public Void visitFor(For s) {
 		symbolTable.enterScope();
+
 		if (s.initializer instanceof Decl d) {
 			d.accept(this);
 		}
 		else if (s.initializer instanceof Stmt st) {
 			st.accept(this);
 		}
+		// else: null → do nothing
+
 		if (s.condition != null) {
 			s.condition.accept(this);
 		}
+
 		if (s.increment != null) {
 			s.increment.accept(this);
 		}
+
 		s.body.accept(this);
 		symbolTable.exitScope();
 		return null;
@@ -176,42 +168,23 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 
 	@Override
 	public Void visitReturn(Return s) {
-		if (currentScene == null) {
+		if (currentScene == null)
 			throw new RuntimeException("'cut' outside scene at line " + s.keyword.getLine());
-		}
 		ResolvedType actual = (s.value != null) ? s.value.accept(this) : ResolvedType.SCRAP;
 		checkTypeMatch(resolveType(currentScene.returnType), actual, s.keyword, "Return type mismatch");
 		return null;
 	}
 
-	@Override
-	public Void visitBreak(Break s) {
-		return null;
-	}
-
-	@Override
-	public Void visitContinue(Continue s) {
-		return null;
-	}
+	/* ================= EXPRESSIONS ================= */
 
 	@Override
 	public ResolvedType visitLiteral(Literal e) {
 		ResolvedType type = ResolvedType.NULL;
-		if (e.value instanceof Integer) {
-			type = ResolvedType.INT;
-		}
-		else if (e.value instanceof Double) {
-			type = ResolvedType.DOUBLE;
-		}
-		else if (e.value instanceof String) {
-			type = ResolvedType.STRING;
-		}
-		else if (e.value instanceof Character) {
-			type = ResolvedType.CHAR;
-		}
-		else if (e.value instanceof Boolean) {
-			type = ResolvedType.BOOL;
-		}
+		if (e.value instanceof Integer) type = ResolvedType.INT;
+		else if (e.value instanceof Double) type = ResolvedType.DOUBLE;
+		else if (e.value instanceof String) type = ResolvedType.STRING;
+		else if (e.value instanceof Character) type = ResolvedType.CHAR;
+		else if (e.value instanceof Boolean) type = ResolvedType.BOOL;
 		e.setType(type);
 		return type;
 	}
@@ -219,8 +192,8 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	@Override
 	public ResolvedType visitVariable(Variable e) {
 		SymbolTable.Symbol sym = symbolTable.resolve(e.name);
-		e.setType(sym.type);
 		e.resolvedDecl = sym.declaration;
+		e.setType(sym.type);
 		return sym.type;
 	}
 
@@ -237,9 +210,12 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	public ResolvedType visitBinary(Binary e) {
 		ResolvedType l = e.left.accept(this);
 		ResolvedType r = e.right.accept(this);
-		ResolvedType res = (l.isNumeric() && r.isNumeric()) ?
-			((l == ResolvedType.DOUBLE || r == ResolvedType.DOUBLE) ? ResolvedType.DOUBLE : ResolvedType.INT) :
-			ResolvedType.BOOL;
+		ResolvedType res =
+			(l.isNumeric() && r.isNumeric())
+				? ((l == ResolvedType.DOUBLE || r == ResolvedType.DOUBLE)
+				? ResolvedType.DOUBLE
+				: ResolvedType.INT)
+				: ResolvedType.BOOL;
 		e.setType(res);
 		return res;
 	}
@@ -252,15 +228,13 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 		return ResolvedType.BOOL;
 	}
 
-	@Override
-	public ResolvedType visitUnary(Unary e) {
+	@Override public ResolvedType visitUnary(Unary e) {
 		ResolvedType t = e.right.accept(this);
 		e.setType(t);
 		return t;
 	}
 
-	@Override
-	public ResolvedType visitGrouping(Grouping e) {
+	@Override public ResolvedType visitGrouping(Grouping e) {
 		ResolvedType t = e.expr.accept(this);
 		e.setType(t);
 		return t;
@@ -269,32 +243,41 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	@Override
 	public ResolvedType visitCall(Call e) {
 		List<ResolvedType> args = new ArrayList<>();
-		for (Expr a : e.arguments) {
-			args.add(a.accept(this));
-		}
+		for (Expr a : e.arguments) args.add(a.accept(this));
+
 		ResolvedType ret = ResolvedType.NULL;
+
 		if (e.callee instanceof Variable v) {
 			SceneDecl scene = symbolTable.getScene(v.name.getLexeme());
-			if (scene == null) {
-				throw new RuntimeException("Undefined scene: " + v.name.getLexeme() + " at line " + v.name.getLine());
-			}
+			if (scene == null)
+				throw new RuntimeException("Undefined scene: " + v.name.getLexeme()
+					+ " at line " + v.name.getLine());
 			validateArgs(scene.params, args, v.name);
 			ret = resolveType(scene.returnType);
 		}
 		else if (e.callee instanceof Get g) {
 			ResolvedType obj = g.object.accept(this);
 			SetupDecl setup = symbolTable.getSetup(obj.name());
-			if (setup == null) {
-				throw new RuntimeException("Type '" + obj.name() + "' has no methods at line " + g.name.getLine());
-			}
+			if (setup == null)
+				throw new RuntimeException("Type '" + obj.name()
+					+ "' has no methods at line " + g.name.getLine());
+
+			boolean found = false;
 			for (SceneDecl m : setup.methods) {
 				if (m.name.getLexeme().equals(g.name.getLexeme())) {
 					validateArgs(m.params, args, g.name);
 					ret = resolveType(m.returnType);
+					found = true;
 					break;
 				}
 			}
+			if (!found) {
+				throw new RuntimeException("Method '" + g.name.getLexeme()
+					+ "' not found in setup '" + obj.name()
+					+ "' at line " + g.name.getLine());
+			}
 		}
+
 		e.setType(ret);
 		return ret;
 	}
@@ -303,9 +286,10 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	public ResolvedType visitGet(Get e) {
 		ResolvedType obj = e.object.accept(this);
 		SetupDecl setup = symbolTable.getSetup(obj.name());
-		if (setup == null) {
-			throw new RuntimeException("Cannot access member of non-setup type '" + obj.name() + "' at line " + e.name.getLine());
-		}
+		if (setup == null)
+			throw new RuntimeException("Cannot access member of non-setup type '"
+				+ obj.name() + "' at line " + e.name.getLine());
+
 		for (VarDecl f : setup.fields) {
 			if (f.name.getLexeme().equals(e.name.getLexeme())) {
 				ResolvedType t = resolveType(f.type);
@@ -313,7 +297,8 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 				return t;
 			}
 		}
-		throw new RuntimeException("Field '" + e.name.getLexeme() + "' not found in setup '" + obj.name() + "'");
+		throw new RuntimeException("Field '" + e.name.getLexeme()
+			+ "' not found in setup '" + obj.name() + "'");
 	}
 
 	@Override
@@ -321,9 +306,9 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 		ResolvedType obj = e.object.accept(this);
 		ResolvedType val = e.value.accept(this);
 		SetupDecl setup = symbolTable.getSetup(obj.name());
-		if (setup == null) {
+		if (setup == null)
 			throw new RuntimeException("Cannot set member of non-setup type '" + obj.name() + "'");
-		}
+
 		ResolvedType fieldT = null;
 		for (VarDecl f : setup.fields) {
 			if (f.name.getLexeme().equals(e.name.getLexeme())) {
@@ -331,9 +316,10 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 				break;
 			}
 		}
-		if (fieldT == null) {
-			throw new RuntimeException("Field '" + e.name.getLexeme() + "' not found in setup '" + obj.name() + "'");
-		}
+		if (fieldT == null)
+			throw new RuntimeException("Field '" + e.name.getLexeme()
+				+ "' not found in setup '" + obj.name() + "'");
+
 		checkTypeMatch(fieldT, val, e.name, "Field assignment mismatch");
 		e.setType(val);
 		return val;
@@ -343,19 +329,16 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	public ResolvedType visitIndex(Index e) {
 		ResolvedType arr = e.array.accept(this);
 		ResolvedType idx = e.index.accept(this);
-		if (!idx.equals(ResolvedType.INT)) {
+		if (!idx.equals(ResolvedType.INT))
 			throw new RuntimeException("Array index must be int, got " + idx.name());
-		}
-		if (arr.dimensions() <= 0) {
+		if (arr.dimensions() <= 0)
 			throw new RuntimeException("Cannot index non-array type '" + arr.name() + "'");
-		}
 		ResolvedType res = new ResolvedType(arr.name(), arr.dimensions() - 1);
 		e.setType(res);
 		return res;
 	}
 
-	@Override
-	public ResolvedType visitPostfix(Postfix e) {
+	@Override public ResolvedType visitPostfix(Postfix e) {
 		ResolvedType t = e.target.accept(this);
 		e.setType(t);
 		return t;
@@ -363,9 +346,8 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 
 	@Override
 	public ResolvedType visitThis(This e) {
-		if (currentSetup == null) {
+		if (currentSetup == null)
 			throw new RuntimeException("'@' used outside setup at line " + e.atToken.getLine());
-		}
 		ResolvedType t = new ResolvedType(currentSetup.name.getLexeme(), 0);
 		e.setType(t);
 		return t;
@@ -374,91 +356,107 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	@Override
 	public ResolvedType visitActionNew(ActionNew e) {
 		ResolvedType t = new ResolvedType(e.type.name.getLexeme(), e.type.dimension);
+
+		if (e.type.dimension > 0 && e.arrayInitializer != null) {
+			ResolvedType elem =
+				new ResolvedType(e.type.name.getLexeme(), e.type.dimension - 1);
+			for (Expr ex : e.arrayInitializer) {
+				ResolvedType it = ex.accept(this);
+				if (!elem.equals(it))
+					throw new RuntimeException("Array initializer element mismatch: expected "
+						+ elem.name() + " but got " + it.name());
+			}
+		}
+
 		e.setType(t);
 		return t;
 	}
 
 	@Override
 	public ResolvedType visitArrayLiteral(ArrayLiteral e) {
-		if (e.elements.isEmpty()) {
-			return ResolvedType.NULL;
-		}
+		if (e.elements.isEmpty()) return ResolvedType.NULL;
 		ResolvedType first = e.elements.get(0).accept(this);
+		for (int i = 1; i < e.elements.size(); i++) {
+			ResolvedType cur = e.elements.get(i).accept(this);
+			if (!first.equals(cur))
+				throw new RuntimeException("Array literal element type mismatch");
+		}
 		ResolvedType t = new ResolvedType(first.name(), first.dimensions() + 1);
 		e.setType(t);
 		return t;
 	}
 
+	/* ================= HELPERS ================= */
+
 	private ResolvedType resolveType(LType l) {
-		return (l == null) ? ResolvedType.SCRAP : new ResolvedType(l.name.getLexeme(), l.dimension);
+		return (l == null) ? ResolvedType.SCRAP
+			: new ResolvedType(l.name.getLexeme(), l.dimension);
 	}
 
 	private void checkTypeMatch(ResolvedType exp, ResolvedType act, Token t, String m) {
 		if (exp != ResolvedType.NULL && act != ResolvedType.NULL && !exp.equals(act)) {
-			throw new RuntimeException(m + " at line " + t.getLine() + ". Expected " + exp.name() + " but got " + act.name());
+			throw new RuntimeException(m + " at line " + t.getLine()
+				+ ". Expected " + exp.name() + " but got " + act.name());
 		}
 	}
 
 	private void validateArgs(List<Param> params, List<ResolvedType> args, Token t) {
-		if (params.size() != args.size()) {
-			throw new RuntimeException("Arg count mismatch for '" + t.getLexeme() + "'.");
-		}
-		for (int i = 0; i < params.size(); i++) {
+		if (params.size() != args.size())
+			throw new RuntimeException("Arg count mismatch for '"
+				+ t.getLexeme() + "' at line " + t.getLine());
+		for (int i = 0; i < params.size(); i++)
 			checkTypeMatch(resolveType(params.get(i).type), args.get(i), t, "Param mismatch");
-		}
 	}
 
+	/* ================= SYMBOL TABLE ================= */
+
 	private static class SymbolTable {
-		record Symbol(ResolvedType type, Node declaration) {
-		}
+
+		record Symbol(ResolvedType type, Node declaration) {}
 
 		private final List<Map<String, Symbol>> scopes = new ArrayList<>();
 		private final Map<String, SetupDecl> setups = new HashMap<>();
 		private final Map<String, SceneDecl> scenes = new HashMap<>();
 
-		SymbolTable() {
-			enterScope();
-		}
+		SymbolTable() { enterScope(); }
 
-		void enterScope() {
-			scopes.add(new HashMap<>());
-		}
-
-		void exitScope() {
-			scopes.remove(scopes.size() - 1);
-		}
+		void enterScope() { scopes.add(new HashMap<>()); }
+		void exitScope() { scopes.remove(scopes.size() - 1); }
 
 		void define(Token n, ResolvedType t, Node d) {
 			scopes.get(scopes.size() - 1).put(n.getLexeme(), new Symbol(t, d));
 		}
 
 		void defineSetup(SetupDecl d) {
-			setups.put(d.name.getLexeme(), d);
+			String n = d.name.getLexeme();
+			if (setups.containsKey(n))
+				throw new RuntimeException("Duplicate setup declaration: " + n);
+			setups.put(n, d);
 		}
 
 		void defineScene(SceneDecl d) {
-			scenes.put(d.name.getLexeme(), d);
+			String n = d.name.getLexeme();
+			if (scenes.containsKey(n))
+				throw new RuntimeException("Duplicate scene declaration: " + n);
+			scenes.put(n, d);
 		}
 
 		void defineGlobalVar(VarDecl v) {
-			define(v.name, new ResolvedType(v.type.name.getLexeme(), v.type.dimension), v);
+			define(v.name,
+				new ResolvedType(v.type.name.getLexeme(), v.type.dimension),
+				v);
 		}
 
 		Symbol resolve(Token n) {
 			for (int i = scopes.size() - 1; i >= 0; i--) {
-				if (scopes.get(i).containsKey(n.getLexeme())) {
+				if (scopes.get(i).containsKey(n.getLexeme()))
 					return scopes.get(i).get(n.getLexeme());
-				}
 			}
-			throw new RuntimeException("Undefined symbol: " + n.getLexeme() + " at line " + n.getLine());
+			throw new RuntimeException("Undefined symbol: "
+				+ n.getLexeme() + " at line " + n.getLine());
 		}
 
-		SetupDecl getSetup(String n) {
-			return setups.get(n);
-		}
-
-		SceneDecl getScene(String n) {
-			return scenes.get(n);
-		}
+		SetupDecl getSetup(String n) { return setups.get(n); }
+		SceneDecl getScene(String n) { return scenes.get(n); }
 	}
 }
