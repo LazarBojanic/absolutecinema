@@ -2,306 +2,6 @@
   "type" : "program",
   "declarations" : [ {
     "kind" : "scene",
-    "name" : "binarySearch",
-    "isMethod" : false,
-    "returnType" : {
-      "name" : "int",
-      "dimension" : 0
-    },
-    "params" : [ {
-      "name" : "arr",
-      "type" : {
-        "name" : "int",
-        "dimension" : 1
-      }
-    }, {
-      "name" : "len",
-      "type" : {
-        "name" : "int",
-        "dimension" : 0
-      }
-    }, {
-      "name" : "x",
-      "type" : {
-        "name" : "int",
-        "dimension" : 0
-      }
-    } ],
-    "body" : [ {
-      "stmt" : "var",
-      "decl" : {
-        "name" : "left",
-        "type" : {
-          "name" : "int",
-          "dimension" : 0
-        },
-        "init" : {
-          "resolvedType" : "int",
-          "expr" : "literal",
-          "value" : 0
-        }
-      }
-    }, {
-      "stmt" : "var",
-      "decl" : {
-        "name" : "right",
-        "type" : {
-          "name" : "int",
-          "dimension" : 0
-        },
-        "init" : {
-          "resolvedType" : "int",
-          "expr" : "binary",
-          "op" : "-",
-          "left" : {
-            "resolvedType" : "int",
-            "expr" : "var",
-            "name" : "len",
-            "resolvedDecl" : "param:len"
-          },
-          "right" : {
-            "resolvedType" : "int",
-            "expr" : "literal",
-            "value" : 1
-          }
-        }
-      }
-    }, {
-      "stmt" : "while",
-      "cond" : {
-        "resolvedType" : "int",
-        "expr" : "binary",
-        "op" : "<=",
-        "left" : {
-          "resolvedType" : "int",
-          "expr" : "var",
-          "name" : "left",
-          "resolvedDecl" : "var:left"
-        },
-        "right" : {
-          "resolvedType" : "int",
-          "expr" : "var",
-          "name" : "right",
-          "resolvedDecl" : "var:right"
-        }
-      },
-      "body" : {
-        "stmt" : "block",
-        "body" : [ {
-          "stmt" : "var",
-          "decl" : {
-            "name" : "mid",
-            "type" : {
-              "name" : "int",
-              "dimension" : 0
-            },
-            "init" : {
-              "resolvedType" : "int",
-              "expr" : "binary",
-              "op" : "+",
-              "left" : {
-                "resolvedType" : "int",
-                "expr" : "var",
-                "name" : "left",
-                "resolvedDecl" : "var:left"
-              },
-              "right" : {
-                "resolvedType" : "int",
-                "expr" : "binary",
-                "op" : "/",
-                "left" : {
-                  "resolvedType" : "int",
-                  "expr" : "group",
-                  "inner" : {
-                    "resolvedType" : "int",
-                    "expr" : "binary",
-                    "op" : "-",
-                    "left" : {
-                      "resolvedType" : "int",
-                      "expr" : "var",
-                      "name" : "right",
-                      "resolvedDecl" : "var:right"
-                    },
-                    "right" : {
-                      "resolvedType" : "int",
-                      "expr" : "var",
-                      "name" : "left",
-                      "resolvedDecl" : "var:left"
-                    }
-                  }
-                },
-                "right" : {
-                  "resolvedType" : "int",
-                  "expr" : "literal",
-                  "value" : 2
-                }
-              }
-            }
-          }
-        }, {
-          "stmt" : "if_stmt",
-          "if" : {
-            "type" : "if",
-            "cond" : {
-              "resolvedType" : "int",
-              "expr" : "binary",
-              "op" : "==",
-              "left" : {
-                "resolvedType" : "int",
-                "expr" : "index",
-                "array" : {
-                  "resolvedType" : "int[]",
-                  "expr" : "var",
-                  "name" : "arr",
-                  "resolvedDecl" : "param:arr"
-                },
-                "index" : {
-                  "resolvedType" : "int",
-                  "expr" : "var",
-                  "name" : "mid",
-                  "resolvedDecl" : "var:mid"
-                }
-              },
-              "right" : {
-                "resolvedType" : "int",
-                "expr" : "var",
-                "name" : "x",
-                "resolvedDecl" : "param:x"
-              }
-            },
-            "block" : {
-              "stmt" : "block",
-              "body" : [ {
-                "stmt" : "return",
-                "value" : {
-                  "resolvedType" : "int",
-                  "expr" : "var",
-                  "name" : "mid",
-                  "resolvedDecl" : "var:mid"
-                }
-              } ]
-            }
-          },
-          "elifs" : [ {
-            "type" : "if",
-            "cond" : {
-              "resolvedType" : "int",
-              "expr" : "binary",
-              "op" : "<",
-              "left" : {
-                "resolvedType" : "int",
-                "expr" : "index",
-                "array" : {
-                  "resolvedType" : "int[]",
-                  "expr" : "var",
-                  "name" : "arr",
-                  "resolvedDecl" : "param:arr"
-                },
-                "index" : {
-                  "resolvedType" : "int",
-                  "expr" : "var",
-                  "name" : "mid",
-                  "resolvedDecl" : "var:mid"
-                }
-              },
-              "right" : {
-                "resolvedType" : "int",
-                "expr" : "var",
-                "name" : "x",
-                "resolvedDecl" : "param:x"
-              }
-            },
-            "block" : {
-              "stmt" : "block",
-              "body" : [ {
-                "stmt" : "expr",
-                "expr" : {
-                  "resolvedType" : "int",
-                  "expr" : "assign",
-                  "target" : {
-                    "resolvedType" : "int",
-                    "expr" : "var",
-                    "name" : "left",
-                    "resolvedDecl" : "var:left"
-                  },
-                  "op" : "=",
-                  "value" : {
-                    "resolvedType" : "int",
-                    "expr" : "binary",
-                    "op" : "+",
-                    "left" : {
-                      "resolvedType" : "int",
-                      "expr" : "var",
-                      "name" : "mid",
-                      "resolvedDecl" : "var:mid"
-                    },
-                    "right" : {
-                      "resolvedType" : "int",
-                      "expr" : "literal",
-                      "value" : 1
-                    }
-                  }
-                }
-              } ]
-            }
-          } ],
-          "else" : {
-            "type" : "if",
-            "cond" : {
-              "expr" : "null"
-            },
-            "block" : {
-              "stmt" : "block",
-              "body" : [ {
-                "stmt" : "expr",
-                "expr" : {
-                  "resolvedType" : "int",
-                  "expr" : "assign",
-                  "target" : {
-                    "resolvedType" : "int",
-                    "expr" : "var",
-                    "name" : "right",
-                    "resolvedDecl" : "var:right"
-                  },
-                  "op" : "=",
-                  "value" : {
-                    "resolvedType" : "int",
-                    "expr" : "binary",
-                    "op" : "-",
-                    "left" : {
-                      "resolvedType" : "int",
-                      "expr" : "var",
-                      "name" : "mid",
-                      "resolvedDecl" : "var:mid"
-                    },
-                    "right" : {
-                      "resolvedType" : "int",
-                      "expr" : "literal",
-                      "value" : 1
-                    }
-                  }
-                }
-              } ]
-            }
-          }
-        } ]
-      }
-    }, {
-      "stmt" : "return",
-      "value" : {
-        "resolvedType" : "int",
-        "expr" : "unary",
-        "op" : "-",
-        "right" : {
-          "resolvedType" : "int",
-          "expr" : "literal",
-          "value" : 1
-        }
-      }
-    } ],
-    "decl" : "scene"
-  }, {
-    "kind" : "scene",
     "name" : "entrance",
     "isMethod" : false,
     "returnType" : {
@@ -318,100 +18,20 @@
     "body" : [ {
       "stmt" : "var",
       "decl" : {
-        "name" : "arr",
+        "name" : "name",
         "type" : {
-          "name" : "int",
-          "dimension" : 1
-        },
-        "init" : {
-          "resolvedType" : "int[]",
-          "expr" : "action",
-          "type" : {
-            "name" : "int",
-            "dimension" : 1,
-            "dimNums" : [ "10" ]
-          },
-          "initializer" : [ {
-            "resolvedType" : "int",
-            "expr" : "literal",
-            "value" : 2
-          }, {
-            "resolvedType" : "int",
-            "expr" : "literal",
-            "value" : 4
-          }, {
-            "resolvedType" : "int",
-            "expr" : "literal",
-            "value" : 5
-          }, {
-            "resolvedType" : "int",
-            "expr" : "literal",
-            "value" : 7
-          }, {
-            "resolvedType" : "int",
-            "expr" : "literal",
-            "value" : 16
-          }, {
-            "resolvedType" : "int",
-            "expr" : "literal",
-            "value" : 25
-          }, {
-            "resolvedType" : "int",
-            "expr" : "literal",
-            "value" : 33
-          }, {
-            "resolvedType" : "int",
-            "expr" : "literal",
-            "value" : 39
-          }, {
-            "resolvedType" : "int",
-            "expr" : "literal",
-            "value" : 49
-          }, {
-            "resolvedType" : "int",
-            "expr" : "literal",
-            "value" : 69
-          } ]
-        }
-      }
-    }, {
-      "stmt" : "var",
-      "decl" : {
-        "name" : "x",
-        "type" : {
-          "name" : "int",
+          "name" : "string",
           "dimension" : 0
         },
         "init" : {
-          "resolvedType" : "int",
-          "expr" : "literal",
-          "value" : 5
+          "resolvedType" : "string",
+          "expr" : "call",
+          "callee" : {
+            "expr" : "var",
+            "name" : "capture"
+          },
+          "args" : [ ]
         }
-      }
-    }, {
-      "stmt" : "expr",
-      "expr" : {
-        "resolvedType" : "int",
-        "expr" : "call",
-        "callee" : {
-          "expr" : "var",
-          "name" : "binarySearch"
-        },
-        "args" : [ {
-          "resolvedType" : "int[]",
-          "expr" : "var",
-          "name" : "arr",
-          "resolvedDecl" : "var:arr"
-        }, {
-          "resolvedType" : "int",
-          "expr" : "literal",
-          "value" : 10
-        }, {
-          "resolvedType" : "int",
-          "expr" : "var",
-          "name" : "x",
-          "resolvedDecl" : "var:x"
-        } ]
       }
     }, {
       "stmt" : "expr",
@@ -424,8 +44,19 @@
         },
         "args" : [ {
           "resolvedType" : "string",
-          "expr" : "literal",
-          "value" : "success"
+          "expr" : "binary",
+          "op" : "+",
+          "left" : {
+            "resolvedType" : "string",
+            "expr" : "literal",
+            "value" : "hello "
+          },
+          "right" : {
+            "resolvedType" : "string",
+            "expr" : "var",
+            "name" : "name",
+            "resolvedDecl" : "var:name"
+          }
         } ]
       }
     } ],
