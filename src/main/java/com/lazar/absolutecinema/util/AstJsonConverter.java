@@ -265,7 +265,7 @@ public final class AstJsonConverter {
 			return o;
 		}
 		ObjectNode o = mapper.createObjectNode();
-		// Enrichment: Add resolved type if present
+		
 		if (e.getType() != null) {
 			ResolvedType rt = e.getType();
 			o.put("resolvedType", rt.name() + "[]".repeat(rt.dimensions()));
@@ -280,7 +280,7 @@ public final class AstJsonConverter {
 				o.put("expr", "var");
 				o.put("name", v.name.getLexeme());
 				if (v.resolvedDecl != null) {
-					// Link back to where it was defined
+					
 					if (v.resolvedDecl instanceof VarDecl vd) {
 						o.put("resolvedDecl", "var:" + vd.name.getLexeme());
 					}

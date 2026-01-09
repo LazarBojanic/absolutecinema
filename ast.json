@@ -2,52 +2,51 @@
   "type" : "program",
   "declarations" : [ {
     "decl" : "setup",
-    "name" : "Shirt",
+    "name" : "Player",
     "fields" : [ {
-      "name" : "color",
+      "name" : "x",
       "type" : {
-        "name" : "string",
+        "name" : "int",
         "dimension" : 0
       }
     }, {
-      "name" : "size",
+      "name" : "y",
       "type" : {
         "name" : "int",
+        "dimension" : 0
+      }
+    }, {
+      "name" : "health",
+      "type" : {
+        "name" : "int",
+        "dimension" : 0
+      }
+    }, {
+      "name" : "speed",
+      "type" : {
+        "name" : "double",
         "dimension" : 0
       }
     } ],
     "ctor" : {
       "kind" : "ctor",
-      "name" : "Shirt",
-      "params" : [ {
-        "name" : "color",
-        "type" : {
-          "name" : "string",
-          "dimension" : 0
-        }
-      }, {
-        "name" : "size",
-        "type" : {
-          "name" : "int",
-          "dimension" : 0
-        }
-      } ],
+      "name" : "Player",
+      "params" : [ ],
       "body" : [ {
         "stmt" : "expr",
         "expr" : {
-          "resolvedType" : "string",
+          "resolvedType" : "int",
           "expr" : "set",
           "object" : {
-            "resolvedType" : "Shirt",
+            "resolvedType" : "Player",
             "expr" : "this"
           },
-          "name" : "color",
+          "name" : "x",
           "op" : "=",
           "value" : {
-            "resolvedType" : "string",
-            "expr" : "var",
-            "name" : "color",
-            "resolvedDecl" : "param:color"
+            "resolvedType" : "int",
+            "expr" : "literal",
+            "value" : 0
           }
         }
       }, {
@@ -56,39 +55,199 @@
           "resolvedType" : "int",
           "expr" : "set",
           "object" : {
-            "resolvedType" : "Shirt",
+            "resolvedType" : "Player",
             "expr" : "this"
           },
-          "name" : "size",
+          "name" : "y",
           "op" : "=",
           "value" : {
             "resolvedType" : "int",
-            "expr" : "var",
-            "name" : "size",
-            "resolvedDecl" : "param:size"
+            "expr" : "literal",
+            "value" : 0
+          }
+        }
+      }, {
+        "stmt" : "expr",
+        "expr" : {
+          "resolvedType" : "int",
+          "expr" : "set",
+          "object" : {
+            "resolvedType" : "Player",
+            "expr" : "this"
+          },
+          "name" : "health",
+          "op" : "=",
+          "value" : {
+            "resolvedType" : "int",
+            "expr" : "literal",
+            "value" : 100
+          }
+        }
+      }, {
+        "stmt" : "expr",
+        "expr" : {
+          "resolvedType" : "double",
+          "expr" : "set",
+          "object" : {
+            "resolvedType" : "Player",
+            "expr" : "this"
+          },
+          "name" : "speed",
+          "op" : "=",
+          "value" : {
+            "resolvedType" : "double",
+            "expr" : "literal",
+            "value" : 1.0
           }
         }
       } ]
     },
     "methods" : [ {
       "kind" : "scene",
-      "name" : "getColor",
+      "name" : "gainHealth",
       "isMethod" : true,
       "returnType" : {
-        "name" : "string",
+        "name" : "scrap",
         "dimension" : 0
       },
-      "params" : [ ],
+      "params" : [ {
+        "name" : "amount",
+        "type" : {
+          "name" : "int",
+          "dimension" : 0
+        }
+      } ],
       "body" : [ {
-        "stmt" : "return",
-        "value" : {
-          "resolvedType" : "string",
-          "expr" : "get",
+        "stmt" : "expr",
+        "expr" : {
+          "resolvedType" : "int",
+          "expr" : "set",
           "object" : {
-            "resolvedType" : "Shirt",
+            "resolvedType" : "Player",
             "expr" : "this"
           },
-          "name" : "color"
+          "name" : "health",
+          "op" : "+=",
+          "value" : {
+            "resolvedType" : "int",
+            "expr" : "var",
+            "name" : "amount",
+            "resolvedDecl" : "param:amount"
+          }
+        }
+      } ]
+    }, {
+      "kind" : "scene",
+      "name" : "loseHealth",
+      "isMethod" : true,
+      "returnType" : {
+        "name" : "scrap",
+        "dimension" : 0
+      },
+      "params" : [ {
+        "name" : "amount",
+        "type" : {
+          "name" : "int",
+          "dimension" : 0
+        }
+      } ],
+      "body" : [ {
+        "stmt" : "expr",
+        "expr" : {
+          "resolvedType" : "int",
+          "expr" : "set",
+          "object" : {
+            "resolvedType" : "Player",
+            "expr" : "this"
+          },
+          "name" : "health",
+          "op" : "-=",
+          "value" : {
+            "resolvedType" : "int",
+            "expr" : "var",
+            "name" : "amount",
+            "resolvedDecl" : "param:amount"
+          }
+        }
+      } ]
+    }, {
+      "kind" : "scene",
+      "name" : "move",
+      "isMethod" : true,
+      "returnType" : {
+        "name" : "scrap",
+        "dimension" : 0
+      },
+      "params" : [ {
+        "name" : "dx",
+        "type" : {
+          "name" : "int",
+          "dimension" : 0
+        }
+      }, {
+        "name" : "dy",
+        "type" : {
+          "name" : "int",
+          "dimension" : 0
+        }
+      } ],
+      "body" : [ {
+        "stmt" : "expr",
+        "expr" : {
+          "resolvedType" : "int",
+          "expr" : "set",
+          "object" : {
+            "resolvedType" : "Player",
+            "expr" : "this"
+          },
+          "name" : "x",
+          "op" : "+=",
+          "value" : {
+            "resolvedType" : "int",
+            "expr" : "binary",
+            "op" : "*",
+            "left" : {
+              "resolvedType" : "int",
+              "expr" : "var",
+              "name" : "dx",
+              "resolvedDecl" : "param:dx"
+            },
+            "right" : {
+              "resolvedType" : "double",
+              "expr" : "var",
+              "name" : "speed",
+              "resolvedDecl" : "var:speed"
+            }
+          }
+        }
+      }, {
+        "stmt" : "expr",
+        "expr" : {
+          "resolvedType" : "int",
+          "expr" : "set",
+          "object" : {
+            "resolvedType" : "Player",
+            "expr" : "this"
+          },
+          "name" : "y",
+          "op" : "+=",
+          "value" : {
+            "resolvedType" : "int",
+            "expr" : "binary",
+            "op" : "*",
+            "left" : {
+              "resolvedType" : "int",
+              "expr" : "var",
+              "name" : "dy",
+              "resolvedDecl" : "param:dy"
+            },
+            "right" : {
+              "resolvedType" : "double",
+              "expr" : "var",
+              "name" : "speed",
+              "resolvedDecl" : "var:speed"
+            }
+          }
         }
       } ]
     } ]
@@ -110,26 +269,20 @@
     "body" : [ {
       "stmt" : "var",
       "decl" : {
-        "name" : "shirt",
+        "name" : "player",
         "type" : {
-          "name" : "Shirt",
+          "name" : "Player",
           "dimension" : 0
         },
         "init" : {
-          "resolvedType" : "Shirt",
+          "resolvedType" : "Player",
           "expr" : "action",
           "type" : {
-            "name" : "Shirt",
+            "name" : "Player",
             "dimension" : 0,
             "dimNums" : [ ]
           },
-          "args" : [ {
-            "expr" : "literal",
-            "value" : "red"
-          }, {
-            "expr" : "literal",
-            "value" : 32
-          } ]
+          "args" : [ ]
         }
       }
     }, {
@@ -138,209 +291,45 @@
         "resolvedType" : "scrap",
         "expr" : "call",
         "callee" : {
-          "expr" : "var",
-          "name" : "project"
+          "expr" : "get",
+          "object" : {
+            "resolvedType" : "Player",
+            "expr" : "var",
+            "name" : "player",
+            "resolvedDecl" : "var:player"
+          },
+          "name" : "move"
         },
         "args" : [ {
-          "resolvedType" : "string",
-          "expr" : "call",
-          "callee" : {
-            "expr" : "get",
-            "object" : {
-              "resolvedType" : "Shirt",
-              "expr" : "var",
-              "name" : "shirt",
-              "resolvedDecl" : "var:shirt"
-            },
-            "name" : "getColor"
-          },
-          "args" : [ ]
-        } ]
-      }
-    }, {
-      "stmt" : "if_stmt",
-      "if" : {
-        "type" : "if",
-        "cond" : {
           "resolvedType" : "int",
-          "expr" : "binary",
-          "op" : ">",
-          "left" : {
-            "resolvedType" : "int",
-            "expr" : "get",
-            "object" : {
-              "resolvedType" : "Shirt",
-              "expr" : "var",
-              "name" : "shirt",
-              "resolvedDecl" : "var:shirt"
-            },
-            "name" : "size"
-          },
-          "right" : {
-            "resolvedType" : "int",
-            "expr" : "literal",
-            "value" : 30
-          }
-        },
-        "block" : {
-          "stmt" : "block",
-          "body" : [ {
-            "stmt" : "expr",
-            "expr" : {
-              "resolvedType" : "scrap",
-              "expr" : "call",
-              "callee" : {
-                "expr" : "var",
-                "name" : "project"
-              },
-              "args" : [ {
-                "resolvedType" : "string",
-                "expr" : "literal",
-                "value" : "large"
-              } ]
-            }
-          } ]
-        }
-      },
-      "elifs" : [ {
-        "type" : "if",
-        "cond" : {
-          "resolvedType" : "bool",
-          "expr" : "logical",
-          "op" : "&&",
-          "left" : {
-            "resolvedType" : "int",
-            "expr" : "binary",
-            "op" : ">",
-            "left" : {
-              "resolvedType" : "int",
-              "expr" : "get",
-              "object" : {
-                "resolvedType" : "Shirt",
-                "expr" : "var",
-                "name" : "shirt",
-                "resolvedDecl" : "var:shirt"
-              },
-              "name" : "size"
-            },
-            "right" : {
-              "resolvedType" : "int",
-              "expr" : "literal",
-              "value" : 20
-            }
-          },
-          "right" : {
-            "resolvedType" : "int",
-            "expr" : "binary",
-            "op" : "<=",
-            "left" : {
-              "resolvedType" : "int",
-              "expr" : "get",
-              "object" : {
-                "resolvedType" : "Shirt",
-                "expr" : "var",
-                "name" : "shirt",
-                "resolvedDecl" : "var:shirt"
-              },
-              "name" : "size"
-            },
-            "right" : {
-              "resolvedType" : "int",
-              "expr" : "literal",
-              "value" : 30
-            }
-          }
-        },
-        "block" : {
-          "stmt" : "block",
-          "body" : [ {
-            "stmt" : "expr",
-            "expr" : {
-              "resolvedType" : "scrap",
-              "expr" : "call",
-              "callee" : {
-                "expr" : "var",
-                "name" : "project"
-              },
-              "args" : [ {
-                "resolvedType" : "string",
-                "expr" : "literal",
-                "value" : "medium"
-              } ]
-            }
-          } ]
-        }
-      } ],
-      "else" : {
-        "type" : "if",
-        "cond" : {
-          "expr" : "null"
-        },
-        "block" : {
-          "stmt" : "block",
-          "body" : [ {
-            "stmt" : "expr",
-            "expr" : {
-              "resolvedType" : "scrap",
-              "expr" : "call",
-              "callee" : {
-                "expr" : "var",
-                "name" : "project"
-              },
-              "args" : [ {
-                "resolvedType" : "string",
-                "expr" : "literal",
-                "value" : "small"
-              } ]
-            }
-          } ]
-        }
-      }
-    }, {
-      "stmt" : "var",
-      "decl" : {
-        "name" : "shirtArr",
-        "type" : {
-          "name" : "Shirt",
-          "dimension" : 1
-        },
-        "init" : {
-          "resolvedType" : "Shirt[]",
-          "expr" : "action",
-          "type" : {
-            "name" : "Shirt",
-            "dimension" : 1,
-            "dimNums" : [ "5" ]
-          }
-        }
+          "expr" : "literal",
+          "value" : 5
+        }, {
+          "resolvedType" : "int",
+          "expr" : "literal",
+          "value" : 4
+        } ]
       }
     }, {
       "stmt" : "expr",
       "expr" : {
-        "resolvedType" : "Shirt",
-        "expr" : "assign",
-        "target" : {
-          "resolvedType" : "Shirt",
-          "expr" : "index",
-          "array" : {
-            "resolvedType" : "Shirt[]",
+        "resolvedType" : "scrap",
+        "expr" : "call",
+        "callee" : {
+          "expr" : "get",
+          "object" : {
+            "resolvedType" : "Player",
             "expr" : "var",
-            "name" : "shirtArr",
-            "resolvedDecl" : "var:shirtArr"
+            "name" : "player",
+            "resolvedDecl" : "var:player"
           },
-          "index" : {
-            "resolvedType" : "int",
-            "expr" : "literal",
-            "value" : 0
-          }
+          "name" : "gainHealth"
         },
-        "op" : "=",
-        "value" : {
-          "resolvedType" : "Shirt",
-          "expr" : "var",
-          "name" : "shirt",
-          "resolvedDecl" : "var:shirt"
-        }
+        "args" : [ {
+          "resolvedType" : "int",
+          "expr" : "literal",
+          "value" : 10
+        } ]
       }
     } ],
     "decl" : "scene"

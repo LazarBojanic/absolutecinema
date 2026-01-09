@@ -63,7 +63,7 @@ public final class JsonAstSwingViewer {
 			for (Map.Entry<String, JsonNode> property : properties) {
 				String key = property.getKey();
 				JsonNode val = property.getValue();
-				// Skip purely internal identifier keys that are already in the label
+				
 				if ((key.equals("decl") && label.startsWith("decl:")) ||
 					(key.equals("stmt") && label.startsWith("stmt:")) ||
 					(key.equals("expr") && label.startsWith("expr:"))) {
@@ -111,7 +111,7 @@ public final class JsonAstSwingViewer {
 		}
 		if (node.isObject()) {
 			StringBuilder sb = new StringBuilder();
-			// Main identifier with safety checks
+			
 			if (node.has("expr") && node.get("expr").isTextual()) {
 				sb.append("expr:").append(node.get("expr").asText());
 			}
@@ -127,7 +127,7 @@ public final class JsonAstSwingViewer {
 			else {
 				sb.append("{ }");
 			}
-			// Add resolved semantic information to the label
+			
 			if (node.has("resolvedType")) {
 				JsonNode rt = node.get("resolvedType");
 				sb.append(" <type: ").append(rt.isTextual() ? rt.asText() : "complex").append(">");

@@ -480,9 +480,9 @@ public final class Parser {
 			Token name = previous();
 			while (check(TokenType.LEFT_BRACKET)) {
 				advance();
-				// FIXED: Allow empty brackets for array type dimensions
+				
 				if (!check(TokenType.RIGHT_BRACKET)) {
-					// If there is an expression inside, we handle it as a dimension but LType usually doesn't store capacity
+					
 					expression();
 				}
 				consume(TokenType.RIGHT_BRACKET, "Expected right bracket after array size expression.");
@@ -500,19 +500,19 @@ public final class Parser {
 			Token name = previous();
 			while (check(TokenType.LEFT_BRACKET)) {
 				advance();
-				// FIXED: dimension parsing logic. If it's not a closing bracket, look for a literal.
+				
 				if (!check(TokenType.RIGHT_BRACKET)) {
 					if (check(TokenType.INT_LITERAL)) {
 						Token intLiteral = consume(TokenType.INT_LITERAL, "Expected array size literal.");
 						arrayCapacities.add(intLiteral);
 					}
 					else {
-						// Other expressions could be allowed here in the future, but for now we stick to literals or empty
+						
 						error(peek(), "Expected array size literal.");
 					}
 				}
 				else {
-					// FIXED: Support empty brackets [] by adding a null/empty indicator to capacities to maintain dimension count
+					
 					arrayCapacities.add(null);
 				}
 				consume(TokenType.RIGHT_BRACKET, "Expected right bracket after array size expression.");

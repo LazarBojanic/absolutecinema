@@ -12,7 +12,7 @@
 <lType> ::= ("int" | "double" | "char" | "string" | "bool" | IDENT)("[" "]")*
 <rType> ::= ("int" | "double" | "char" | "string" | "bool" | IDENT)("["INT"]")*
 
-// Statements
+
 <block> ::= "{" (<varDecl> | <statement> | ";")* "}"
 <statement> ::= <exprStmt> | <ifStmt> | <whileStmt> | <forStmt> | <returnStmt> | <assignStmt> | <block> | <emptyStmt>
 <exprStmt> ::= <expression> ";"
@@ -23,7 +23,7 @@
 <assignStmt> ::= <accessExpression> "=" <expression> ";"
 <emptyStmt> ::= ";"
 
-// Expressions
+
 <expression> ::= <assignment>
 <assignment> ::= <accessExpression> "=" <assignment> | <logical_or>
 <logical_or> ::= <logical_and> ("||" <logical_and>)*
@@ -36,10 +36,10 @@
 <postfix> ::= <primary> ( "(" <arguments>? ")" | "[" <expression> "]" | "." IDENT | "++" | "--" )*
 <primary> ::= <literal> | IDENT | "@" | "(" <expression> ")" | <arrayLiteral> | <objectInstantiation>
 
-// Access (for assignment LHS)
+
 <accessExpression> ::= (IDENT | "@" | "(" <expression> ")") ( "." IDENT | "[" <expression> "]" | "(" <arguments>? ")" )*
 
-// Literals and special expressions
+
 <literal> ::= INT | DOUBLE | STRING | CHAR | "true" | "false" | "null"
 <arrayLiteral> ::= "action" <rType> "{" (<expression> ("," <expression>)*)? "}"
 <objectInstantiation> ::= "action" <rType> "(" <arguments>? ")"
