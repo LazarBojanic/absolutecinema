@@ -77,7 +77,7 @@ public class JVMGenerator implements IGenerator {
 
 	private byte[] generateMainClass() {
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-		cw.visit(Opcodes.V1_8,
+		cw.visit(Opcodes.V21,
 				Opcodes.ACC_PUBLIC | Opcodes.ACC_SUPER,
 				MAIN_CLASS_NAME,
 				null,
