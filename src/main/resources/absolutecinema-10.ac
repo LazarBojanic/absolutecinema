@@ -20,4 +20,5 @@ scene entrance(var args: string[]): scrap{
 	var arr: int[] = action int[10] {2, 4, 5, 7, 16, 25, 33, 39, 49, 69};
 	var x: int = 5;
 	binarySearch(arr, 10, x);
+	project("success");
 }

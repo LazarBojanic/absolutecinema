@@ -97,7 +97,11 @@ public class JVMGenerator implements IGenerator {
 		mv.visitInsn(Opcodes.RETURN);
 		mv.visitMaxs(1, 1);
 		mv.visitEnd();
+
 		generateStaticInitializer(cw);
+		generateProjectMethod(cw);
+		generateCaptureMethod(cw);
+
 		for (VarDecl globalVar : globalVars.values()) {
 			generateGlobalField(cw, globalVar);
 		}
@@ -119,6 +123,29 @@ public class JVMGenerator implements IGenerator {
 		mv.visitFieldInsn(Opcodes.PUTSTATIC, MAIN_CLASS_NAME, "scanner", "Ljava/util/Scanner;");
 		mv.visitInsn(Opcodes.RETURN);
 		mv.visitMaxs(3, 0);
+		mv.visitEnd();
+	}
+
+	private void generateProjectMethod(ClassWriter cw) {
+		MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC,
+				"project", "(Ljava/lang/String;)V", null, null);
+		mv.visitCode();
+		mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+		mv.visitVarInsn(Opcodes.ALOAD, 0);
+		mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+		mv.visitInsn(Opcodes.RETURN);
+		mv.visitMaxs(2, 1);
+		mv.visitEnd();
+	}
+
+	private void generateCaptureMethod(ClassWriter cw) {
+		MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC,
+				"capture", "()Ljava/lang/String;", null, null);
+		mv.visitCode();
+		mv.visitFieldInsn(Opcodes.GETSTATIC, MAIN_CLASS_NAME, "scanner", "Ljava/util/Scanner;");
+		mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/util/Scanner", "nextLine", "()Ljava/lang/String;", false);
+		mv.visitInsn(Opcodes.ARETURN);
+		mv.visitMaxs(1, 0);
 		mv.visitEnd();
 	}
 
@@ -870,8 +897,24 @@ public class JVMGenerator implements IGenerator {
 			Variable callee = (Variable) call.callee;
 			String funcName = callee.name.getLexeme();
 
+			if (funcName.equals("project")) {
+				for (Expr arg : call.arguments) {
+					generateExpression(mv, arg);
+				}
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+						MAIN_CLASS_NAME,
+						"project",
+						"(Ljava/lang/String;)V",
+						false);
+				return;
+			}
+
 			if (funcName.equals("capture")) {
-				generateCaptureCall(mv, call);
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+						MAIN_CLASS_NAME,
+						"capture",
+						"()Ljava/lang/String;",
+						false);
 				return;
 			}
 
@@ -890,50 +933,6 @@ public class JVMGenerator implements IGenerator {
 					MAIN_CLASS_NAME,
 					funcName,
 					descriptor.toString(),
-					false);
-		}
-	}
-
-	private void generateCaptureCall(MethodVisitor mv, Call call) {
-		ResolvedType expectedType = call.getType();
-		mv.visitFieldInsn(Opcodes.GETSTATIC,
-				MAIN_CLASS_NAME,
-				"scanner",
-				"Ljava/util/Scanner;");
-
-		if (expectedType.equals(ResolvedType.INT)) {
-			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-					"java/util/Scanner",
-					"nextInt",
-					"()I",
-					false);
-		}
-		else if (expectedType.equals(ResolvedType.DOUBLE)) {
-			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-					"java/util/Scanner",
-					"nextDouble",
-					"()D",
-					false);
-		}
-		else if (expectedType.equals(ResolvedType.BOOL)) {
-			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-					"java/util/Scanner",
-					"nextBoolean",
-					"()Z",
-					false);
-		}
-		else if (expectedType.equals(ResolvedType.STRING)) {
-			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-					"java/util/Scanner",
-					"nextLine",
-					"()Ljava/lang/String;",
-					false);
-		}
-		else {
-			mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-					"java/util/Scanner",
-					"nextLine",
-					"()Ljava/lang/String;",
 					false);
 		}
 	}
@@ -1304,6 +1303,8 @@ public class JVMGenerator implements IGenerator {
 		jasminOutput.append("    return\n");
 		jasminOutput.append(".end method\n\n");
 
+		generateJasminProjectMethod();
+		generateJasminCaptureMethod();
 		generateJasminMainMethod();
 
 		for (SceneDecl scene : scenes.values()) {
@@ -1311,6 +1312,27 @@ public class JVMGenerator implements IGenerator {
 				generateJasminSceneMethod(scene);
 			}
 		}
+	}
+
+	private void generateJasminProjectMethod() {
+		jasminOutput.append(".method public static project(Ljava/lang/String;)V\n");
+		jasminOutput.append("    .limit stack 2\n");
+		jasminOutput.append("    .limit locals 1\n");
+		jasminOutput.append("    getstatic java/lang/System/out Ljava/io/PrintStream;\n");
+		jasminOutput.append("    aload 0\n");
+		jasminOutput.append("    invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V\n");
+		jasminOutput.append("    return\n");
+		jasminOutput.append(".end method\n\n");
+	}
+
+	private void generateJasminCaptureMethod() {
+		jasminOutput.append(".method public static capture()Ljava/lang/String;\n");
+		jasminOutput.append("    .limit stack 1\n");
+		jasminOutput.append("    .limit locals 0\n");
+		jasminOutput.append("    getstatic ").append(MAIN_CLASS_NAME).append("/scanner Ljava/util/Scanner;\n");
+		jasminOutput.append("    invokevirtual java/util/Scanner/nextLine()Ljava/lang/String;\n");
+		jasminOutput.append("    areturn\n");
+		jasminOutput.append(".end method\n\n");
 	}
 
 	private void generateJasminMainMethod() {
@@ -1523,30 +1545,6 @@ public class JVMGenerator implements IGenerator {
 		jasminOutput.append(indent).append(endLabel).append(":\n");
 	}
 
-	private void generateJasminStatement(Stmt stmt, String indent) {
-		if (stmt instanceof Block block) {
-			generateJasminBlock(block, 2);
-		}
-		else if (stmt instanceof ExprStmt exprStmt) {
-			generateJasminExprStmt(exprStmt, indent);
-		}
-		else if (stmt instanceof If ifStmt) {
-			generateJasminIf(ifStmt, indent);
-		}
-		else if (stmt instanceof While whileStmt) {
-			generateJasminWhile(whileStmt, indent);
-		}
-		else if (stmt instanceof For forStmt) {
-			generateJasminFor(forStmt, indent);
-		}
-		else if (stmt instanceof Return returnStmt) {
-			generateJasminReturn(returnStmt, indent);
-		}
-		else if (stmt instanceof Var varStmt) {
-			generateJasminVarDecl(varStmt.decl, indent);
-		}
-	}
-
 	private void generateJasminExprStmt(ExprStmt exprStmt, String indent) {
 		generateJasminExpression(exprStmt.expr, indent);
 		if (exprStmt.expr.getType() != null && !exprStmt.expr.getType().name().equals("scrap")) {
@@ -1680,18 +1678,13 @@ public class JVMGenerator implements IGenerator {
 	private void generateJasminCall(Call call, String indent) {
 		if (call.callee instanceof Variable var) {
 			String funcName = var.name.getLexeme();
+			if (funcName.equals("project")) {
+				generateJasminExpression(call.arguments.get(0), indent);
+				jasminOutput.append(indent).append("invokestatic ").append(MAIN_CLASS_NAME).append("/project(Ljava/lang/String;)V\n");
+				return;
+			}
 			if (funcName.equals("capture")) {
-				jasminOutput.append(indent).append("getstatic ").append(MAIN_CLASS_NAME).append("/scanner Ljava/util/Scanner;\n");
-				ResolvedType expectedType = call.getType();
-				if (expectedType.equals(ResolvedType.INT)) {
-					jasminOutput.append(indent).append("invokevirtual java/util/Scanner/nextInt()I\n");
-				}
-				else if (expectedType.equals(ResolvedType.DOUBLE)) {
-					jasminOutput.append(indent).append("invokevirtual java/util/Scanner/nextDouble()D\n");
-				}
-				else if (expectedType.equals(ResolvedType.STRING)) {
-					jasminOutput.append(indent).append("invokevirtual java/util/Scanner/nextLine()Ljava/lang/String;\n");
-				}
+				jasminOutput.append(indent).append("invokestatic ").append(MAIN_CLASS_NAME).append("/capture()Ljava/lang/String;\n");
 				return;
 			}
 
@@ -1750,8 +1743,6 @@ public class JVMGenerator implements IGenerator {
 
 	private void generateJasminLogical(Logical logical, String indent) {
 		String op = logical.op.getLexeme();
-		Label falseLabel = new Label();
-		Label endLabel = new Label();
 
 		if (op.equals("&&")) {
 			generateJasminExpression(logical.left, indent);
@@ -1817,6 +1808,30 @@ public class JVMGenerator implements IGenerator {
 					jasminOutput.append(indent).append("putstatic ").append(MAIN_CLASS_NAME).append("/").append(varName).append(" ").append(fieldType.getDescriptor()).append("\n");
 				}
 			}
+		}
+	}
+
+	private void generateJasminStatement(Stmt stmt, String indent) {
+		if (stmt instanceof Block block) {
+			generateJasminBlock(block, 2);
+		}
+		else if (stmt instanceof ExprStmt exprStmt) {
+			generateJasminExprStmt(exprStmt, indent);
+		}
+		else if (stmt instanceof If ifStmt) {
+			generateJasminIf(ifStmt, indent);
+		}
+		else if (stmt instanceof While whileStmt) {
+			generateJasminWhile(whileStmt, indent);
+		}
+		else if (stmt instanceof For forStmt) {
+			generateJasminFor(forStmt, indent);
+		}
+		else if (stmt instanceof Return returnStmt) {
+			generateJasminReturn(returnStmt, indent);
+		}
+		else if (stmt instanceof Var varStmt) {
+			generateJasminVarDecl(varStmt.decl, indent);
 		}
 	}
 

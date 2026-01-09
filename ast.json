@@ -413,6 +413,21 @@
           "resolvedDecl" : "var:x"
         } ]
       }
+    }, {
+      "stmt" : "expr",
+      "expr" : {
+        "resolvedType" : "scrap",
+        "expr" : "call",
+        "callee" : {
+          "expr" : "var",
+          "name" : "project"
+        },
+        "args" : [ {
+          "resolvedType" : "string",
+          "expr" : "literal",
+          "value" : "success"
+        } ]
+      }
     } ],
     "decl" : "scene"
   } ]
