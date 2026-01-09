@@ -15,23 +15,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class App {
+	private File sourceFile;
+	private String sourceCode;
 	private Lexer lexer;
 	private Parser parser;
 	private SemanticAnalyzer semanticAnalyzer;
-	private IGenerator generator;
-	private File sourceFile;
-	private String sourceCode;
-	private GeneratorType generatorType;
-	private GeneratorMode generatorMode;
+	private boolean codeGen;
+	private Generator generator;
 	private GenerationResult generationResult;
 
 	public App(String[] args) {
 		try {
-			if (args.length == 3) {
+			if (args.length == 2) {
 				sourceFile = Util.loadFileFromResources(args[0]);
 				sourceCode = Files.readString(sourceFile.toPath(), StandardCharsets.UTF_8);
-				generatorType = GeneratorType.valueOf(args[1].toUpperCase());
-				generatorMode = GeneratorMode.valueOf(args[2].toUpperCase());
+				codeGen = Boolean.parseBoolean(args[1]);
 			}
 			else {
 				throw new IllegalArgumentException("Invalid number of arguments");
@@ -59,23 +57,14 @@ public class App {
 			semanticAnalyzer.analyze();
 
 			System.out.println("Semantic analysis successful!");
-			System.out.println("Generating IR...");
-			if (generatorType.equals(GeneratorType.JVM)) {
-				generator = new JVMGenerator(generatorMode);
-			}
-			else {
-				generator = new LLVMGenerator(generatorMode);
-			}
-			generationResult = generator.generate(program);
-			if (generator instanceof JVMGenerator) {
+			if(codeGen){
+				System.out.println("Generating IR...");
+				generator = new Generator();
+				generator.generate(program);
 				Util.writeStringToFile(generationResult.getPlainTextIR(), "./Main.j");
 				Util.writeBytesToFile(generationResult.getBinaryIR(), "./Main.class");
+				System.out.println("IR generation successful!");
 			}
-			else {
-				Util.writeStringToFile(generationResult.getPlainTextIR(), "./Main.ll");
-				Util.writeBytesToFile(generationResult.getBinaryIR(), "./Main.bc");
-			}
-			System.out.println("IR generation successful!");
 			System.out.println("Converting AST to JSON...");
 			AstJsonConverter printer = new AstJsonConverter();
 			String json = printer.convert(program);

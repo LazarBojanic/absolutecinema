@@ -8,7 +8,7 @@ import org.objectweb.asm.*;
 
 import java.util.*;
 
-public class JVMGenerator implements IGenerator {
+public class Generator implements IGenerator {
 	private final GeneratorMode generatorMode;
 	private final Map<String, SceneDecl> scenes = new HashMap<>();
 	private final Map<String, VarDecl> globalVars = new HashMap<>();
@@ -34,7 +34,7 @@ public class JVMGenerator implements IGenerator {
 		}
 	}
 
-	public JVMGenerator(GeneratorMode generatorMode) {
+	public Generator(GeneratorMode generatorMode) {
 		this.generatorMode = generatorMode;
 	}
 
