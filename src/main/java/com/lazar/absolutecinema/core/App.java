@@ -60,7 +60,7 @@ public class App {
 			if(codeGen){
 				System.out.println("Generating IR...");
 				generator = new Generator();
-				generator.generate(program);
+				generationResult = generator.generate(program);
 				Util.writeStringToFile(generationResult.getPlainTextIR(), "./Main.j");
 				Util.writeBytesToFile(generationResult.getBinaryIR(), "./Main.class");
 				System.out.println("IR generation successful!");

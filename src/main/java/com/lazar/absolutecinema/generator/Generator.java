@@ -8,8 +8,7 @@ import org.objectweb.asm.*;
 
 import java.util.*;
 
-public class Generator implements IGenerator {
-	private final GeneratorMode generatorMode;
+public class Generator {
 	private final Map<String, SceneDecl> scenes = new HashMap<>();
 	private final Map<String, VarDecl> globalVars = new HashMap<>();
 	private final Map<String, SetupDecl> setups = new HashMap<>();
@@ -34,21 +33,7 @@ public class Generator implements IGenerator {
 		}
 	}
 
-	public Generator(GeneratorMode generatorMode) {
-		this.generatorMode = generatorMode;
-	}
-
-	@Override
 	public GenerationResult generate(Program program) {
-		if (generatorMode.equals(GeneratorMode.LIBRARY)) {
-			return generateWithLibrary(program);
-		}
-		else {
-			return generateManually(program);
-		}
-	}
-
-	private GenerationResult generateWithLibrary(Program program) {
 		try {
 			for (Node item : program.items) {
 				if (item instanceof SceneDecl scene) {
@@ -1833,9 +1818,5 @@ public class Generator implements IGenerator {
 		else if (stmt instanceof Var varStmt) {
 			generateJasminVarDecl(varStmt.decl, indent);
 		}
-	}
-
-	private GenerationResult generateManually(Program program) {
-		return new GenerationResult("; Manual mode not implemented.", new byte[0]);
 	}
 }
