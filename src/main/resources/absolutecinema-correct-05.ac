@@ -1,0 +1,8 @@
+scene add(var a: int, var b: int): int {
+	cut a + b;
+}
+
+scene entrance(var args: string[]): scrap {
+	var result: int = add(5, 3);
+	project("done");
+}

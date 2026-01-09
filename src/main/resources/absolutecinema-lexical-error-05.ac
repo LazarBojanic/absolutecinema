@@ -1,0 +1,4 @@
+scene entrance(var args: string[]): scrap {
+	var flag: bool = true & false;
+	project(flag);
+}

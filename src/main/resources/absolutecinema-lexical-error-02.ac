@@ -1,0 +1,4 @@
+scene entrance(var args: string[]): scrap {
+	var msg: string = "unterminated string;
+	project(msg);
+}

@@ -1,0 +1,4 @@
+scene entrance(var args: string[]): scrap {
+	var arr: int[] = action int[5];
+	arr[0 = 10;
+}

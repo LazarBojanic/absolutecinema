@@ -2,6 +2,48 @@
   "type" : "program",
   "declarations" : [ {
     "kind" : "scene",
+    "name" : "add",
+    "isMethod" : false,
+    "returnType" : {
+      "name" : "int",
+      "dimension" : 0
+    },
+    "params" : [ {
+      "name" : "a",
+      "type" : {
+        "name" : "int",
+        "dimension" : 0
+      }
+    }, {
+      "name" : "b",
+      "type" : {
+        "name" : "int",
+        "dimension" : 0
+      }
+    } ],
+    "body" : [ {
+      "stmt" : "return",
+      "value" : {
+        "resolvedType" : "int",
+        "expr" : "binary",
+        "op" : "+",
+        "left" : {
+          "resolvedType" : "int",
+          "expr" : "var",
+          "name" : "a",
+          "resolvedDecl" : "param:a"
+        },
+        "right" : {
+          "resolvedType" : "int",
+          "expr" : "var",
+          "name" : "b",
+          "resolvedDecl" : "param:b"
+        }
+      }
+    } ],
+    "decl" : "scene"
+  }, {
+    "kind" : "scene",
     "name" : "entrance",
     "isMethod" : false,
     "returnType" : {
@@ -18,19 +60,27 @@
     "body" : [ {
       "stmt" : "var",
       "decl" : {
-        "name" : "name",
+        "name" : "result",
         "type" : {
-          "name" : "string",
+          "name" : "int",
           "dimension" : 0
         },
         "init" : {
-          "resolvedType" : "string",
+          "resolvedType" : "int",
           "expr" : "call",
           "callee" : {
             "expr" : "var",
-            "name" : "capture"
+            "name" : "add"
           },
-          "args" : [ ]
+          "args" : [ {
+            "resolvedType" : "int",
+            "expr" : "literal",
+            "value" : 5
+          }, {
+            "resolvedType" : "int",
+            "expr" : "literal",
+            "value" : 3
+          } ]
         }
       }
     }, {
@@ -44,19 +94,8 @@
         },
         "args" : [ {
           "resolvedType" : "string",
-          "expr" : "binary",
-          "op" : "+",
-          "left" : {
-            "resolvedType" : "string",
-            "expr" : "literal",
-            "value" : "hello "
-          },
-          "right" : {
-            "resolvedType" : "string",
-            "expr" : "var",
-            "name" : "name",
-            "resolvedDecl" : "var:name"
-          }
+          "expr" : "literal",
+          "value" : "done"
         } ]
       }
     } ],

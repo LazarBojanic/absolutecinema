@@ -478,10 +478,8 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 
 	private void checkTypeMatch(ResolvedType exp, ResolvedType act, Token t, String m) {
 		if (exp != ResolvedType.NULL && act != ResolvedType.NULL && !exp.equals(act)) {
-			if (!act.equals(ResolvedType.STRING)) {
-				throw new RuntimeException(m + " at line " + t.getLine()
-					+ ". Expected " + exp.name() + " but got " + act.name());
-			}
+			throw new RuntimeException(m + " at line " + t.getLine()
+				+ ". Expected " + exp.name() + " but got " + act.name());
 		}
 	}
 

@@ -1,0 +1,4 @@
+scene entrance(var args: string[]): scrap {
+	var name: string = "test";
+	project(name#invalid);
+}

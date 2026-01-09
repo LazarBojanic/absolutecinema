@@ -1,0 +1,6 @@
+scene entrance(var args: string[]): scrap {
+	var x: int = 5;
+	var y: bool = true;
+	var z: int = x + y;
+	project(z);
+}
