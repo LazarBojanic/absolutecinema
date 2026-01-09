@@ -265,6 +265,44 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	@Override
 	public ResolvedType visitUnary(Unary e) {
 		ResolvedType t = e.right.accept(this);
+		String op = e.op.getLexeme();
+
+		// Handle explicit casting
+		if (op.equals("int") || op.equals("double")) {
+			ResolvedType targetType = new ResolvedType(op, 0);
+
+			// Check if casting is allowed
+			if (e.right instanceof Literal lit && lit.value instanceof Double doubleVal) {
+				// Casting double to int: only allowed if decimal part is all zeros
+				if (op.equals("int")) {
+					if (doubleVal == Math.floor(doubleVal)) {
+						e.setType(targetType);
+						return targetType;
+					}
+					else {
+						throw new RuntimeException("Cannot cast " + doubleVal +
+								" to int: decimal part is not all zeros at line " + e.op.getLine());
+					}
+				}
+			}
+
+			// int to double is always allowed
+			if (op.equals("double") && t.equals(ResolvedType.INT)) {
+				e.setType(targetType);
+				return targetType;
+			}
+
+			// double to int (general case)
+			if (op.equals("int") && t.equals(ResolvedType.DOUBLE)) {
+				e.setType(targetType);
+				return targetType;
+			}
+
+			throw new RuntimeException("Invalid cast from " + t.name() + " to " + op +
+					" at line " + e.op.getLine());
+		}
+
+		// Regular unary operations
 		e.setType(t);
 		return t;
 	}

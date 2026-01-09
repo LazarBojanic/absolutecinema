@@ -1,0 +1,180 @@
+PROGRAMSKI PREVODIOCI
+ZADATAK ZA DRUGU KOLOKVIJUMSKU NEDELJU
+DODATAK NA PRVI DOMAĆI ZADATAK
+SEMANTIČKA ANALIZA I KOMPAJLOVANJE
+SPECIFIKACIJA
+U nastavku je predstavljena specifikacija dodatka na prvi domaći zadatak koji rade studenti na
+predmetu Programski prevodioci.
+Cilj
+Cilj zadatka jeste razumevanje načina prevođenja programskih kodova u proizvoljnom jeziku
+opšteg domena, sa fokusom na semantičku analizu i generisanje međukoda.
+Zadatak
+Zadatak studenata jeste da implementiraju semantičku analizu nad programskim jezikom koji su
+osmislili i donekle analizirali na prvom domaćem zadatku, te da završe kompajlovanje time što će
+kod iz svog jezika prevesti u međujezik.
+Kao osnovu za izradu ovog zadatka studenti treba da koriste leksički i sintaksni analizator koji su
+implementirali u sklopu prvog domaćeg zadatka. Na već započet kod treba da dodaju nove
+funkcionalnosti.
+Semantička analiza
+Cilj semantičke analize treba da bude:
+• utvrđivanje oblasti vidljivosti svih imena iz programskog koda
+• dodeljivanje tipova podataka svim čvorovima izrađenog sintaksnog stabla
+Za svako ime zadato u programskom kodu potrebno je dati oblast vidljivosti. Ovo uključuje:
+• ključne reči i simbole – vidljivi u bilo kom delu programskog koda
+• imena funkcija i promenljivih – vidljiva nakon deklaracije
+Semantički analizator treba da prati sledeća ograničenja:
+• statička tipizacija
+• tipska sigurnost (type safety) bez mogućnosti implicitnog kastovanja
+• statičko ugnježdavanje blokova
+Za svako okruženje je potrebno definisati skup vidljivih imena (izuzeti iz okruženja ključne reči i
+simbole koji su u njima sigurno vidljivi).
+Ukoliko je blok ugnježden u nekom drugom bloku, on treba da nasledi imena iz dostupnog
+okruženja. Prilikom izlaska iz bloka se brišu imena deklarisana u tom bloku.
+U osmišljene jezike treba dodati mogućnost eksplicitnog kastovanja numeričkih tipova:
+• uvek je dozvoljeno kastovanje iz celog u realan broj
+• kastovanje iz realnog u celi broj je dozvoljeno samo ukoliko se iza decimalne tačke nalaze
+isključivo cifre 0
+Implicitno kastovanje nije dozvoljeno.
+( 1 )
+PROGRAMSKI PREVODIOCI
+ZADATAK ZA DRUGU KOLOKVIJUMSKU NEDELJU
+DODATAK NA PRVI DOMAĆI ZADATAK
+SEMANTIČKA ANALIZA I KOMPAJLOVANJE
+SPECIFIKACIJA
+Greške koje bi pritom trebalo obraditi su:
+• nepostojanje main funkcije
+• više od jedne deklaracije main funkcije
+• korišćenje promenljive/funkcije koja prethodno nije deklarisana
+◦ primer: int main() {a = a + a;}
+• deklaracija promenljive/funkcije koja već postoji u tom okruženju
+◦ primer: int a; int b = a; int a;
+• neispravno kastovanje (objašnjeno na prethodnoj strani)
+• nepodudaranje tipova podataka u aritmetičkim izrazima (ili su svi celi ili svi realni brojevi)
+◦ primer: int x = a + 3.5;
+• u izrazima sa relacionim operatorima operandi nisu brojevi, a rezultat nije logička vrednost
+◦ primer: double x = 1 < true;
+• u logičkim izrazima operandi i/ili rezultat nisu logički izrazi
+◦ primer: int x = true && 0.5;
+• neispravno korišćenje grananja i petlji
+◦ primer: if ("1") {}
+• dodavanje vrednosti u niz pogrešnog tipa
+◦ primer: int a[5]; a[0] = 4.5;
+• nepodudaranje povratnog tipa funkcije sa povratnom vrednošću
+◦ primer: int vrati0 {return 1.0 – 1.0;}
+• nepodudaranje broja parametara funkcije i argumenata pri pozivu funkcije
+◦ primer: int f(int a) {return a;} int main() {int x = f();}
+• nepodudaranje bar jednog od tipova parametara funkcije i argumenata pri pozivu funkcije
+◦ primer: int f(int a) {return a;} int main() {f(1.5);}
+• nepodudaranje povratnog tipa funkcije sa tipom podataka koji je potreban u izrazu
+◦ primer: int f(int a) {return a;} int main() {bool p = f(5);}
+• pristup preko indeksa u tipu podatka koji ne podržava indeksiranje
+◦ primer: int x = 5; x[2]; int[] a; a[0][0];
+• poziv objekta kao funkcije
+◦ primer: int x = 5; x();
+Izlaz iz semantičke analize treba da bude:
+• poruka o semantičkoj grešci (u slučaju da je kod semantički neispravan)
+◦ vrsta semantičke greške (jedna od zadatih u prethodnom listingu)
+◦ podaci o čvoru u sintaksnom stablu na kome je nastala semantička greška
+◦ lokacija u programskom kodu na kojoj je nastala semantička greška
+• tipizirano sintaksno stablo (u slučaju da je kod semantički ispravan), za svaki čvor navesti
+◦ sve što je bilo poznato nakon sintaksne analize
+◦ tip podatka u tom čvoru
+( 2 )
+PROGRAMSKI PREVODIOCI
+ZADATAK ZA DRUGU KOLOKVIJUMSKU NEDELJU
+DODATAK NA PRVI DOMAĆI ZADATAK
+SEMANTIČKA ANALIZA I KOMPAJLOVANJE
+SPECIFIKACIJA
+Generisanje međukoda
+Ukoliko je kod leksički, sintaksno i semantički ispravan, potrebno ga je prevesti u međukod napisan
+u jeziku stek mašine sa sledećim komandama:
+• push [atom] – dodavanje literala/promenljive na stek
+• pop – uklanjanje poslednjeg elementa sa steka
+• odgovarajuće komande za aritmetičke, relacione i logičke operacije koje se izvršavaju nad
+poslednjim dodatim elementima na steku, te rezultat odgovarajuće operacije skladište na
+steku takođe (operandi treba da budu automatski skinuti sa steka)
+• jmp [label] – skače na prvu instrukciju iza labele sa zadatim imenom
+• jmp [ip] – skače na liniju sa zadatim rednim brojem
+Svaku naredbu treba pretvoriti u niz ovih komandi. Na primer, naredbu int a = 2 + 3 treba
+pretvoriti u niz instrukcija: push 2, push 3, add. Instrukcije jmp treba koristiti:
+• pri grananjima i petljama, po potrebi
+• pri pozivima funkcija, obavezno
+Dozvoljeno je imati samo jednu promenljivu – IP, koja sadrži redni broj linije koja se trenutno
+izvršava. Ona će pomoći prilikom skakanja (instrukcija jmp).
+Koraci u izvršavanju programa
+1. Na početku se izvršava deo koda koji je izrađen na prvom domaćem zadatku. Dalji koraci se
+izvršavaju samo ukoliko je kod leksički i sintaksno ispravan.
+2. Zatim se radi semantička analiza. Ulaz u semantičku analizu treba da bude sintaksno stablo,
+izlaz iz nje treba da bude isto to stablo, ali sa dodeljenim tipovima. Ukoliko kod nije
+semantički ispravan, treba ispisati poruku o grešci i prekinuti program.
+3. Na kraju se na osnovu stabla generiše međukod. Ovde nema nikakvih provera ispravnosti
+koda, treba samo generisati i ispisati kod u posebnom fajlu. Ulaz u generator međukoda
+treba da bude stablo dobijeno semantičkim analizatorom
+Arhitektura
+Arhitektura programa mora da prati određene principe, koji su navedeni u sledećem listingu:
+• leksički, sintaksni i semantički analizator i generator međukoda moraju da budu u različitim
+paketima, nazvanim lexer, parser, semantic i intermidiate
+• u osnovnom, main, paketu, pozivaju se leksički, sintaksni i semantički analizator redom, pa
+onda i generator međukoda, sa odgovarajućim prosleđenim argumentima
+• kod mora da bude čitljiv, a komponente istog jasno struktuirane
+( 3 )
+PROGRAMSKI PREVODIOCI
+ZADATAK ZA DRUGU KOLOKVIJUMSKU NEDELJU
+DODATAK NA PRVI DOMAĆI ZADATAK
+SEMANTIČKA ANALIZA I KOMPAJLOVANJE
+SPECIFIKACIJA
+Tehnička specifikacija
+• Ovaj dodatak mogu raditi samo oni studenti koji su autori započetog koda za prvi domaći
+zadatak. Ukoliko jedan od njih ne želi da radi ovaj dodatak, drugi ga može odraditi
+samostalno.
+• Kod se mora raditi u istom programskom jeziku u kom se radio i kod za prvi domaći
+zadatak.
+• Svaki domaći zadatak, da bi se dobili poeni, mora da bude odbranjen. Od studenata se traži
+da dokažu da su autori svog programskog koda.
+Predaja
+Predaja projekta se vrši preko forme na sledećem linku: https://forms.gle/wQ5WHC6NrXQiABZz7.
+Da biste uspešno predali, treba da imate:
+• dokument sa specifikacijom programskog jezika
+• zip
+◦ projektni kod
+◦ 10 primera programskih kodova za dizajnirani jezik
+▪ neki od tih primera moraju da sadrže leksičke, sintaksne i semantičke greške
+Poslednji rok za predaju dodatka na prvi domaći zadatak je petak, 09.01.2026. u 23:59:59. Svi
+projekti poslati ili modifikovani nakon toga se neće uvažiti.
+Odbrana
+Da bi tim dobio poene, mora biti prisutan na zakazanoj odbrani.
+Na odbrani domaćeg zadatka student pokazuje razumevanje osnovnih pojmova koji su bili obrađeni
+domaćim zadatkom i dokazuje da je priloženi projektni kod njegovo delo.
+Da bi se odbrana prihvatila, student treba da bude u stanju da odgovori na sledeće vrste pitanja:
+• sva pitanja iz gradiva koja asistent utvrdi da je student savladao na osnovu priloženog koda
+• pitanja o pokretanju projektnog koda
+• pitanja o detaljima projektnog koda i/ili dizajniranog programskog jezika
+• pitanja o eventualnim poteškoćama prilikom izrade projektnog koda i načina njihovog
+prevazilaženja
+• pitanja o eventualnoj dopuni i/ili prepravci programskog koda
+Asistent zadržava pravo da studenta na odbrani pita sve što misli da je potrebno da student zna
+nakon uspešne izrade prvog domaćeg zadatka.
+Student koji iz neopravdanog razloga ne bude prisustvovao na odbrani ili se utvrdi da ne poznaje
+gradivo ili da je njegov teret izrade "vukao" ostatak tima, automatski će dobiti 0 poena.
+( 4 )
+PROGRAMSKI PREVODIOCI
+ZADATAK ZA DRUGU KOLOKVIJUMSKU NEDELJU
+DODATAK NA PRVI DOMAĆI ZADATAK
+SEMANTIČKA ANALIZA I KOMPAJLOVANJE
+SPECIFIKACIJA
+Bodovanje
+Domaći zadatak je podeljen na celine koje se ocenjuju na sledeći način:
+# ZAHTEV POENI
+1 Semantička analiza: Provera okruženja 2
+2 Semantička analiza: Eksplicitno kastovanje i provera tipova 4
+3 Semantička analiza: Dodavanje tipova podataka na sintaksno stablo 2
+4 Generisanje međukoda: Upotreba steka i prevođenje operatora 3
+5 Generisanje međukoda: Labele, promenljiva IP, prevođenje nelinearne strukture 7
+6 Arhitektura projektnog koda, redosled izvršavanja etapa 2
+Napomena: Ukoliko ne postoji bar jedan primer koda u dizajniranom jeziku, te bar jedan primer
+koji nije semantički ispravan, domaći zadatak se označava kao da nije predat. Slično važi i za
+projektne kodove koji ne mogu da se pokrenu.
+Ukupan broj poena koji se može osvojiti je 20, a maksimalna preciznost je 0.25.
+Konačnu ocenu za prvi domaći zadatak student dobija nakon proglašenja njegove odbrane
+uspešnom. Ukoliko do pomenutog ne dođe (odnosno, ako odbrane nije bilo ili ako se smatra
+neuspešnom), student dobija 0 poena.

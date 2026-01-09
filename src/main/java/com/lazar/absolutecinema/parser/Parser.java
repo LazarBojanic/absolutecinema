@@ -424,6 +424,14 @@ public final class Parser {
 		if (match(TokenType.IDENTIFIER)) {
 			return new Variable(previous());
 		}
+		// Add explicit casting support
+		if (match(TokenType.INT, TokenType.DOUBLE)) {
+			Token castToken = previous();
+			consume(TokenType.LEFT_PAREN, "Expected '(' after cast type");
+			Expr expr = expression();
+			consume(TokenType.RIGHT_PAREN, "Expected ')' after cast expression");
+			return new Unary(castToken, expr);
+		}
 		if (match(TokenType.AT)) {
 			return new This(previous());
 		}
