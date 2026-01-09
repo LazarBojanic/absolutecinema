@@ -925,16 +925,16 @@ public class Generator {
 
 	private void generateAssign(MethodVisitor mv, Assign assign) {
 		if (assign.target instanceof Index) {
-			// For array assignment: arr[i] = value
-			// IASTORE/AASTORE/DASTORE expects: [array, index, value] from bottom to top
+			
+			
 			Index indexExpr = (Index) assign.target;
 
-			// Generate in the correct order: array, index, value
+			
 			generateExpression(mv, indexExpr.array);
 			generateExpression(mv, indexExpr.index);
 			generateExpression(mv, assign.value);
 
-			// Now stack is: [array, index, value] - perfect for IASTORE
+			
 			ResolvedType elementType = indexExpr.getType();
 			if (elementType.equals(ResolvedType.INT)) {
 				mv.visitInsn(Opcodes.IASTORE);
@@ -946,14 +946,14 @@ public class Generator {
 				mv.visitInsn(Opcodes.AASTORE);
 			}
 
-			// IASTORE consumes all values and leaves nothing on stack
-			// But assignments should return the assigned value for expression chaining
-			// So we need to push the value back
+			
+			
+			
 			generateExpression(mv, assign.value);
 			return;
 		}
 
-		// Regular variable assignment
+		
 		generateExpression(mv, assign.value);
 
 		if (assign.target instanceof Variable) {
@@ -1031,13 +1031,13 @@ public class Generator {
 			generateArrayWithInitializer(mv, typeName, dimensions, actionNew.arrayInitializer);
 		}
 		else {
-			// Extract array sizes from RType if args is not provided
+			
 			List<Expr> sizes = actionNew.args;
 			if (sizes == null || sizes.isEmpty()) {
 				sizes = new ArrayList<>();
 				for (Token capacityToken : actionNew.type.arrayCapacities) {
 					if (capacityToken != null) {
-						// Convert Token to Literal expression
+						
 						Integer value = (Integer) capacityToken.getLiteral();
 						Literal literal = new Literal(value);
 						literal.setType(ResolvedType.INT);
