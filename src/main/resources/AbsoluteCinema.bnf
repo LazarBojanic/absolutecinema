@@ -1,46 +1,125 @@
-<program> ::= (<setupDecl> | <sceneDecl> | <varDecl>)* EOF
+<program> ::= <topLevelList> EOF
+<topLevelList> ::= <topLevel> <topLevelList> | ε
+<topLevel> ::= <setupDecl> | <sceneDecl> | <varDecl>
 
-<setupDecl> ::= "setup" IDENT "{" (<fieldDecl> | <ctorDecl> | <methodDecl> | ";")* "}"
-<fieldDecl> ::= "var" IDENT ":" <lType> ("=" <expression>)? ";"
-<ctorDecl> ::= IDENT "(" <params>? ")" <block>
-<methodDecl> ::= "scene" IDENT "(" <params>? ")" ":" ("scrap" | <lType>) <block>
-<sceneDecl> ::= "scene" IDENT "(" <params>? ")" ":" ("scrap" | <lType>) <block>
-<varDecl> ::= "var" IDENT ":" <lType> ("=" <expression>)? ";"
-<params> ::= <param> ("," <param>)*
-<param> ::= ("var")? IDENT ":" <lType>
+<setupDecl> ::= "setup" IDENT "{" <setupBody> "}"
+<setupBody> ::= <setupMember> <setupBody> | ε
+<setupMember> ::= <fieldDecl> | <ctorDecl> | <methodDecl> | ";"
 
-<lType> ::= ("int" | "double" | "char" | "string" | "bool" | IDENT)("[" "]")*
-<rType> ::= ("int" | "double" | "char" | "string" | "bool" | IDENT)("["INT"]")*
+<fieldDecl> ::= "var" IDENT ":" <lType> <optInitializer> ";"
+<optInitializer> ::= "=" <expression> | ε
 
+<ctorDecl> ::= IDENT "(" <optParams> ")" <block>
+<methodDecl> ::= "scene" IDENT "(" <optParams> ")" ":" <returnType> <block>
 
-<block> ::= "{" (<varDecl> | <statement> | ";")* "}"
-<statement> ::= <exprStmt> | <ifStmt> | <whileStmt> | <forStmt> | <returnStmt> | <assignStmt> | <block> | <emptyStmt>
+<sceneDecl> ::= "scene" IDENT "(" <optParams> ")" ":" <returnType> <block>
+<returnType> ::= "scrap" | <lType>
+
+<varDecl> ::= "var" IDENT ":" <lType> <optInitializer> ";"
+
+<optParams> ::= <params> | ε
+<params> ::= <param> <paramTail>
+<paramTail> ::= "," <param> <paramTail> | ε
+<param> ::= <optVar> IDENT ":" <lType>
+<optVar> ::= "var" | ε
+
+<lType> ::= <baseType> <arrayDims>
+<baseType> ::= "int" | "double" | "char" | "string" | "bool" | IDENT
+<arrayDims> ::= "[" "]" <arrayDims> | ε
+
+<rType> ::= <baseType> <rArrayDims>
+<rArrayDims> ::= "[" INT "]" <rArrayDims> | ε
+
+<block> ::= "{" <blockItems> "}"
+<blockItems> ::= <blockItem> <blockItems> | ε
+<blockItem> ::= <varDecl> | <statement> | ";"
+
+<statement> ::= <exprStmt>
+              | <ifStmt>
+              | <whileStmt>
+              | <forStmt>
+              | <returnStmt>
+              | <assignStmt>
+              | <block>
+              | ";"
+
 <exprStmt> ::= <expression> ";"
-<ifStmt> ::= "if" "(" <expression> ")" <block> ("elif" "(" <expression> ")" <block>)* ("else" <block>)?
-<whileStmt> ::= "keepRollingIf" "(" <expression> ")" <block>
-<forStmt> ::= "keepRollingDuring" "(" (<varDecl> | <exprStmt> | ";") <expression>? ";" <expression>? ")" <block>
-<returnStmt> ::= "cut" <expression>? ";"
-<assignStmt> ::= <accessExpression> "=" <expression> ";"
-<emptyStmt> ::= ";"
 
+<ifStmt> ::= "if" "(" <expression> ")" <block> <elifList> <optElse>
+<elifList> ::= "elif" "(" <expression> ")" <block> <elifList> | ε
+<optElse> ::= "else" <block> | ε
+
+<whileStmt> ::= "keepRollingIf" "(" <expression> ")" <block>
+
+<forStmt> ::= "keepRollingDuring"
+              "(" <forInit> <optExpression> ";" <optExpression> ")" <block>
+<forInit> ::= <varDecl> | <exprStmt> | ";"
+<optExpression> ::= <expression> | ε
+
+<returnStmt> ::= "cut" <optExpression> ";"
+
+<assignStmt> ::= <accessExpression> "=" <expression> ";"
 
 <expression> ::= <assignment>
-<assignment> ::= <accessExpression> "=" <assignment> | <logical_or>
-<logical_or> ::= <logical_and> ("||" <logical_and>)*
-<logical_and> ::= <equality> ("&&" <equality>)*
-<equality> ::= <comparison> (("==" | "!=") <comparison>)*
-<comparison> ::= <term> (("<" | "<=" | ">" | ">=") <term>)*
-<term> ::= <factor> (("+" | "-") <factor>)*
-<factor> ::= <unary> (("*" | "/" | "%") <unary>)*
-<unary> ::= ("!" | "+" | "-" | "++" | "--") <unary> | <postfix>
-<postfix> ::= <primary> ( "(" <arguments>? ")" | "[" <expression> "]" | "." IDENT | "++" | "--" )*
-<primary> ::= <literal> | IDENT | "@" | "(" <expression> ")" | <arrayLiteral> | <objectInstantiation>
 
+<assignment> ::= <accessExpression> "=" <assignment>
+               | <logical_or>
 
-<accessExpression> ::= (IDENT | "@" | "(" <expression> ")") ( "." IDENT | "[" <expression> "]" | "(" <arguments>? ")" )*
+<logical_or> ::= <logical_and> <logical_or_tail>
+<logical_or_tail> ::= "||" <logical_and> <logical_or_tail> | ε
 
+<logical_and> ::= <equality> <logical_and_tail>
+<logical_and_tail> ::= "&&" <equality> <logical_and_tail> | ε
+
+<equality> ::= <comparison> <equality_tail>
+<equality_tail> ::= ("==" | "!=") <comparison> <equality_tail> | ε
+
+<comparison> ::= <term> <comparison_tail>
+<comparison_tail> ::= ("<" | "<=" | ">" | ">=") <term> <comparison_tail> | ε
+
+<term> ::= <factor> <term_tail>
+<term_tail> ::= ("+" | "-") <factor> <term_tail> | ε
+
+<factor> ::= <unary> <factor_tail>
+<factor_tail> ::= ("*" | "/" | "%") <unary> <factor_tail> | ε
+
+<unary> ::= <castExpr>
+          | ("!" | "+" | "-" | "++" | "--") <unary>
+
+<castExpr> ::= "int" "(" <expression> ")"
+             | "double" "(" <expression> ")"
+             | <postfix>
+
+<postfix> ::= <primary> <postfix_tail>
+<postfix_tail> ::= "(" <optArguments> ")"
+                 | "[" <expression> "]"
+                 | "." IDENT
+                 | "++"
+                 | "--"
+                 | ε
+
+<optArguments> ::= <arguments> | ε
+<arguments> ::= <expression> <arguments_tail>
+<arguments_tail> ::= "," <expression> <arguments_tail> | ε
+
+<primary> ::= <literal>
+            | IDENT
+            | "@"
+            | "(" <expression> ")"
+            | <arrayLiteral>
+            | <objectInstantiation>
+
+<accessExpression> ::= <primary> <accessTail>
+<accessTail> ::= "." IDENT <accessTail>
+               | "[" <expression> "]" <accessTail>
+               | "(" <optArguments> ")" <accessTail>
+               | ε
 
 <literal> ::= INT | DOUBLE | STRING | CHAR | "true" | "false" | "null"
-<arrayLiteral> ::= "action" <rType> "{" (<expression> ("," <expression>)*)? "}"
-<objectInstantiation> ::= "action" <rType> "(" <arguments>? ")"
-<arguments> ::= <expression> ("," <expression>)*
+
+<arrayLiteral> ::= "action" <rType> "{" <optArrayElements> "}"
+<optArrayElements> ::= <arrayElements> | ε
+<arrayElements> ::= <expression> <arrayElementsTail>
+<arrayElementsTail> ::= "," <expression> <arrayElementsTail> | ε
+
+<objectInstantiation> ::= "action" <rType> "(" <optArguments> ")"
