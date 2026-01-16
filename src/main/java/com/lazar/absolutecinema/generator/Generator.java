@@ -622,6 +622,35 @@ public class Generator {
 			return;
 		}
 
+
+
+
+
+
+		boolean leftIsInt = leftType.equals(ResolvedType.INT);
+		boolean leftIsDouble = leftType.equals(ResolvedType.DOUBLE);
+		boolean rightIsInt = rightType.equals(ResolvedType.INT);
+		boolean rightIsDouble = rightType.equals(ResolvedType.DOUBLE);
+
+		if (leftIsInt && rightIsDouble) {
+
+			generateExpression(mv, binary.left);
+			mv.visitInsn(Opcodes.I2D); // promote left to double
+			generateExpression(mv, binary.right);
+
+			emitDoubleOperationOrComparison(mv, op);
+			return;
+		}
+		else if (leftIsDouble && rightIsInt) {
+
+			generateExpression(mv, binary.left);
+			generateExpression(mv, binary.right);
+			mv.visitInsn(Opcodes.I2D); // promote right to double (top)
+
+			emitDoubleOperationOrComparison(mv, op);
+			return;
+		}
+
 		generateExpression(mv, binary.left);
 		generateExpression(mv, binary.right);
 
@@ -663,53 +692,55 @@ public class Generator {
 				default:
 					throw new RuntimeException("Unsupported integer operation: " + op);
 			}
+			return;
 		}
-		else if (leftType.equals(ResolvedType.DOUBLE) && rightType.equals(ResolvedType.DOUBLE)) {
-			switch (op) {
-				case "+":
-					mv.visitInsn(Opcodes.DADD);
-					break;
-				case "-":
-					mv.visitInsn(Opcodes.DSUB);
-					break;
-				case "*":
-					mv.visitInsn(Opcodes.DMUL);
-					break;
-				case "/":
-					mv.visitInsn(Opcodes.DDIV);
-					break;
-				case "%":
-					mv.visitInsn(Opcodes.DREM);
-					break;
-				case "==":
-					generateDoubleComparison(mv, Opcodes.IFEQ);
-					break;
-				case "!=":
-					generateDoubleComparison(mv, Opcodes.IFNE);
-					break;
-				case "<":
-					generateDoubleComparison(mv, Opcodes.IFLT);
-					break;
-				case "<=":
-					generateDoubleComparison(mv, Opcodes.IFLE);
-					break;
-				case ">":
-					generateDoubleComparison(mv, Opcodes.IFGT);
-					break;
-				case ">=":
-					generateDoubleComparison(mv, Opcodes.IFGE);
-					break;
-				default:
-					throw new RuntimeException("Unsupported double operation: " + op);
-			}
+
+		if (leftType.equals(ResolvedType.DOUBLE) && rightType.equals(ResolvedType.DOUBLE)) {
+			emitDoubleOperationOrComparison(mv, op);
+			return;
 		}
-		else if ((leftType.equals(ResolvedType.INT) && rightType.equals(ResolvedType.DOUBLE)) ||
-				(leftType.equals(ResolvedType.DOUBLE) && rightType.equals(ResolvedType.INT))) {
-			throw new RuntimeException("Cannot mix int and double in binary operation without explicit conversion");
-		}
-		else {
-			throw new RuntimeException("Unsupported binary operation types: " +
-					leftType + " " + op + " " + rightType);
+
+
+		throw new RuntimeException("Unsupported binary operation types: " +
+			leftType + " " + op + " " + rightType);
+	}
+	private void emitDoubleOperationOrComparison(MethodVisitor mv, String op) {
+		switch (op) {
+			case "+":
+				mv.visitInsn(Opcodes.DADD);
+				break;
+			case "-":
+				mv.visitInsn(Opcodes.DSUB);
+				break;
+			case "*":
+				mv.visitInsn(Opcodes.DMUL);
+				break;
+			case "/":
+				mv.visitInsn(Opcodes.DDIV);
+				break;
+			case "%":
+				mv.visitInsn(Opcodes.DREM);
+				break;
+			case "==":
+				generateDoubleComparison(mv, Opcodes.IFEQ);
+				break;
+			case "!=":
+				generateDoubleComparison(mv, Opcodes.IFNE);
+				break;
+			case "<":
+				generateDoubleComparison(mv, Opcodes.IFLT);
+				break;
+			case "<=":
+				generateDoubleComparison(mv, Opcodes.IFLE);
+				break;
+			case ">":
+				generateDoubleComparison(mv, Opcodes.IFGT);
+				break;
+			case ">=":
+				generateDoubleComparison(mv, Opcodes.IFGE);
+				break;
+			default:
+				throw new RuntimeException("Unsupported double operation: " + op);
 		}
 	}
 
@@ -811,6 +842,8 @@ public class Generator {
 	}
 
 	private void generateUnaryExpression(MethodVisitor mv, Unary unary) {
+
+
 		generateExpression(mv, unary.right);
 		ResolvedType type = unary.right.getType();
 		String op = unary.op.getLexeme();
@@ -825,15 +858,33 @@ public class Generator {
 				}
 				break;
 			case "+":
+
 				break;
 			case "!":
 				convertToBoolean(mv, type);
 				mv.visitInsn(Opcodes.ICONST_1);
 				mv.visitInsn(Opcodes.IXOR);
 				break;
+			case "int":
+
+				if (type.equals(ResolvedType.DOUBLE)) {
+					mv.visitInsn(Opcodes.D2I);
+				}
+
+				break;
+			case "double":
+
+				if (type.equals(ResolvedType.INT)) {
+					mv.visitInsn(Opcodes.I2D);
+				}
+
+				break;
 			case "++":
 			case "--":
 				throw new RuntimeException("Prefix ++ and -- not yet implemented");
+			default:
+
+				throw new RuntimeException("Unsupported unary operator: " + op);
 		}
 	}
 
