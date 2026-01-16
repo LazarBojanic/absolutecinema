@@ -34,6 +34,7 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	}
 
 	public void analyze() {
+
 		for (Node item : program.items) {
 			if (item instanceof SetupDecl d) {
 				symbolTable.defineSetup(d);
@@ -45,10 +46,28 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 				symbolTable.defineGlobalVar(d);
 			}
 		}
+
+		checkEntranceFunction();
+
 		for (Node item : program.items) {
 			if (item instanceof Decl d) {
 				d.accept(this);
 			}
+		}
+	}
+	
+	private void checkEntranceFunction() {
+		int entranceCount = 0;
+		for (Node item : program.items) {
+			if (item instanceof SceneDecl scene && scene.name.getLexeme().equals("entrance")) {
+				entranceCount++;
+			}
+		}
+		if (entranceCount == 0) {
+			throw new RuntimeException("Semantic error: No entrance function found");
+		}
+		if (entranceCount > 1) {
+			throw new RuntimeException("Semantic error: Multiple entrance function declarations found");
 		}
 	}
 
@@ -146,10 +165,18 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 
 	@Override
 	public Void visitIf(If s) {
-		s.ifBranch.cond.accept(this);
+		ResolvedType condType = s.ifBranch.cond.accept(this);
+		if (!condType.equals(ResolvedType.BOOL)) {
+			throw new RuntimeException("Semantic error: If condition must be bool, got " + condType.name() 
+				+ " at line " + getLineNumber(s.ifBranch.cond));
+		}
 		s.ifBranch.block.accept(this);
 		for (Branch b : s.elifBranchList) {
-			b.cond.accept(this);
+			ResolvedType elifCondType = b.cond.accept(this);
+			if (!elifCondType.equals(ResolvedType.BOOL)) {
+				throw new RuntimeException("Semantic error: Elif condition must be bool, got " + elifCondType.name() 
+					+ " at line " + getLineNumber(b.cond));
+			}
 			b.block.accept(this);
 		}
 		if (s.elseBranch != null) {
@@ -160,7 +187,11 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 
 	@Override
 	public Void visitWhile(While s) {
-		s.condition.accept(this);
+		ResolvedType condType = s.condition.accept(this);
+		if (!condType.equals(ResolvedType.BOOL)) {
+			throw new RuntimeException("Semantic error: While condition must be bool, got " + condType.name() 
+				+ " at line " + getLineNumber(s.condition));
+		}
 		s.body.accept(this);
 		return null;
 	}
@@ -175,7 +206,11 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 			st.accept(this);
 		}
 		if (s.condition != null) {
-			s.condition.accept(this);
+			ResolvedType condType = s.condition.accept(this);
+			if (!condType.equals(ResolvedType.BOOL)) {
+				throw new RuntimeException("Semantic error: For condition must be bool, got " + condType.name() 
+					+ " at line " + getLineNumber(s.condition));
+			}
 		}
 		if (s.increment != null) {
 			s.increment.accept(this);
@@ -229,13 +264,22 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	public ResolvedType visitAssign(Assign e) {
 		ResolvedType left = e.target.accept(this);
 		ResolvedType right = e.value.accept(this);
+
 		if (e.value instanceof Call call) {
 			if (call.callee instanceof Variable var && var.name.getLexeme().equals("capture")) {
 				e.setType(left);
 				return left;
 			}
 		}
-		checkTypeMatch(left, right, e.op, "Assignment mismatch");
+
+		if (e.target instanceof Index) {
+
+			checkTypeMatch(left, right, e.op, "Array element assignment type mismatch");
+			e.setType(left);
+			return left;
+		}
+		
+		checkTypeMatch(left, right, e.op, "Assignment type mismatch");
 		e.setType(left);
 		return left;
 	}
@@ -244,25 +288,52 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	public ResolvedType visitBinary(Binary e) {
 		ResolvedType l = e.left.accept(this);
 		ResolvedType r = e.right.accept(this);
-		if (e.op.getLexeme().equals("+") &&
+		String op = e.op.getLexeme();
+
+		if (op.equals("+") &&
 			(l.equals(ResolvedType.STRING) || r.equals(ResolvedType.STRING))) {
 			e.setType(ResolvedType.STRING);
 			return ResolvedType.STRING;
 		}
-		ResolvedType res =
-			(l.isNumeric() && r.isNumeric())
-				? ((l == ResolvedType.DOUBLE || r == ResolvedType.DOUBLE)
-				? ResolvedType.DOUBLE
-				: ResolvedType.INT)
-				: ResolvedType.BOOL;
-		e.setType(res);
-		return res;
+
+		if (op.equals("<") || op.equals("<=") || op.equals(">") || op.equals(">=") || 
+			op.equals("==") || op.equals("!=")) {
+			if (!l.isNumeric() || !r.isNumeric()) {
+				throw new RuntimeException("Semantic error: Relational operator operands must be numeric, got " 
+					+ l.name() + " and " + r.name() + " at line " + e.op.getLine());
+			}
+			e.setType(ResolvedType.BOOL);
+			return ResolvedType.BOOL;
+		}
+
+		if (op.equals("+") || op.equals("-") || op.equals("*") || op.equals("/") || op.equals("%")) {
+			if (!l.isNumeric() || !r.isNumeric()) {
+				throw new RuntimeException("Semantic error: Arithmetic operator operands must be numeric, got " 
+					+ l.name() + " and " + r.name() + " at line " + e.op.getLine());
+			}
+
+			ResolvedType res = (l == ResolvedType.DOUBLE || r == ResolvedType.DOUBLE) 
+				? ResolvedType.DOUBLE 
+				: ResolvedType.INT;
+			e.setType(res);
+			return res;
+		}
+
+		throw new RuntimeException("Semantic error: Unknown binary operator " + op + " at line " + e.op.getLine());
 	}
 
 	@Override
 	public ResolvedType visitLogical(Logical e) {
-		e.left.accept(this);
-		e.right.accept(this);
+		ResolvedType l = e.left.accept(this);
+		ResolvedType r = e.right.accept(this);
+		if (!l.equals(ResolvedType.BOOL)) {
+			throw new RuntimeException("Semantic error: Logical operator left operand must be bool, got " 
+				+ l.name() + " at line " + e.op.getLine());
+		}
+		if (!r.equals(ResolvedType.BOOL)) {
+			throw new RuntimeException("Semantic error: Logical operator right operand must be bool, got " 
+				+ r.name() + " at line " + e.op.getLine());
+		}
 		e.setType(ResolvedType.BOOL);
 		return ResolvedType.BOOL;
 	}
@@ -271,37 +342,38 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 	public ResolvedType visitUnary(Unary e) {
 		ResolvedType t = e.right.accept(this);
 		String op = e.op.getLexeme();
-		
+
 		if (op.equals("int") || op.equals("double")) {
 			ResolvedType targetType = new ResolvedType(op, 0);
-			
-			if (e.right instanceof Literal lit && lit.value instanceof Double doubleVal) {
-				
-				if (op.equals("int")) {
+
+			if (op.equals("double") && t.equals(ResolvedType.INT)) {
+				e.setType(targetType);
+				return targetType;
+			}
+
+			if (op.equals("int") && t.equals(ResolvedType.DOUBLE)) {
+
+				if (e.right instanceof Literal lit && lit.value instanceof Double doubleVal) {
 					if (doubleVal == Math.floor(doubleVal)) {
 						e.setType(targetType);
 						return targetType;
 					}
 					else {
-						throw new RuntimeException("Cannot cast " + doubleVal +
+						throw new RuntimeException("Semantic error: Cannot cast " + doubleVal +
 							" to int: decimal part is not all zeros at line " + e.op.getLine());
 					}
 				}
-			}
-			
-			if (op.equals("double") && t.equals(ResolvedType.INT)) {
+
+
+
 				e.setType(targetType);
 				return targetType;
 			}
-			
-			if (op.equals("int") && t.equals(ResolvedType.DOUBLE)) {
-				e.setType(targetType);
-				return targetType;
-			}
-			throw new RuntimeException("Invalid cast from " + t.name() + " to " + op +
-				" at line " + e.op.getLine());
+
+			throw new RuntimeException("Semantic error: Invalid cast from " + t.name() + " to " + op +
+				" at line " + e.op.getLine() + ". Only int to double and double to int (with zero decimal part) are allowed.");
 		}
-		
+
 		e.setType(t);
 		return t;
 	}
@@ -315,6 +387,7 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 
 	@Override
 	public ResolvedType visitCall(Call e) {
+		
 		List<ResolvedType> args = new ArrayList<>();
 		for (Expr a : e.arguments) {
 			args.add(a.accept(this));
@@ -328,7 +401,13 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 			else {
 				SceneDecl scene = symbolTable.getScene(funcName);
 				if (scene == null) {
-					throw new RuntimeException("Undefined scene: " + funcName
+
+					SymbolTable.Symbol sym = symbolTable.resolve(v.name);
+					if (sym.declaration instanceof VarDecl) {
+						throw new RuntimeException("Semantic error: Attempting to call non-function variable '" 
+							+ funcName + "' at line " + v.name.getLine());
+					}
+					throw new RuntimeException("Semantic error: Undefined scene: " + funcName
 						+ " at line " + v.name.getLine());
 				}
 				validateArgs(scene.params, args, v.name);
@@ -339,7 +418,7 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 			ResolvedType obj = g.object.accept(this);
 			SetupDecl setup = symbolTable.getSetup(obj.name());
 			if (setup == null) {
-				throw new RuntimeException("Type '" + obj.name()
+				throw new RuntimeException("Semantic error: Type '" + obj.name()
 					+ "' has no methods at line " + g.name.getLine());
 			}
 			boolean found = false;
@@ -352,10 +431,15 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 				}
 			}
 			if (!found) {
-				throw new RuntimeException("Method '" + g.name.getLexeme()
+				throw new RuntimeException("Semantic error: Method '" + g.name.getLexeme()
 					+ "' not found in setup '" + obj.name()
 					+ "' at line " + g.name.getLine());
 			}
+		}
+		else {
+
+			throw new RuntimeException("Semantic error: Attempting to call non-function expression at line " 
+				+ getLineNumber(e.callee));
 		}
 		e.setType(ret);
 		return ret;
@@ -409,10 +493,12 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 		ResolvedType arr = e.array.accept(this);
 		ResolvedType idx = e.index.accept(this);
 		if (!idx.equals(ResolvedType.INT)) {
-			throw new RuntimeException("Array index must be int, got " + idx.name());
+			throw new RuntimeException("Semantic error: Array index must be int, got " + idx.name() 
+				+ " at line " + getLineNumber(e.index));
 		}
 		if (arr.dimensions() <= 0) {
-			throw new RuntimeException("Cannot index non-array type '" + arr.name() + "'");
+			throw new RuntimeException("Semantic error: Cannot index non-array type '" + arr.name() 
+				+ "' at line " + getLineNumber(e.array));
 		}
 		ResolvedType res = new ResolvedType(arr.name(), arr.dimensions() - 1);
 		e.setType(res);
@@ -478,19 +564,52 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 
 	private void checkTypeMatch(ResolvedType exp, ResolvedType act, Token t, String m) {
 		if (exp != ResolvedType.NULL && act != ResolvedType.NULL && !exp.equals(act)) {
-			throw new RuntimeException(m + " at line " + t.getLine()
+			throw new RuntimeException("Semantic error: " + m + " at line " + t.getLine()
 				+ ". Expected " + exp.name() + " but got " + act.name());
 		}
 	}
 
 	private void validateArgs(List<Param> params, List<ResolvedType> args, Token t) {
 		if (params.size() != args.size()) {
-			throw new RuntimeException("Arg count mismatch for '"
-				+ t.getLexeme() + "' at line " + t.getLine());
+			throw new RuntimeException("Semantic error: Parameter count mismatch for '"
+				+ t.getLexeme() + "' at line " + t.getLine() + ". Expected " + params.size() 
+				+ " parameters but got " + args.size());
 		}
 		for (int i = 0; i < params.size(); i++) {
-			checkTypeMatch(resolveType(params.get(i).type), args.get(i), t, "Param mismatch");
+			checkTypeMatch(resolveType(params.get(i).type), args.get(i), t, "Parameter type mismatch");
 		}
+	}
+	
+	private int getLineNumber(Expr expr) {
+		if (expr instanceof Binary b) {
+			return b.op.getLine();
+		}
+		else if (expr instanceof Unary u) {
+			return u.op.getLine();
+		}
+		else if (expr instanceof Variable v) {
+			return v.name.getLine();
+		}
+		else if (expr instanceof Literal l) {
+
+			return 0;
+		}
+		else if (expr instanceof Call c) {
+			return getLineNumber(c.callee);
+		}
+		else if (expr instanceof Assign a) {
+			return a.op.getLine();
+		}
+		else if (expr instanceof Logical l) {
+			return l.op.getLine();
+		}
+		else if (expr instanceof Grouping g) {
+			return getLineNumber(g.expr);
+		}
+		else if (expr instanceof Index i) {
+			return getLineNumber(i.index);
+		}
+		return 0;
 	}
 
 	private static class SymbolTable {
@@ -514,13 +633,19 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 		}
 
 		void define(Token n, ResolvedType t, Node d) {
-			scopes.get(scopes.size() - 1).put(n.getLexeme(), new Symbol(t, d));
+			Map<String, Symbol> currentScope = scopes.get(scopes.size() - 1);
+			if (currentScope.containsKey(n.getLexeme())) {
+				throw new RuntimeException("Semantic error: Duplicate declaration of '" + n.getLexeme() 
+					+ "' in the same scope at line " + n.getLine());
+			}
+			currentScope.put(n.getLexeme(), new Symbol(t, d));
 		}
 
 		void defineSetup(SetupDecl d) {
 			String n = d.name.getLexeme();
 			if (setups.containsKey(n)) {
-				throw new RuntimeException("Duplicate setup declaration: " + n);
+				throw new RuntimeException("Semantic error: Duplicate setup declaration: " + n 
+					+ " at line " + d.name.getLine());
 			}
 			setups.put(n, d);
 		}
@@ -528,7 +653,8 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 		void defineScene(SceneDecl d) {
 			String n = d.name.getLexeme();
 			if (scenes.containsKey(n)) {
-				throw new RuntimeException("Duplicate scene declaration: " + n);
+				throw new RuntimeException("Semantic error: Duplicate scene declaration: " + n 
+					+ " at line " + d.name.getLine());
 			}
 			scenes.put(n, d);
 		}
@@ -545,7 +671,7 @@ public class SemanticAnalyzer implements DeclVisitor<Void>, StmtVisitor<Void>, E
 					return scopes.get(i).get(n.getLexeme());
 				}
 			}
-			throw new RuntimeException("Undefined symbol: "
+			throw new RuntimeException("Semantic error: Undefined symbol: "
 				+ n.getLexeme() + " at line " + n.getLine());
 		}
 
