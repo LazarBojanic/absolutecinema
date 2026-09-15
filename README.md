@@ -1,5 +1,7 @@
 # absolutecinema specification
 
+![Marty](./absolute-cinema.png)
+
 ## General syntax:
 	Variables are declared with the var keyword, types are declared after a colon like so (var num: int = 5;).
 	Scope - {}.
